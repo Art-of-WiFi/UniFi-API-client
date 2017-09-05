@@ -1,8 +1,6 @@
 ## UniFi controller API client class
 
-This PHP class provides access to the **UniFi Controller API** and is based off the work of @domwo and @fbagnol and the API shell client as published by UBNT.
-
-Please refer to the code samples in the `examples` directory for a starting point for your own PHP code.
+This PHP class provides access to the **UniFi Controller API**. Versions 4.x.x and 5.x.x of the UniFi Controller software (version 5.5.20 has been confirmed to work) are supported.
 
 ### Donations
 If you'd like to support further development of this PHP API client class, please use the PayPal donate button below. All donations go to the project maintainer.
@@ -142,6 +140,8 @@ $results          = $unifi_connection->list_alarms(); // returns the alarms in a
 ...
 
 ```
+
+Please refer to the `examples` directory for some more detailed examples which you can use as a starting point for your own PHP code.
 
 >**NOTE:**
 >
