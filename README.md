@@ -1,7 +1,3 @@
-[![Latest Stable Version](https://poser.pugx.org/art-of-wifi/unifi-api-client/v/stable)](https://packagist.org/packages/art-of-wifi/unifi-api-client)
-[![Total Downloads](https://poser.pugx.org/art-of-wifi/unifi-api-client/downloads)](https://packagist.org/packages/art-of-wifi/unifi-api-client)
-[![License](https://poser.pugx.org/art-of-wifi/unifi-api-client/license)](https://packagist.org/packages/art-of-wifi/unifi-api-client)
-
 ## UniFi controller API client class
 
 This PHP class provides access to the **UniFi Controller API** and is based off the work of @domwo and @fbagnol and the API shell client as published by UBNT.
