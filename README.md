@@ -11,7 +11,7 @@ Please refer to the code samples in the `examples` directory for a starting poin
 ### Donations
 If you'd like to support further development of this PHP API client class, please use the donate button below. All donations go to the project maintainer.
 
-[![Donate](https://www.paypalobjects.com/en_GB/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=M7TVNVX3Z44VN)
+[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=M7TVNVX3Z44VN)
 
 ### Install
 
