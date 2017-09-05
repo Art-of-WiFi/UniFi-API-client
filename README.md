@@ -1,6 +1,6 @@
 ## UniFi controller API client class
 
-This PHP class provides access to the **UniFi Controller API**. Versions 4.x.x and 5.x.x of the UniFi Controller software (version 5.5.20 has been confirmed to work) are supported.
+This PHP class provides access to Ubiquiti's **UniFi Controller API**. Versions 4.x.x and 5.x.x of the UniFi Controller software (version 5.5.20 has been confirmed to work) are supported.
 
 ### Donations
 If you'd like to support further development of this PHP API client class, please use the PayPal donate button below. All donations go to the project maintainer.
