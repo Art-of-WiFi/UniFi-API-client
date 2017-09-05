@@ -8,6 +8,11 @@
  */
 
 /**
+ * using the composer autoloader
+ */
+require "vendor/autoload.php";
+
+/**
  * include the config file (place your credentials etc. there if not already present)
  * see the config.template.php file for an example
  */

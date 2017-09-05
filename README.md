@@ -122,6 +122,12 @@ A basic example how to use the class:
 ```php
 
 ...
+
+/**
+ * load the class using the composer autoloader
+ */
+require "vendor/autoload.php";
+
 /**
  * initialize the Unifi API connection class, log in to the controller and request the alarms collection
  * (this example assumes you have already assigned the correct values to the variables used)
