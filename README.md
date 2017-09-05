@@ -9,23 +9,6 @@ If you'd like to support further development of this PHP API client class, pleas
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=M7TVNVX3Z44VN)
 
-### Credits
-This class is largely based on the work done by the following developers:
-- domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
-- fbagnol: https://github.com/fbagnol/class.unifi.php
-- and the API as published by Ubiquiti: https://www.ubnt.com/downloads/unifi/5.5.20/unifi_sh_api
-
-### Install
-Simply execute this command from your project directory:
-
-```
-composer require art-of-wifi/unifi-api-client
-```
-
-### Requirements
-- a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1)
-- network connectivity between this web server and the server and port (normally port 8443) where the UniFi controller is running
-
 ### Methods and functions supported
 
 This class currently supports the following functions/methods to get/set data through the UniFi controller API:
@@ -120,6 +103,23 @@ Internal functions:
 - get_last_error_message()
 
 Please refer to the source code for more details on each function/method and it's parameters.
+
+### Credits
+This class is largely based on the work done by the following developers:
+- domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
+- fbagnol: https://github.com/fbagnol/class.unifi.php
+- and the API as published by Ubiquiti: https://www.ubnt.com/downloads/unifi/5.5.20/unifi_sh_api
+
+### Requirements
+- a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1)
+- network connectivity between this web server and the server and port (normally port 8443) where the UniFi controller is running
+
+### Install
+Simply execute this command from your project directory:
+
+```
+$ composer require art-of-wifi/unifi-api-client
+```
 
 ### Example usage
 A basic example how to use the class:
