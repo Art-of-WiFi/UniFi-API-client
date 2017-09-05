@@ -9,8 +9,13 @@ If you'd like to support further development of this PHP API client class, pleas
 
 [![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=M7TVNVX3Z44VN)
 
-### Install
+### Credits
+This class is largely based on the work done by the following developers:
+- domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
+- fbagnol: https://github.com/fbagnol/class.unifi.php
+- and the API as published by Ubiquiti: https://www.ubnt.com/downloads/unifi/5.5.20/unifi_sh_api
 
+### Install
 Simply execute this command from your project directory:
 
 ```
