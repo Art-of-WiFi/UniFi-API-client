@@ -2,35 +2,29 @@
 /**
  * This file is part of the art-of-wifi/unifi-api-client package
  *
- * This UniFi API client is based on the work done by
- * the following developers:
+ * This UniFi API client is based on the work done by the following developers:
  *    domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
  *    fbagnol: https://github.com/fbagnol/class.unifi.php
  * and the API as published by Ubiquiti:
- *    https://www.ubnt.com/downloads/unifi/5.3.8/unifi_sh_api
+ *    https://www.ubnt.com/downloads/unifi/<UniFi controller version number>/unifi_sh_api
  *
  * Copyright (c) 2017, Art of WiFi <info@artofwifi.net>
  *
  * This source file is subject to the MIT license that is bundled
  * with this package in the file LICENSE.md
- *
  */
 namespace UniFi_API;
 
 class Client
 {
     /**
-     * public properties
-     */
-    public $user          = '';
-    public $password      = '';
-    public $site          = 'default';
-    public $baseurl       = 'https://127.0.0.1:8443';
-    public $version       = '5.4.16';
-
-    /**
      * private properties
      */
+    private $user;
+    private $password;
+    private $baseurl      = 'https://127.0.0.1:8443';
+    private $site         = 'default';
+    private $version      = '5.4.16';
     private $debug        = false;
     private $is_loggedin  = false;
     private $cookies      = '';
@@ -38,15 +32,27 @@ class Client
     private $last_results_raw;
     private $last_error_message;
 
-    function __construct($user = '', $password = '', $baseurl = '', $site = '', $version = '')
+    function __construct($user, $password, $baseurl = '', $site = '', $version = '')
     {
-        if (!empty($user)) $this->user         = trim($user);
-        if (!empty($password)) $this->password = trim($password);
-        if (!empty($baseurl)) $this->baseurl   = trim($baseurl);
-        if (!empty($site)) $this->site         = trim($site);
-        if (!empty($version)) $this->version   = trim($version);
+        if (!extension_loaded('curl')) {
+            trigger_error('The PHP curl extension is not loaded! Please correct this before proceeding!');
+        }
+
+        $this->user     = trim($user);
+        $this->password = trim($password);
+
+        if (!empty($baseurl)) $this->baseurl = trim($baseurl);
+        if (!empty($site)) $this->site       = trim($site);
+        if (!empty($version)) $this->version = trim($version);
+
         if (isset($_SESSION['unificookie'])) {
             $this->cookies = $_SESSION['unificookie'];
+        }
+
+        $base_url_components = parse_url($this->baseurl);
+
+        if (empty($base_url_components['scheme']) || empty($base_url_components['host']) || empty($base_url_components['port'])) {
+            trigger_error('The URL provided is incomplete!');
         }
     }
 
@@ -60,9 +66,7 @@ class Client
         /**
          * logout, if needed
          */
-        if ($this->is_loggedin) {
-            $this->logout();
-        }
+        if ($this->is_loggedin) $this->logout();
     }
 
     /**
@@ -144,6 +148,33 @@ class Client
      ****************************************************************/
 
     /**
+     * Set site
+     * --------
+     * modify the private property site, returns the new (short) site name
+     * required parameter <site> = string; must be the short site name of a site to which the
+     *                             provided credentials have access
+     *
+     * NOTE:
+     * this method can be useful when switching between sites
+     */
+    public function set_site($site)
+    {
+        $this->site = $site;
+
+        return $this->site;
+    }
+
+    /**
+     * Get site
+     * --------
+     * get the value of private property site, returns the current (short) site name
+     */
+    public function get_site()
+    {
+        return $this->site;
+    }
+
+    /**
      * Set debug mode
      * --------------
      * sets debug mode to true or false, returns false if a non-boolean parameter was passed
@@ -201,7 +232,7 @@ class Client
      * --------------------------------
      * returns the UniFi controller cookie
      */
-    public function getcookie()
+    public function get_cookie()
     {
         if (!$this->is_loggedin) return false;
         return $this->cookies;
@@ -574,8 +605,8 @@ class Client
     }
 
     /**
-     * Edit user group
-     * ---------------
+     * Update user group (using REST)
+     * ------------------------------
      * returns an array containing a single object with attributes of the updated usergroup on success
      * required parameter <group_id>   = id of the user group
      * required parameter <site_id>    = id of the site
@@ -594,8 +625,8 @@ class Client
     }
 
     /**
-     * Add user group
-     * --------------
+     * Add user group (using REST)
+     * ---------------------------
      * returns an array containing a single object with attributes of the new usergroup ("_id", "name", "qos_rate_max_down", "qos_rate_max_up", "site_id") on success
      * required parameter <group_name> = name of the user group
      * optional parameter <group_dn>   = limit download bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
@@ -610,8 +641,8 @@ class Client
     }
 
     /**
-     * Delete user group
-     * -----------------
+     * Delete user group (using REST)
+     * ------------------------------
      * returns true on success
      * required parameter <group_id> = id of the user group
      */
@@ -673,8 +704,8 @@ class Client
     }
 
     /**
-     * List (device) tags
-     * ------------------
+     * List (device) tags (using REST)
+     * -------------------------------
      * returns an array of known device tag objects
      *
      * NOTES: this endpoint was introduced with controller versions 5.5.X
@@ -854,8 +885,8 @@ class Client
     }
 
     /**
-     * Create hotspot operator
-     * -----------------------
+     * Create hotspot operator (using REST)
+     * ------------------------------------
      * return true upon success
      * required parameter <name>       = name for the hotspot operator
      * required parameter <x_password> = clear text password for the hotspot operator
@@ -1072,8 +1103,8 @@ class Client
     }
 
     /**
-     * Disable/enable an access point
-     * ------------------------------
+     * Disable/enable an access point (using REST)
+     * -------------------------------------------
      * return true on success
      * required parameter <ap_id>   = 24 char string; value of _id for the access point which can be obtained from the device list
      * required parameter <disable> = boolean; true will disable the device, false will enable the device
@@ -1093,8 +1124,8 @@ class Client
     }
 
     /**
-     * Override LED mode for a device
-     * ------------------------------
+     * Override LED mode for a device (using REST)
+     * -------------------------------------------
      * return true on success
      * required parameter <device_id>     = 24 char string; value of _id for the device which can be obtained from the device list
      * required parameter <override_mode> = string, off/on/default; "off" will disable the LED of the device,
@@ -1255,17 +1286,17 @@ class Client
         $x_passphrase,
         $usergroup_id,
         $wlangroup_id,
-        $enabled = true,
-        $hide_ssid = false,
-        $is_guest = false,
-        $security = 'open',
-        $wpa_mode = 'wpa2',
-        $wpa_enc = 'ccmp',
-        $vlan_enabled = false,
-        $vlan = null,
-        $uapsd_enabled = false,
+        $enabled          = true,
+        $hide_ssid        = false,
+        $is_guest         = false,
+        $security         = 'open',
+        $wpa_mode         = 'wpa2',
+        $wpa_enc          = 'ccmp',
+        $vlan_enabled     = false,
+        $vlan             = null,
+        $uapsd_enabled    = false,
         $schedule_enabled = false,
-        $schedule = []
+        $schedule         = []
     ) {
         if (!$this->is_loggedin) return false;
         $json = [
@@ -1291,22 +1322,53 @@ class Client
     }
 
     /**
-     * Delete a wlan
-     * -------------
+     * List wlan settings (using REST)
+     * -------------------------------
+     * returns an array of wireless networks and their settings, or an array containing a single wireless network when using
+     * the <wlan_id> parameter
+     * optional parameter <wlan_id> = 24 char string; _id of the wlan to fetch the settings for
+     */
+    public function list_wlanconf($wlan_id = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/wlanconf/'.trim($wlan_id)));
+        return $this->process_response($content_decoded);
+    }
+
+    /**
+     * Delete a wlan (using REST)
+     * --------------------------
      * return true on success
      * required parameter <wlan_id> = 24 char string; _id of the wlan that can be found with the list_wlanconf() function
      */
     public function delete_wlan($wlan_id)
     {
         if (!$this->is_loggedin) return false;
-        $json            = json_encode([]);
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/del/wlanconf/'.trim($wlan_id), 'json='.$json));
+        $this->request_type = 'DELETE';
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/wlanconf/'.trim($wlan_id)));
         return $this->process_response_boolean($content_decoded);
     }
 
     /**
-     * Set wlan settings
-     * -----------------
+     * Set wlan settings, base (using REST)
+     * ------------------------------------
+     * return true on success
+     * required parameter <wlan_id>
+     * required parameter <wlan_settings> = stdClass object containing the configuration of the wlan to apply, must be a (partial) object structured
+     *                                      in the same manner as is returned by list_wlanconf() for a specific wlan)
+     */
+    public function set_wlansettings_base($wlan_id, $wlan_settings)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json               = json_encode($wlan_settings);
+        $content_decoded    = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/rest/wlanconf/'.trim($wlan_id), 'json='.$json));
+        return $this->process_response_boolean($content_decoded);
+    }
+
+    /**
+     * Set basic wlan settings
+     * -----------------------
      * return true on success
      * required parameter <wlan_id>
      * required parameter <x_passphrase> = new pre-shared key, minimal length is 8 characters, maximum length is 63,
@@ -1315,13 +1377,10 @@ class Client
      */
     public function set_wlansettings($wlan_id, $x_passphrase, $name = null)
     {
-        if (!$this->is_loggedin) return false;
-        $json            = [];
-        if (!is_null($x_passphrase)) $json['x_passphrase'] = trim($x_passphrase);
-        if (!is_null($name)) $json['name'] = trim($name);
-        $json            = json_encode($json);
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.trim($wlan_id), 'json='.$json));
-        return $this->process_response_boolean($content_decoded);
+        $payload = new \stdClass();
+        if (!is_null($x_passphrase)) $payload->x_passphrase = trim($x_passphrase);
+        if (!is_null($name)) $payload->name = trim($name);
+        return $this->set_wlansettings_base($wlan_id, $payload);
     }
 
     /**
@@ -1333,12 +1392,30 @@ class Client
      */
     public function disable_wlan($wlan_id, $disable)
     {
-        if (!$this->is_loggedin) return false;
-        $action          = ($disable) ? false : true;
-        $json            = ['enabled' => (bool)$action];
-        $json            = json_encode($json);
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/wlanconf/'.trim($wlan_id), 'json='.$json));
-        return $this->process_response_boolean($content_decoded);
+        $payload          = new \stdClass();
+        $action           = ($disable) ? false : true;
+        $payload->enabled = (bool)$action;
+        return $this->set_wlansettings_base($wlan_id, $payload);
+    }
+
+    /**
+     * Set MAC filter for a wlan
+     * ----------------------------
+     * return true on success
+     * required parameter <wlan_id>
+     * required parameter <mac_filter_policy>  = string, "allow" or "deny"; default MAC policy to apply
+     * required parameter <mac_filter_enabled> = boolean; true enables the policy, false disables it
+     * required parameter <macs>               = array; must contain MAC strings to be placed in the MAC filter list,
+     *                                           replacing existing values. Existing MAC filter list can be obtained
+     *                                           through list_wlanconf().
+     */
+    public function set_wlan_mac_filter($wlan_id, $mac_filter_policy, $mac_filter_enabled, array $macs)
+    {
+        $payload                     = new \stdClass();
+        $payload->mac_filter_enabled = (bool)$mac_filter_enabled;
+        $payload->mac_filter_policy  = $mac_filter_policy;
+        $payload->mac_filter_list    = $macs;
+        return $this->set_wlansettings_base($wlan_id, $payload);
     }
 
     /**
@@ -1355,18 +1432,6 @@ class Client
         $json            = ['_sort' => '-time', 'within' => $historyhours, 'type' => null, '_start' => $start, '_limit' => $limit];
         $json            = json_encode($json);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/event', 'json='.$json));
-        return $this->process_response($content_decoded);
-    }
-
-    /**
-     * List wireless settings
-     * ----------------------
-     * returns an array of wireless networks and settings
-     */
-    public function list_wlanconf()
-    {
-        if (!$this->is_loggedin) return false;
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/list/wlanconf'));
         return $this->process_response($content_decoded);
     }
 
@@ -1463,8 +1528,8 @@ class Client
     }
 
     /**
-     * List Radius user accounts
-     * -------------------------
+     * List Radius user accounts (using REST)
+     * --------------------------------------
      * returns an array of objects containing all Radius accounts for the current site
 	 *
      * NOTES:
@@ -1582,7 +1647,7 @@ class Client
                 }
 
                 if ($this->debug) {
-                    trigger_error('Last error message: ' . $this->last_error_message);
+                    trigger_error('Debug: Last error message: ' . $this->last_error_message);
                 }
             }
         }
@@ -1610,7 +1675,7 @@ class Client
                 }
 
                 if ($this->debug) {
-                    trigger_error('Last error message: ' . $this->last_error_message);
+                    trigger_error('Debug: Last error message: ' . $this->last_error_message);
                 }
             }
         }
@@ -1653,10 +1718,12 @@ class Client
         $strerr   = '{ "data" : [ ] , "meta" : { "msg" : "api.err.LoginRequired" , "rc" : "error"}}';
 
         if ($httpcode == 401 && strcmp($content, $strerr) == 0) {
-            error_log('cURL: Needed reconnect to UniFi Controller');
+            if ($this->debug) {
+                error_log('cURL debug: Needed reconnect to UniFi Controller');
+            }
 
             /**
-             * explicit unset the old cookie now
+             * explicitly unset the old cookie now
              */
             if (isset($_SESSION['unificookie'])) {
                 unset($_SESSION['unificookie']);
@@ -1669,7 +1736,7 @@ class Client
              * when login was okay, exec the same command again
              */
             if ($this->is_loggedin) {
-                curl_close ($ch);
+                curl_close($ch);
 
                 /**
                  * setup the cookie for the user within $_SESSION
@@ -1696,7 +1763,7 @@ class Client
             print '</pre>';
         }
 
-        curl_close ($ch);
+        curl_close($ch);
         return $content;
     }
 

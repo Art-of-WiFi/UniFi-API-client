@@ -95,8 +95,11 @@ This class currently supports the following functions/methods to get/set data th
 - stat_sysinfo()
 - stat_voucher()
 
-Internal functions:
+Internal functions, getters/setters:
 - set_debug()
+- set_site()
+- get_site()
+- get_cookie() (renamed from getcookie())
 - get_last_results_raw()
 - get_last_error_message()
 
@@ -152,8 +155,6 @@ Please refer to the `examples` directory for some more detailed examples which y
 >```
 >
 >Here `jl3z2shm` is the value required for $site_id.
-
-Have a look at the files in the `examples` directory for more examples how to use this class.
 
 ## Important Disclaimer
 Many of these functions are not officially supported by UBNT and as such, may not be supported in future versions of the UniFi controller API.
