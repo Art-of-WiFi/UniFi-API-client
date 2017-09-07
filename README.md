@@ -122,7 +122,7 @@ This class is largely based on the work done by the following developers:
 
 ## Installation ##
 
-You can use **Composer** or simply **Download the Release**
+You can use **Composer**, **Git** or simply **Download the Release**
 
 ### Composer
 
@@ -138,6 +138,20 @@ Finally, be sure to include the autoloader in your code:
 
 ```php
 require_once('vendor/autoload.php');
+```
+
+### Git
+
+Execute the following `git` command from the shell in your project directory:
+
+```sh
+git clone https://github.com/Art-of-WiFi/UniFi-API-client.git
+```
+
+When git is done cloning, include the file containing the class like so in your code:
+
+```php
+require_once('path/to/src/Client.php');
 ```
 
 ### Download the Release
