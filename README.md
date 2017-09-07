@@ -167,7 +167,7 @@ $login            = $unifi_connection->login();
 $results          = $unifi_connection->list_alarms(); // returns the alarms in a PHP array
 ```
 
-Please refer to the `examples` directory for some more detailed examples which you can use as a starting point for your own PHP code.
+Please refer to the `examples/` directory for some more detailed examples which you can use as a starting point for your own PHP code.
 
 ### NOTE:
 
