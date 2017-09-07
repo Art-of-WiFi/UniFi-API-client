@@ -137,7 +137,7 @@ composer require art-of-wifi/unifi-api-client
 Finally, be sure to include the autoloader in your code:
 
 ```php
-require_once 'vendor/autoload.php';
+require_once('vendor/autoload.php');
 ```
 
 ### Download the Release
@@ -158,7 +158,7 @@ A basic example how to use the class:
 /**
  * load the class using the composer autoloader
  */
-require 'vendor/autoload.php';
+require_once('vendor/autoload.php');
 
 /**
  * initialize the Unifi API connection class, log in to the controller and request the alarms collection

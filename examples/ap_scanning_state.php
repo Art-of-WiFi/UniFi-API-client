@@ -9,7 +9,7 @@
 /**
  * using the composer autoloader
  */
-require "vendor/autoload.php";
+require_once('vendor/autoload.php');
 
 /**
  * include the config file (place your credentials etc. there if not already present)
