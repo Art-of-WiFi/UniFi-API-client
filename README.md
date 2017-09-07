@@ -153,8 +153,6 @@ require_once('path/to/src/Client.php');
 A basic example how to use the class:
 
 ```php
-
-...
 /**
  * load the class using the composer autoloader
  */
@@ -167,8 +165,6 @@ require_once('vendor/autoload.php');
 $unifi_connection = new UniFi_API\Client($controller_user, $controller_password, $controller_url, $site_id, $controller_version);
 $login            = $unifi_connection->login();
 $results          = $unifi_connection->list_alarms(); // returns the alarms in a PHP array
-...
-
 ```
 
 Please refer to the `examples` directory for some more detailed examples which you can use as a starting point for your own PHP code.
