@@ -171,7 +171,7 @@ Please refer to the `examples` directory for some more detailed examples which y
 
 ### NOTE:
 
-In the example above, $site_id is the 8 character short site "name" which is visible in the URL when managing the site in the UniFi controller:
+In the example above, `$site_id` is the 8 character short site "name" which is visible in the URL when managing the site in the UniFi controller:
 
 `https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
 
