@@ -161,7 +161,7 @@ require_once('path/to/src/Client.php');
 
 ### Download the Release
 
-If you prefer not to use composer, you can simply [download the package](https://github.com/Art-of-WiFi/UniFi-API-client/archive/master.zip), uncompress the zip file, then in your code include the file containing the class like so:
+If you prefer not to use composer or git, you can simply [download the package](https://github.com/Art-of-WiFi/UniFi-API-client/archive/master.zip), uncompress the zip file, then include the file containing the class in your code like so:
 
 ```php
 require_once('path/to/src/Client.php');
