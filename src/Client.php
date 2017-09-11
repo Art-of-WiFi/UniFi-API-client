@@ -24,17 +24,16 @@ class Client
     /**
      * private properties
      */
-    private $user;
-    private $password;
-    private $baseurl      = 'https://127.0.0.1:8443';
-    private $site         = 'default';
-    private $version      = '5.4.16';
-    private $debug        = false;
-    private $is_loggedin  = false;
-    private $cookies      = '';
-    private $request_type = 'POST';
-    private $last_results_raw;
-    private $last_error_message;
+    private $baseurl            = 'https://127.0.0.1:8443';
+    private $site               = 'default';
+    private $version            = '5.4.16';
+    private $debug              = false;
+    private $is_loggedin        = false;
+    private $cookies            = '';
+    private $request_type       = 'POST';
+    private $connect_timeout    = 10;
+    private $last_results_raw   = null;
+    private $last_error_message = null;
 
     function __construct($user, $password, $baseurl = '', $site = '', $version = '')
     {
@@ -60,7 +59,7 @@ class Client
         }
 
         if (strlen($this->site) !== 8 && $this->site !== 'default' && $this->debug) {
-            error_log('The provided short site name is probably incorrect');
+            error_log('The provided (short) site name is probably incorrect');
         }
     }
 
@@ -97,7 +96,12 @@ class Client
         curl_setopt($ch, CURLOPT_URL, $this->baseurl.'/api/login');
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
 
-        if (($content = curl_exec($ch)) === false) {
+        /**
+         * execute the cURL request
+         */
+        $content = curl_exec($ch);
+
+        if (curl_errno($ch)) {
             trigger_error('cURL error: '.curl_error($ch));
         }
 
@@ -159,7 +163,6 @@ class Client
      * Set site
      * --------
      * modify the private property site, returns the new (short) site name
-     * returns the new short name, or false if string length is incorrect or not 'default'
      * required parameter <site> = string; must be the short site name of a site to which the
      *                             provided credentials have access
      *
@@ -168,13 +171,14 @@ class Client
      */
     public function set_site($site)
     {
-        if (strlen($site) === 8 || $site === 'default') {
-            $this->site = $site;
 
-            return $this->site;
-        } else {
-            return false;
+        if (strlen($site) === 8 || $site === 'default') {
+            error_log('The provided (short) site name is probably incorrect');
         }
+
+        $this->site = $site;
+
+        return $this->site;
     }
 
     /**
@@ -209,15 +213,13 @@ class Client
     /**
      * Get last raw results
      * --------------------
-     * returns the raw results of the last method called in PHP stdClass Object format by default, returns false if not set
-     * optional parameter <return_json> = boolean; true will return the results in "pretty printed" json format
-     *
-     * NOTE:
-     * this method can be used to get the full error as returned by the controller
+     * returns the raw results of the last method called, returns false if unavailable
+     * optional parameter <return_json> = boolean; true will return the results in "pretty printed" json format,
+     *                                    PHP stdClass Object format is returned by default
      */
     public function get_last_results_raw($return_json = false)
     {
-        if ($this->last_results_raw != null) {
+        if ($this->last_results_raw !== null) {
             if ($return_json) {
                 return json_encode($this->last_results_raw, JSON_PRETTY_PRINT);
             }
@@ -231,11 +233,11 @@ class Client
     /**
      * Get last error message
      * ----------------------
-     * returns the error message of the last method called in PHP stdClass Object format, returns false if not set
+     * returns the error message of the last method called in PHP stdClass Object format, returns false if unavailable
      */
     public function get_last_error_message()
     {
-        if (isset($this->last_error_message)) {
+        if ($this->last_error_message  !== null) {
             return $this->last_error_message;
         }
 
@@ -1884,7 +1886,12 @@ class Client
             }
         }
 
-        if (($content = curl_exec($ch)) === false) {
+        /**
+         * execute the cURL request
+         */
+        $content = curl_exec($ch);
+
+        if (curl_errno($ch)) {
             trigger_error('cURL error: '.curl_error($ch));
         }
 
@@ -1892,9 +1899,10 @@ class Client
          * has the session timed out?
          */
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $strerr   = '{ "data" : [ ] , "meta" : { "msg" : "api.err.LoginRequired" , "rc" : "error"}}';
 
-        if ($httpcode == 401 && strcmp($content, $strerr) == 0) {
+        $json_decoded_content = json_decode($content, true);
+
+        if ($httpcode == 401 && isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
             if ($this->debug) {
                 error_log('cURL debug: Needed reconnect to UniFi Controller');
             }
@@ -1960,6 +1968,7 @@ class Client
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
 
         if ($this->debug) {
             curl_setopt($ch, CURLOPT_VERBOSE, true);

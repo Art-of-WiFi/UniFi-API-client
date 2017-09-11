@@ -6,7 +6,7 @@ This PHP class provides access to Ubiquiti's **UniFi Controller API**. Versions 
 
 If you'd like to support further development of this PHP API client class, please use the PayPal donate button below. All donations go to the project maintainer.
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=M7TVNVX3Z44VN)
+[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=M7TVNVX3Z44VN)
 
 ## Methods and functions supported
 
@@ -113,13 +113,6 @@ Internal functions, getters/setters:
 
 Please refer to the source code for more details on each function/method and it's parameters.
 
-## Credits
-
-This class is largely based on the work done by the following developers:
-- domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
-- fbagnol: https://github.com/fbagnol/class.unifi.php
-- and the API as published by Ubiquiti: https://www.ubnt.com/downloads/unifi/5.5.20/unifi_sh_api
-
 ## Requirements
 
 - a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1)
@@ -198,11 +191,18 @@ In this case, `jl3z2shm` is the value required for $site_id.
 
 ## Need help or have suggestions?
 
-There is still work to be done to add functionality and improve the usability of this class, so all suggestions/comments are welcome. Please use the github [issue](https://github.com/Art-of-WiFi/UniFi-API-client/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/PHP-class-to-access-the-UniFi-controller-API-updates-and/td-p/1512870) to share your ideas.
+There is still work to be done to add functionality and improve the usability of this class, so all suggestions/comments are welcome. Please use the github [issue](https://github.com/Art-of-WiFi/UniFi-API-client/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/PHP-class-to-access-the-UniFi-controller-API-updates-and/td-p/1512870) to share your ideas/questions.
 
 ## Contribute
 
 If you would like to contribute code (improvements), please open an issue and include your code there or else create a pull request.
+
+## Credits
+
+This class is largely based on the work done by the following developers:
+- domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
+- fbagnol: https://github.com/fbagnol/class.unifi.php
+- and the API as published by Ubiquiti: https://www.ubnt.com/downloads/unifi/5.5.20/unifi_sh_api
 
 ## Important Disclaimer
 
