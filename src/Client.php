@@ -171,13 +171,11 @@ class Client
      */
     public function set_site($site)
     {
-
-        if (strlen($site) === 8 || $site === 'default') {
+        if (strlen($site) !== 8 && $site !== 'default' && $this->debug) {
             error_log('The provided (short) site name is probably incorrect');
         }
 
         $this->site = $site;
-
         return $this->site;
     }
 

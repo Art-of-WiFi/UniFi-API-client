@@ -126,7 +126,7 @@ You can use **Composer**, **Git** or simply **Download the Release**
 
 The preferred method is via [composer](https://getcomposer.org). Follow the [installation instructions](https://getcomposer.org/doc/00-intro.md) if you do not already have composer installed.
 
-Once composer is installed, simply execute this command from your project directory:
+Once composer is installed, simply execute this command from the shell in your project directory:
 
 ```sh
 composer require art-of-wifi/unifi-api-client
@@ -176,7 +176,7 @@ require_once('vendor/autoload.php');
  */
 $unifi_connection = new UniFi_API\Client($controller_user, $controller_password, $controller_url, $site_id, $controller_version);
 $login            = $unifi_connection->login();
-$results          = $unifi_connection->list_alarms(); // returns an PHP array containing alarm objects
+$results          = $unifi_connection->list_alarms(); // returns a PHP array containing alarm objects
 ```
 
 Please refer to the `examples/` directory for some more detailed examples which you can use as a starting point for your own PHP code.
