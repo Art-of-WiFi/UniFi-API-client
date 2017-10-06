@@ -37,9 +37,10 @@ $new_password = '<new password goes here>';
  */
 $unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
 $set_debug_mode   = $unifi_connection->set_debug($debug);
-$loginresults     = $unifi_connection->set_wlansettings($wlan_id, $new_password);
+$loginresults     = $unifi_connection->login();
+$results          = $unifi_connection->set_wlansettings($wlan_id, $new_password);
 
 /**
  * provide feedback in json format
  */
-echo json_encode($loginresults, JSON_PRETTY_PRINT);
+echo json_encode($results, JSON_PRETTY_PRINT);
