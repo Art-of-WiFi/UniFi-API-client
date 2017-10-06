@@ -1,6 +1,8 @@
 ## UniFi controller API client class
 
-This PHP class provides access to Ubiquiti's **UniFi Controller API**. Versions 4.x.x and 5.x.x of the UniFi Controller software (version 5.5.20 has been confirmed to work) are supported. It is an independent version of the class which is used in the API browser tool [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+This PHP class provides access to Ubiquiti's **UniFi Controller API**. Versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.5.20 has been confirmed to work). It is an independent version of the class which is used in the API browser tool [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+
+The class is now also installable through composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
 ### Donations
 
@@ -116,11 +118,11 @@ Please refer to the source code for more details on each function/method and it'
 ## Requirements
 
 - a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1)
-- network connectivity between this web server and the server and port (normally port 8443) where the UniFi controller is running
+- network connectivity between this web server and the server and port (normally TCP port 8443) where the UniFi controller is running
 
 ## Installation ##
 
-You can use **Composer**, **Git** or simply **Download the Release**
+You can use **Composer**, **Git** or simply **Download the Release** to install the API client class.
 
 ### Composer
 
@@ -174,14 +176,19 @@ require_once('vendor/autoload.php');
  * initialize the Unifi API connection class, log in to the controller and request the alarms collection
  * (this example assumes you have already assigned the correct values to the variables used)
  */
-$unifi_connection = new UniFi_API\Client($controller_user, $controller_password, $controller_url, $site_id, $controller_version);
+$unifi_connection = new UniFi_API\Client($controller_user, $controller_password, $controller_url, $site_id, $controller_version, true);
 $login            = $unifi_connection->login();
 $results          = $unifi_connection->list_alarms(); // returns a PHP array containing alarm objects
 ```
 
 Please refer to the `examples/` directory for some more detailed examples which you can use as a starting point for your own PHP code.
 
-### NOTE:
+### IMPORTANT NOTES:
+
+In the example above, the last parameter (`true`, without quotes) that is passed to the constructor enables validation of the controller's SSL certificate which is *disabled* by default.
+It is highly recommended to enable this feature in production environments where you have a valid SSL cert installed on the UniFi controller, and which is associated with the FQDN of the server as used in the `controller_url` parameter. This option was added with API client version 1.1.16.
+
+---
 
 In the example above, `$site_id` is the 8 character short site "name" which is visible in the URL when managing the site in the UniFi controller:
 
@@ -206,4 +213,4 @@ This class is largely based on the work done by the following developers:
 
 ## Important Disclaimer
 
-Many of these functions are not officially supported by UBNT and as such, may not be supported in future versions of the UniFi controller API.
+Many of the functions in this API client class are not officially supported by UBNT and as such, may not be supported in future versions of the UniFi controller API.

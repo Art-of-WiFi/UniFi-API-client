@@ -34,7 +34,8 @@ curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
 /**
- * This cURL option can have a value of 0-6 see this URL for more details:
+ * This cURL option can have a value of 0-6
+ * see this URL for more details:
  * http://php.net/manual/en/function.curl-setopt.php
  * 0 is the default value and is used by the PHP API client class
  */

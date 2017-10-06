@@ -24,18 +24,33 @@ class Client
     /**
      * private properties
      */
-    private $baseurl            = 'https://127.0.0.1:8443';
-    private $site               = 'default';
-    private $version            = '5.4.16';
-    private $debug              = false;
-    private $is_loggedin        = false;
-    private $cookies            = '';
-    private $request_type       = 'POST';
-    private $connect_timeout    = 10;
-    private $last_results_raw   = null;
-    private $last_error_message = null;
+    private $baseurl              = 'https://127.0.0.1:8443';
+    private $site                 = 'default';
+    private $version              = '5.4.16';
+    private $debug                = false;
+    private $is_loggedin          = false;
+    private $cookies              = '';
+    private $request_type         = 'POST';
+    private $connect_timeout      = 10;
+    private $last_results_raw     = null;
+    private $last_error_message   = null;
+    private $curl_ssl_verify_peer = false;
+    private $curl_ssl_verify_host = false;
 
-    function __construct($user, $password, $baseurl = '', $site = '', $version = '')
+    /**
+     * Construct an instance of the UniFi API client class
+     * ---------------------------------------------------
+     * return a new class instance
+     * required parameter <user>       = string; user name to use when connecting to the UniFi controller
+     * required parameter <password>   = string; password to use when connecting to the UniFi controller
+     * optional parameter <baseurl>    = string; base URL of the UniFi controller, must include "https://" prefix and port suffix (:8443)
+     * optional parameter <site>       = string; short site name to access, defaults to "default"
+     * optional parameter <version>    = string; the version number of the controller, defaults to "5.4.16"
+     * optional parameter <ssl_verify> = boolean; whether to validate the controller's SSL certificate or not, true is recommended for
+     *                                   production environments to prevent potential MitM attacks, default is to not validate the
+     *                                   controller certificate
+     */
+    function __construct($user, $password, $baseurl = '', $site = '', $version = '', $ssl_verify = false)
     {
         if (!extension_loaded('curl')) {
             trigger_error('The PHP curl extension is not loaded. Please correct this before proceeding!');
@@ -47,20 +62,14 @@ class Client
         if (!empty($baseurl)) $this->baseurl = trim($baseurl);
         if (!empty($site)) $this->site       = trim($site);
         if (!empty($version)) $this->version = trim($version);
-
-        if (isset($_SESSION['unificookie'])) {
-            $this->cookies = $_SESSION['unificookie'];
+        if ($ssl_verify === true) {
+            $this->curl_ssl_verify_peer = true;
+            $this->curl_ssl_verify_host = 2;
         }
 
-        $base_url_components = parse_url($this->baseurl);
-
-        if (empty($base_url_components['scheme']) || empty($base_url_components['host']) || empty($base_url_components['port'])) {
-            trigger_error('The URL provided is incomplete!');
-        }
-
-        if (strlen($this->site) !== 8 && $this->site !== 'default' && $this->debug) {
-            error_log('The provided (short) site name is probably incorrect');
-        }
+        $this->check_base_url();
+        $this->check_site($this->site);
+        $this->update_unificookie();
     }
 
     function __destruct()
@@ -82,12 +91,9 @@ class Client
     public function login()
     {
         /**
-         * if user has $_SESSION['unificookie'] set, skip the login ;)
+         * if user has $_SESSION['unificookie'] set, skip the login
          */
-        if (isset($_SESSION['unificookie'])) {
-            $this->is_loggedin = true;
-            return $this->is_loggedin;
-        }
+        if (isset($_SESSION['unificookie'])) return $this->is_loggedin = true;
 
         $ch = $this->get_curl_obj();
 
@@ -101,9 +107,7 @@ class Client
          */
         $content = curl_exec($ch);
 
-        if (curl_errno($ch)) {
-            trigger_error('cURL error: '.curl_error($ch));
-        }
+        if (curl_errno($ch)) trigger_error('cURL error: '.curl_error($ch));
 
         if ($this->debug) {
             curl_setopt($ch, CURLOPT_VERBOSE, true);
@@ -124,13 +128,12 @@ class Client
         curl_close ($ch);
 
         preg_match_all('|Set-Cookie: (.*);|U', substr($content, 0, $header_size), $results);
+
         if (isset($results[1])) {
             $this->cookies = implode(';', $results[1]);
             if (!empty($body)) {
                 if (($code >= 200) && ($code < 400)) {
-                    if (strpos($this->cookies, 'unifises') !== false) {
-                        $this->is_loggedin = true;
-                    }
+                    if (strpos($this->cookies, 'unifises') !== false) return $this->is_loggedin = true;
                 }
 
                 if ($code === 400) {
@@ -140,7 +143,7 @@ class Client
             }
         }
 
-        return $this->is_loggedin;
+        return false;
     }
 
     /**
@@ -171,11 +174,8 @@ class Client
      */
     public function set_site($site)
     {
-        if (strlen($site) !== 8 && $site !== 'default' && $this->debug) {
-            error_log('The provided (short) site name is probably incorrect');
-        }
-
         $this->site = $site;
+        $this->check_site($this->site);
         return $this->site;
     }
 
@@ -218,10 +218,7 @@ class Client
     public function get_last_results_raw($return_json = false)
     {
         if ($this->last_results_raw !== null) {
-            if ($return_json) {
-                return json_encode($this->last_results_raw, JSON_PRETTY_PRINT);
-            }
-
+            if ($return_json) return json_encode($this->last_results_raw, JSON_PRETTY_PRINT);
             return $this->last_results_raw;
         }
 
@@ -235,10 +232,7 @@ class Client
      */
     public function get_last_error_message()
     {
-        if ($this->last_error_message  !== null) {
-            return $this->last_error_message;
-        }
-
+        if ($this->last_error_message !== null) return $this->last_error_message;
         return false;
     }
 
@@ -924,7 +918,7 @@ class Client
     /**
      * Create voucher(s)
      * -----------------
-     * returns an array of voucher codes (without the dash "-" in the middle) by calling the stat_voucher method
+     * returns an array containing a single object which contains the create_time(stamp) of the voucher(s) created
      * required parameter <minutes> = minutes the voucher is valid after activation (expiration time)
      * optional parameter <count>   = number of vouchers to create, default value is 1
      * optional parameter <quota>   = single-use or multi-use vouchers, string value '0' is for multi-use, '1' is for single-use,
@@ -933,6 +927,8 @@ class Client
      * optional parameter <up>      = upload speed limit in kbps
      * optional parameter <down>    = download speed limit in kbps
      * optional parameter <MBytes>  = data transfer limit in MB
+     *
+     * NOTES: please use the stat_voucher() method/function to retrieve the newly created voucher(s) by create_time
      */
     public function create_voucher($minutes, $count = 1, $quota = '0', $note = null, $up = null, $down = null, $MBytes = null)
     {
@@ -1730,6 +1726,11 @@ class Client
      */
     public function list_aps($device_mac = null)
     {
+        trigger_error(
+            'Function list_aps() has been deprecated, use list_devices() instead.',
+            E_USER_DEPRECATED
+        );
+
         return $this->list_devices($device_mac);
     }
 
@@ -1808,23 +1809,15 @@ class Client
         if (isset($response->meta->rc)) {
             if ($response->meta->rc === 'ok') {
                 $this->last_error_message = null;
-                if (is_array($response->data)) {
-                    return $response->data;
-                }
-
+                if (is_array($response->data)) return $response->data;
                 return true;
             } elseif ($response->meta->rc === 'error') {
                 /**
                  * we have an error:
                  * set $this->set last_error_message if the returned error message is available
                  */
-                if (isset($response->meta->msg)) {
-                    $this->last_error_message = $response->meta->msg;
-                }
-
-                if ($this->debug) {
-                    trigger_error('Debug: Last error message: '.$this->last_error_message);
-                }
+                if (isset($response->meta->msg)) $this->last_error_message = $response->meta->msg;
+                if ($this->debug) trigger_error('Debug: Last error message: '.$this->last_error_message);
             }
         }
 
@@ -1846,17 +1839,42 @@ class Client
                  * we have an error:
                  * set $this->last_error_message if the returned error message is available
                  */
-                if (isset($response->meta->msg)) {
-                    $this->last_error_message = $response->meta->msg;
-                }
-
-                if ($this->debug) {
-                    trigger_error('Debug: Last error message: '.$this->last_error_message);
-                }
+                if (isset($response->meta->msg)) $this->last_error_message = $response->meta->msg;
+                if ($this->debug) trigger_error('Debug: Last error message: '.$this->last_error_message);
             }
         }
 
         return false;
+    }
+
+    /**
+     * Check the submitted base URL
+     */
+    private function check_base_url()
+    {
+        $base_url_components = parse_url($this->baseurl);
+
+        if (empty($base_url_components['scheme']) || empty($base_url_components['host']) || empty($base_url_components['port'])) {
+            trigger_error('The URL provided is incomplete!');
+        }
+    }
+
+    /**
+     * Check the (short) site name
+     */
+    private function check_site($site)
+    {
+        if ($this->debug && strlen($site) !== 8 && $site !== 'default') {
+            error_log('The provided (short) site name is probably incorrect');
+        }
+    }
+
+    /**
+     * Update the unificookie
+     */
+    private function update_unificookie()
+    {
+        if (isset($_SESSION['unificookie'])) $this->cookies = $_SESSION['unificookie'];
     }
 
     /**
@@ -1879,9 +1897,7 @@ class Client
 
         } else {
             curl_setopt($ch, CURLOPT_POST, false);
-            if ($this->request_type === 'DELETE') {
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
-            }
+            if ($this->request_type === 'DELETE') curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
         }
 
         /**
@@ -1896,21 +1912,19 @@ class Client
         /**
          * has the session timed out?
          */
-        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         $json_decoded_content = json_decode($content, true);
 
-        if ($httpcode == 401 && isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
-            if ($this->debug) {
-                error_log('cURL debug: Needed reconnect to UniFi Controller');
-            }
+        if ($http_code == 401 && isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
+            if ($this->debug) error_log('cURL debug: Needed reconnect to UniFi Controller');
 
             /**
              * explicitly unset the old cookie now
              */
             if (isset($_SESSION['unificookie'])) {
                 unset($_SESSION['unificookie']);
-                $have_cookie_in_use = 1;
+                $no_cookie_in_use = 1;
             }
 
             $this->login();
@@ -1924,9 +1938,9 @@ class Client
                 /**
                  * setup the cookie for the user within $_SESSION
                  */
-                if (isset($have_cookie_in_use) && session_status() != PHP_SESSION_DISABLED) {
+                if (isset($no_cookie_in_use) && session_status() != PHP_SESSION_DISABLED) {
                     $_SESSION['unificookie'] = $this->cookies;
-                    unset($have_cookie_in_use);
+                    unset($no_cookie_in_use);
                 }
 
                 return $this->exec_curl($url, $data);
@@ -1957,20 +1971,18 @@ class Client
     }
 
     /**
-     * get the cURL object
+     * Get the cURL object
      */
     private function get_curl_obj()
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->curl_ssl_verify_peer);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->curl_ssl_verify_host);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
 
-        if ($this->debug) {
-            curl_setopt($ch, CURLOPT_VERBOSE, true);
-        }
+        if ($this->debug) curl_setopt($ch, CURLOPT_VERBOSE, true);
 
         if ($this->cookies != '') {
             curl_setopt($ch, CURLOPT_COOKIESESSION, true);
