@@ -185,7 +185,7 @@ Please refer to the `examples/` directory for some more detailed examples which 
 
 ### IMPORTANT NOTES:
 
-In the example above, the last parameter (`true`, without quotes) that is passed to the constructor enables validation of the controller's SSL certificate which is *disabled* by default.
+In the example above, the last parameter (`true`, without quotes) that is passed to the constructor enables validation of the controller's SSL certificate which is **disabled** by default.
 It is highly recommended to enable this feature in production environments where you have a valid SSL cert installed on the UniFi controller, and which is associated with the FQDN of the server as used in the `controller_url` parameter. This option was added with API client version 1.1.16.
 
 ---
