@@ -269,7 +269,7 @@ class Client
         $json = ['cmd' => 'authorize-guest', 'mac' => $mac, 'minutes' => $minutes];
 
         /**
-         * if we have received values for up/down/MBytes we append them to the payload array to be submitted
+         * if we have received values for up/down/MBytes/ap_mac we append them to the payload array to be submitted
          */
         if (isset($up))     $json['up']     = $up;
         if (isset($down))   $json['down']   = $down;
@@ -341,8 +341,8 @@ class Client
     }
 
     /**
-     * Add/modify a client device note
-     * -------------------------------
+     * Add/modify/remove a client device note
+     * --------------------------------------
      * return true on success
      * required parameter <user_id> = id of the user device to be modified
      * optional parameter <note>    = note to be applied to the user device
@@ -360,14 +360,14 @@ class Client
     }
 
     /**
-     * Add/modify a client device name
-     * -------------------------------
+     * Add/modify/remove a client device name
+     * --------------------------------------
      * return true on success
-     * required parameter <user_id> = id of the user device to be modified
-     * optional parameter <name>    = name to be applied to the user device
+     * required parameter <user_id> = id of the client device to be modified
+     * optional parameter <name>    = name to be applied to the client device
      *
      * NOTES:
-     * - when name is empty or not set, the existing name for the user will be removed
+     * - when name is empty or not set, the existing name for the client device will be removed
      */
     public function set_sta_name($user_id, $name = null)
     {
@@ -375,6 +375,52 @@ class Client
         $json            = json_encode(['name' => $name]);
         $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/upd/user/'.trim($user_id), 'json='.$json));
         return $this->process_response_boolean($content_decoded);
+    }
+
+    /**
+     * 5 minutes site stats method
+     * ---------------------------
+     * returns an array of 5 minutes stats objects for the current site
+     * optional parameter <start> = Unix timestamp in seconds
+     * optional parameter <end>   = Unix timestamp in seconds
+     *
+     * NOTES:
+     * - defaults to the past 12 hours
+     * - this function/method is only supported on controller versions 5.5.* and later
+     * - make sure that the retention policy for 5 minutes stats is set to the correct value in
+     *   the controller settings
+     */
+    public function stat_5minutes_site($start = null, $end = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $end             = is_null($end) ? ((time())*1000) : $end;
+        $start           = is_null($start) ? $end-(12*3600*1000) : $start;
+        $attributes      = ['bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'];
+        $json            = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/5minutes.site', 'json='.$json));
+        return $this->process_response($content_decoded);
+    }
+
+    /**
+     * Hourly site stats method
+     * ------------------------
+     * returns an array of hourly stats objects for the current site
+     * optional parameter <start> = Unix timestamp in seconds
+     * optional parameter <end>   = Unix timestamp in seconds
+     *
+     * NOTES:
+     * - defaults to the past 7*24 hours
+     * - "bytes" are no longer returned with controller version 4.9.1 and later
+     */
+    public function stat_hourly_site($start = null, $end = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $end             = is_null($end) ? ((time())*1000) : $end;
+        $start           = is_null($start) ? $end-(7*24*3600*1000) : $start;
+        $attributes      = ['bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'];
+        $json            = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/hourly.site', 'json='.$json));
+        return $this->process_response($content_decoded);
     }
 
     /**
@@ -400,24 +446,28 @@ class Client
     }
 
     /**
-     * Hourly site stats method
-     * ------------------------
-     * returns an array of hourly stats objects for the current site
+     * 5 minutes stats method for a single access point or all access points
+     * ---------------------------------------------------------------------
+     * returns an array of 5 minutes stats objects
      * optional parameter <start> = Unix timestamp in seconds
      * optional parameter <end>   = Unix timestamp in seconds
+     * optional parameter <mac>   = AP MAC address to return stats for
      *
      * NOTES:
-     * - defaults to the past 7*24 hours
-     * - "bytes" are no longer returned with controller version 4.9.1 and later
+     * - defaults to the past 12 hours
+     * - this function/method is only supported on controller versions 5.5.* and later
+     * - make sure that the retention policy for 5 minutes stats is set to the correct value in
+     *   the controller settings
      */
-    public function stat_hourly_site($start = null, $end = null)
+    public function stat_5minutes_aps($start = null, $end = null, $mac = null)
     {
         if (!$this->is_loggedin) return false;
         $end             = is_null($end) ? ((time())*1000) : $end;
-        $start           = is_null($start) ? $end-(7*24*3600*1000) : $start;
-        $attributes      = ['bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'];
-        $json            = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/hourly.site', 'json='.$json));
+        $start           = is_null($start) ? $end-(12*3600*1000) : $start;
+        $json            = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        if (!is_null($mac)) $json['mac'] = $mac;
+        $json            = json_encode($json);
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/report/5minutes.ap', 'json='.$json));
         return $this->process_response($content_decoded);
     }
 
@@ -472,7 +522,7 @@ class Client
     /**
      * Show all login sessions
      * -----------------------
-     * returns an array of login session objects for all devices
+     * returns an array of login session objects for all devices or a single device
      * optional parameter <start> = Unix timestamp in seconds
      * optional parameter <end>   = Unix timestamp in seconds
      * optional parameter <mac>   = client MAC address to return sessions for (can only be used when start and end are also provided)
@@ -599,8 +649,8 @@ class Client
     }
 
     /**
-     * Assign user device to another group
-     * -----------------------------------
+     * Assign client device to another group
+     * -------------------------------------
      * return true on success
      * required parameter <user_id>  = id of the user device to be modified
      * required parameter <group_id> = id of the user group to assign user to
@@ -679,18 +729,21 @@ class Client
      * List dashboard metrics
      * ----------------------
      * returns an array of dashboard metric objects (available since controller version 4.9.1.alpha)
+     * optional parameter <five_minutes> = boolean; if true, return stats based on 5 minute intervals,
+     *                                     returns hourly stats by default (supported on controller versions 5.5.* and higher)
      */
-    public function list_dashboard()
+    public function list_dashboard($five_minutes = false)
     {
         if (!$this->is_loggedin) return false;
-        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/dashboard'));
+        $url_suffix = $five_minutes ? '?scale=5minutes' : null;
+        $content_decoded = json_decode($this->exec_curl($this->baseurl.'/api/s/'.$this->site.'/stat/dashboard'.$url_suffix));
         return $this->process_response($content_decoded);
     }
 
     /**
-     * List user devices
-     * -----------------
-     * returns an array of known user device objects
+     * List client devices
+     * -------------------
+     * returns an array of known client device objects
      */
     public function list_users()
     {
@@ -1894,7 +1947,6 @@ class Client
             } else {
                 curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
             }
-
         } else {
             curl_setopt($ch, CURLOPT_POST, false);
             if ($this->request_type === 'DELETE') curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
@@ -1917,7 +1969,7 @@ class Client
         $json_decoded_content = json_decode($content, true);
 
         if ($http_code == 401 && isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
-            if ($this->debug) error_log('cURL debug: Needed reconnect to UniFi Controller');
+            if ($this->debug) error_log('cURL debug: Needed to reconnect to UniFi Controller');
 
             /**
              * explicitly unset the old cookie now
