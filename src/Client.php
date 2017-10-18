@@ -803,7 +803,7 @@ class Client
     public function list_known_rogueaps()
     {
         if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/rogueknown');
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/rogueknown');
         return $this->process_response($response);
     }
 
