@@ -889,7 +889,7 @@ class Client
     }
 
     /**
-     * List sysinfo
+     * Show sysinfo
      * ------------
      * returns an array of known sysinfo data
      */
@@ -901,9 +901,12 @@ class Client
     }
 
     /**
-     * List controller status
+     * Show controller status
      * ----------------------
-     * returns an array containing general controller status info
+     * returns an empty array upon success
+     *
+     * NOTES: in order to get useful results (e.g. controller version) you should call get_last_results_raw()
+     * immediately after this method
      */
     public function stat_status()
     {
