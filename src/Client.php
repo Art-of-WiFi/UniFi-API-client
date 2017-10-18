@@ -782,9 +782,9 @@ class Client
     }
 
     /**
-     * List rogue access points
-     * ------------------------
-     * returns an array of known rogue access point objects
+     * List rogue/neighboring access points
+     * ------------------------------------
+     * returns an array of rogue/neighboring access point objects
      * optional parameter <within> = hours to go back to list discovered "rogue" access points (default = 24 hours)
      */
     public function list_rogueaps($within = 24)
@@ -792,6 +792,18 @@ class Client
         if (!$this->is_loggedin) return false;
         $json     = json_encode(['within' => intval($within)]);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/rogueap', 'json='.$json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * List known rogue access points
+     * ------------------------------
+     * returns an array of known rogue access point objects
+     */
+    public function list_known_rogueaps()
+    {
+        if (!$this->is_loggedin) return false;
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/rogueknown');
         return $this->process_response($response);
     }
 
@@ -885,6 +897,17 @@ class Client
     {
         if (!$this->is_loggedin) return false;
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/sysinfo');
+        return $this->process_response($response);
+    }
+
+    /**
+     * List controller status
+     * ----------------------
+     * returns an array containing general controller status info
+     */
+    public function stat_status()
+    {
+        $response = $this->exec_curl('/status');
         return $this->process_response($response);
     }
 
@@ -1177,14 +1200,10 @@ class Client
     {
         if (!$this->is_loggedin) return false;
         $this->request_type    = 'PUT';
-        $override_mode_options = ['off', 'on', 'default'];
-        if (in_array($override_mode, $override_mode_options)) {
-            $json     = json_encode(['led_override' => $override_mode]);
-            $response = $this->exec_curl('/api/s/'.$this->site.'/rest/device/'.trim($device_id), $json);
-            return $this->process_response_boolean($response);
-        }
-
-        return false;
+        if (!in_array($override_mode, ['off', 'on', 'default'])) return false;
+        $json     = json_encode(['led_override' => $override_mode]);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/device/'.trim($device_id), $json);
+        return $this->process_response_boolean($response);
     }
 
     /**
@@ -1253,14 +1272,10 @@ class Client
      */
     public function set_ap_wlangroup($wlantype_id, $device_id, $wlangroup_id) {
         if (!$this->is_loggedin) return false;
-        $wlantype_id_options = ['ng', 'na'];
-        if (in_array($wlantype_id, $wlantype_id_options)) {
-            $json     = json_encode(['wlan_overrides' => [],'wlangroup_id_'.$wlantype_id => $wlangroup_id]);
-            $response = $this->exec_curl('/api/s/'.$this->site.'/upd/device/'.trim($device_id),'json='.$json);
-            return $this->process_response_boolean($response);
-        }
-
-        return false;
+        if (in_array($wlantype_id, ['ng', 'na'])) return false;
+        $json     = json_encode(['wlan_overrides' => [],'wlangroup_id_'.$wlantype_id => $wlangroup_id]);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/upd/device/'.trim($device_id),'json='.$json);
+        return $this->process_response_boolean($response);
     }
 
     /**
@@ -1532,16 +1547,12 @@ class Client
      */
     public function set_wlan_mac_filter($wlan_id, $mac_filter_policy, $mac_filter_enabled, array $macs)
     {
-        $mac_filter_policy_options = ['allow', 'deny'];
-        if (in_array($mac_filter_policy, $mac_filter_policy_options)) {
-            $payload                     = new \stdClass();
-            $payload->mac_filter_enabled = (bool)$mac_filter_enabled;
-            $payload->mac_filter_policy  = $mac_filter_policy;
-            $payload->mac_filter_list    = $macs;
-            return $this->set_wlansettings_base($wlan_id, $payload);
-        }
-
-        return false;
+        if (in_array($mac_filter_policy, ['allow', 'deny'])) return false;
+        $payload                     = new \stdClass();
+        $payload->mac_filter_enabled = (bool)$mac_filter_enabled;
+        $payload->mac_filter_policy  = $mac_filter_policy;
+        $payload->mac_filter_list    = $macs;
+        return $this->set_wlansettings_base($wlan_id, $payload);
     }
 
     /**
@@ -1626,6 +1637,25 @@ class Client
     }
 
     /**
+     * Power-cycle the PoE output of a switch port
+     * -------------------------------------------
+     * return true on success
+     * required parameter <switch_mac> = string; main MAC address of the switch
+     * required parameter <port_idx>   = integer; port number/index of the port to be affected
+     *
+     * NOTES:
+     * - only applies to switches and their PoE ports...
+     */
+    public function power_cycle_switch_port($switch_mac, $port_idx)
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = ['mac' => $switch_mac, 'port_idx' => intval($port_idx), 'cmd' => 'power-cycle'];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
      * Trigger an RF scan by an AP
      * ---------------------------
      * return true on success
@@ -1651,6 +1681,23 @@ class Client
         if (!$this->is_loggedin) return false;
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/spectrum-scan/'.trim($ap_mac));
         return $this->process_response($response);
+    }
+
+    /**
+     * Update device settings, base (using REST)
+     * -----------------------------------------
+     * return true on success
+     * required parameter <device_id>       = 24 char string; _id of the device which can be found with the list_devices() function
+     * required parameter <device_settings> = stdClass object or associative array containing the configuration to apply to the device, must be a
+     *                                        (partial) object/array structured in the same manner as is returned by list_devices() for the device.
+     */
+    public function set_device_settings_base($device_id, $device_settings)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json               = json_encode($device_settings);
+        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/device/'.trim($device_id), 'json='.$json);
+        return $this->process_response_boolean($response);
     }
 
     /**
@@ -1727,23 +1774,20 @@ class Client
     public function create_radius_account($name, $x_password, $tunnel_type, $tunnel_medium_type, $vlan = null)
     {
         if (!$this->is_loggedin) return false;
-        $tunnel_type_options        = [1,2,3,4,5,6,7,8,9,10,11,12,13];
-        $tunnel_medium_type_options = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
-        if (in_array($tunnel_type, $tunnel_type_options) && in_array($tunnel_medium_type, $tunnel_medium_type_options)) {
-            $this->request_type = 'POST';
-            $account_details    = [
-                'name'               => $name,
-                'x_password'         => $x_password,
-                'tunnel_type'        => (int) $tunnel_type,
-                'tunnel_medium_type' => (int) $tunnel_medium_type
-            ];
-            if (isset($vlan)) $account_details['vlan'] = (int) $vlan;
-            $json     = json_encode($account_details);
-            $response = $this->exec_curl('/api/s/'.$this->site.'/rest/account', 'json='.$json);
-            return $this->process_response($response);
-        }
-
-        return false;
+        $tunnel_types        = [1,2,3,4,5,6,7,8,9,10,11,12,13];
+        $tunnel_medium_types = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+        if (!in_array($tunnel_type, $tunnel_types) || !in_array($tunnel_medium_type, $tunnel_medium_types)) return false;
+        $this->request_type  = 'POST';
+        $account_details     = [
+            'name'               => $name,
+            'x_password'         => $x_password,
+            'tunnel_type'        => (int) $tunnel_type,
+            'tunnel_medium_type' => (int) $tunnel_medium_type
+        ];
+        if (isset($vlan)) $account_details['vlan'] = (int) $vlan;
+        $json     = json_encode($account_details);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/account', 'json='.$json);
+        return $this->process_response($response);
     }
 
     /**

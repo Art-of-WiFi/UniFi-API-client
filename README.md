@@ -1,6 +1,6 @@
 ## UniFi controller API client class
 
-A PHP class which provides access to Ubiquiti's **UniFi Controller API**. Versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.6.18 has been confirmed to work). It's a standalone version of the class which is used in the API browser tool [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+A PHP class which provides access to Ubiquiti's **UniFi Controller API**. Versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.6.18 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 This class can now also be installed using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
@@ -49,6 +49,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - list_guests()
 - list_health()
 - list_hotspotop()
+- list_known_rogueaps()
 - list_networkconf()
 - list_portconf()
 - list_portforward_stats()
@@ -65,11 +66,13 @@ The class currently supports the following functions/methods to get/post/put/del
 - list_wlan_groups()
 - list_wlanconf()
 - locate_ap()
+- power_cycle_switch_port()
 - reconnect_sta()
 - rename_ap()
 - restart_ap()
 - revoke_voucher()
 - set_ap_radiosettings()
+- set_device_settings_base()
 - set_guestlogin_settings()
 - set_locate_ap() (deprecated but still available as alias)
 - set_networksettings_base()
@@ -98,6 +101,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - stat_sessions()
 - stat_sites()
 - stat_sta_sessions_latest()
+- stat_status()
 - stat_sysinfo()
 - stat_voucher()
 - unauthorize_guest()
