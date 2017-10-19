@@ -16,6 +16,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - login()
 - logout()
 - adopt_device()
+- archive_alarm()
 - authorize_guest()
 - block_sta()
 - count_alarms()
