@@ -901,17 +901,17 @@ class Client
     }
 
     /**
-     * Show controller status
-     * ----------------------
-     * returns an empty array upon success
+     * Get controller status
+     * ---------------------
+     * returns true upon success (controller is online)
      *
-     * NOTES: in order to get useful results (e.g. controller version) you should call get_last_results_raw()
+     * NOTES: in order to get useful results (e.g. controller version) you can call get_last_results_raw()
      * immediately after this method
      */
     public function stat_status()
     {
         $response = $this->exec_curl('/status');
-        return $this->process_response($response);
+        return $this->process_response_boolean($response);
     }
 
     /**
@@ -1363,7 +1363,7 @@ class Client
         if (!$this->is_loggedin) return false;
         $this->request_type = 'POST';
         $json               = json_encode($network_settings);
-        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/networkconf/', 'json='.$json);
+        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/networkconf', 'json='.$json);
         return $this->process_response($response);
     }
 
@@ -1502,7 +1502,7 @@ class Client
      */
     public function set_wlansettings($wlan_id, $x_passphrase, $name = null)
     {
-        $payload = new \stdClass();
+        $payload = (object)[];
         if (!is_null($x_passphrase)) $payload->x_passphrase = trim($x_passphrase);
         if (!is_null($name)) $payload->name = trim($name);
         return $this->set_wlansettings_base($wlan_id, $payload);
@@ -1517,7 +1517,7 @@ class Client
      */
     public function disable_wlan($wlan_id, $disable)
     {
-        $payload          = new \stdClass();
+        $payload          = (object)[];
         $action           = ($disable) ? false : true;
         $payload->enabled = (bool)$action;
         return $this->set_wlansettings_base($wlan_id, $payload);
@@ -1551,7 +1551,7 @@ class Client
     public function set_wlan_mac_filter($wlan_id, $mac_filter_policy, $mac_filter_enabled, array $macs)
     {
         if (in_array($mac_filter_policy, ['allow', 'deny'])) return false;
-        $payload                     = new \stdClass();
+        $payload                     = (object)[];
         $payload->mac_filter_enabled = (bool)$mac_filter_enabled;
         $payload->mac_filter_policy  = $mac_filter_policy;
         $payload->mac_filter_list    = $macs;
@@ -1599,6 +1599,23 @@ class Client
         $url_suffix = ($archived === false) ? '?archived=false' : null;
         $response   = $this->exec_curl('/api/s/'.$this->site.'/cnt/alarm'.$url_suffix);
         return $this->process_response($response);
+    }
+
+    /**
+     * Archive alarms(s)
+     * -----------------
+     * return true on success
+     * optional parameter <alarm_id> = 24 char string; _id of the alarm to archive which can be found with the list_alarms() function,
+     *                                 if not provided, *all* un-archived alarms for the current site will be archived!
+     */
+    public function archive_alarm($alarm_id = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'POST';
+        $json               = json_encode(['cmd' => 'archive-all-alarms']);
+        if (!is_null($alarm_id)) $json = json_encode(['_id' => $alarm_id, 'cmd' => 'archive-alarm']);
+        $response           = $this->exec_curl('/api/s/'.$this->site.'/cmd/evtmgr', 'json='.$json);
+        return $this->process_response_boolean($response);
     }
 
     /**
