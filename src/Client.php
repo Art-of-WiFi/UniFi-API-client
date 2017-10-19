@@ -1275,7 +1275,7 @@ class Client
      */
     public function set_ap_wlangroup($wlantype_id, $device_id, $wlangroup_id) {
         if (!$this->is_loggedin) return false;
-        if (in_array($wlantype_id, ['ng', 'na'])) return false;
+        if (!in_array($wlantype_id, ['ng', 'na'])) return false;
         $json     = json_encode(['wlan_overrides' => [],'wlangroup_id_'.$wlantype_id => $wlangroup_id]);
         $response = $this->exec_curl('/api/s/'.$this->site.'/upd/device/'.trim($device_id),'json='.$json);
         return $this->process_response_boolean($response);
@@ -1550,7 +1550,7 @@ class Client
      */
     public function set_wlan_mac_filter($wlan_id, $mac_filter_policy, $mac_filter_enabled, array $macs)
     {
-        if (in_array($mac_filter_policy, ['allow', 'deny'])) return false;
+        if (!in_array($mac_filter_policy, ['allow', 'deny'])) return false;
         $payload                     = (object)[];
         $payload->mac_filter_enabled = (bool)$mac_filter_enabled;
         $payload->mac_filter_policy  = $mac_filter_policy;
