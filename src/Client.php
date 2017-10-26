@@ -467,7 +467,7 @@ class Client
         $end      = is_null($end) ? ((time())*1000) : intval($end);
         $start    = is_null($start) ? $end-(12*3600*1000) : intval($start);
         $json     = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) $json['mac'] = $mac;
+        if (!is_null($mac)) $json['mac'] = strtolower($mac);
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/5minutes.ap', 'json='.$json);
         return $this->process_response($response);
@@ -491,7 +491,7 @@ class Client
         $end      = is_null($end) ? ((time())*1000) : intval($end);
         $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
         $json     = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) $json['mac'] = $mac;
+        if (!is_null($mac)) $json['mac'] = strtolower($mac);
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/hourly.ap', 'json='.$json);
         return $this->process_response($response);
@@ -515,7 +515,7 @@ class Client
         $end      = is_null($end) ? ((time())*1000) : intval($end);
         $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
         $json     = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) $json['mac'] = $mac;
+        if (!is_null($mac)) $json['mac'] = strtolower($mac);
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/daily.ap', 'json='.$json);
         return $this->process_response($response);
@@ -528,17 +528,19 @@ class Client
      * optional parameter <start> = Unix timestamp in seconds
      * optional parameter <end>   = Unix timestamp in seconds
      * optional parameter <mac>   = client MAC address to return sessions for (can only be used when start and end are also provided)
+     * optional parameter <type>  = client type to return sessions for, can be 'all', 'guest' or 'user'; default value is 'all'
      *
      * NOTES:
      * - defaults to the past 7*24 hours
      */
-    public function stat_sessions($start = null, $end = null, $mac = null)
+    public function stat_sessions($start = null, $end = null, $mac = null, $type = 'all')
     {
         if (!$this->is_loggedin) return false;
+        if (!in_array($type, ['all', 'guest', 'user'])) return false;
         $end      = is_null($end) ? time() : intval($end);
         $start    = is_null($start) ? $end-(7*24*3600) : intval($start);
-        $json     = ['type'=> 'all', 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) $json['mac'] = $mac;
+        $json     = ['type'=> $type, 'start' => $start, 'end' => $end];
+        if (!is_null($mac)) $json['mac'] = strtolower($mac);
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/session', 'json='.$json);
         return $this->process_response($response);
@@ -1339,6 +1341,35 @@ class Client
     }
 
     /**
+     * Move a device to another site
+     * -----------------------------
+     * return true on success
+     * required parameter <mac>     = string; MAC address of the device to move
+     * required parameter <site_id> = 24 char string; _id of the site to move the device to
+     */
+    public function move_device($mac, $site_id)
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = json_encode(['site' => $site_id, 'mac' => $mac, 'cmd' => 'move-device']);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Delete a device from the current site
+     * -------------------------------------
+     * return true on success
+     * required parameter <mac> = string; MAC address of the device to delete
+     */
+    public function delete_device($mac)
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = json_encode(['mac' => $mac, 'cmd' => 'delete-device']);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
      * List network settings (using REST)
      * ----------------------------------
      * returns an array of (non-wireless) networks and their settings
@@ -1544,7 +1575,7 @@ class Client
      * required parameter <wlan_id>
      * required parameter <mac_filter_policy>  = string, "allow" or "deny"; default MAC policy to apply
      * required parameter <mac_filter_enabled> = boolean; true enables the policy, false disables it
-     * required parameter <macs>               = array; must contain MAC strings to be placed in the MAC filter list,
+     * required parameter <macs>               = array; must contain valid MAC strings to be placed in the MAC filter list,
      *                                           replacing existing values. Existing MAC filter list can be obtained
      *                                           through list_wlanconf().
      */

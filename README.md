@@ -1,6 +1,6 @@
 ## UniFi Controller API client class
 
-A PHP class which provides access to Ubiquiti's **UniFi Controller API**, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.6.18 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+A PHP class which provides access to Ubiquiti's **UniFi Controller API**, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.6.18 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 This class can be installed using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
@@ -129,7 +129,7 @@ Please refer to the source code for more details on the functions/methods and th
 
 ## Installation ##
 
-You can use **Composer**, **Git** or simply **Download the Release** to install the API client class.
+You can use [Composer](#composer), [Git](#git) or simply [Download the Release](#download-the-release) to install the API client class.
 
 ### Composer
 
@@ -200,18 +200,15 @@ $results          = $unifi_connection->list_alarms(); // returns a PHP array con
 
 Please refer to the `examples/` directory for some more detailed examples which you can use as a starting point for your own PHP code.
 
-### IMPORTANT NOTES:
+#### IMPORTANT NOTES:
 
-In the example above, the last parameter (`true`) that is passed to the constructor, enables validation of the controller's SSL certificate which is otherwise **disabled** by default.
-It is highly recommended to enable this feature in production environments where you have a valid SSL cert installed on the UniFi Controller, and which is associated with the FQDN of the server as used in the `controller_url` parameter. This option was added with API client version 1.1.16.
+1. The last parameter (`true`) that is passed to the constructor, enables validation of the controller's SSL certificate which is otherwise **disabled** by default. It is highly recommended to enable this feature in production environments where you have a valid SSL cert installed on the UniFi Controller, and which is associated with the FQDN of the server as used in the `controller_url` parameter. This option was added with API client version 1.1.16.
 
----
+2. In the example above, `$site_id` is the 8 character short site "name" which is visible in the URL when managing the site in the UniFi Controller:
 
-In the example above, `$site_id` is the 8 character short site "name" which is visible in the URL when managing the site in the UniFi Controller:
+...`https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
 
-`https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
-
-In this case, `jl3z2shm` is the value required for $site_id.
+...In this case, `jl3z2shm` is the value required for $site_id.
 
 ## Need help or have suggestions?
 
