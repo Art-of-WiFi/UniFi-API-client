@@ -206,9 +206,9 @@ Please refer to the `examples/` directory for some more detailed examples which 
 
 2. In the example above, `$site_id` is the 8 character short site "name" which is visible in the URL when managing the site in the UniFi Controller:
 
-...`https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
+...`https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`..
 
-...In this case, `jl3z2shm` is the value required for $site_id.
+...In this case, `jl3z2shm` is the value required for $site_id...
 
 ## Need help or have suggestions?
 
