@@ -45,6 +45,6 @@ $disable_result = $unifi_connection->disable_ap($device_id, true);
 //$disable_result = $unifi_connection->disable_ap($device_id, false);
 
 /**
- * provide feedback (the newly created voucher code, without the dash) in json format
+ * provide feedback in json format
  */
 echo json_encode($disable_result, JSON_PRETTY_PRINT);
