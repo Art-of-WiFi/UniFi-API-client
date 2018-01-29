@@ -24,11 +24,11 @@ class Client
     /**
      * private properties
      */
-    protected $baseurl              = 'https://127.0.0.1:8443';
-    protected $site                 = 'default';
-    protected $version              = '5.4.16';
-    protected $debug                = false;
-    protected $is_loggedin          = false;
+    protected $baseurl            = 'https://127.0.0.1:8443';
+    protected $site               = 'default';
+    protected $version            = '5.4.16';
+    protected $debug              = false;
+    protected $is_loggedin        = false;
     private $cookies              = '';
     private $request_type         = 'POST';
     private $connect_timeout      = 10;
