@@ -24,11 +24,11 @@ class Client
     /**
      * private properties
      */
-    private $baseurl              = 'https://127.0.0.1:8443';
-    private $site                 = 'default';
-    private $version              = '5.4.16';
-    private $debug                = false;
-    private $is_loggedin          = false;
+    protected $baseurl              = 'https://127.0.0.1:8443';
+    protected $site                 = 'default';
+    protected $version              = '5.4.16';
+    protected $debug                = false;
+    protected $is_loggedin          = false;
     private $cookies              = '';
     private $request_type         = 'POST';
     private $connect_timeout      = 10;
@@ -1972,7 +1972,7 @@ class Client
     /**
      * Process regular responses where output is the content of the data array
      */
-    private function process_response($response_json)
+    protected function process_response($response_json)
     {
         $response = json_decode($response_json);
         $this->catch_json_last_error();
@@ -1998,7 +1998,7 @@ class Client
     /**
      * Process responses where output should be boolean (true/false)
      */
-    private function process_response_boolean($response_json)
+    protected function process_response_boolean($response_json)
     {
         $response = json_decode($response_json);
         $this->catch_json_last_error();
@@ -2122,7 +2122,7 @@ class Client
     /**
      * Execute the cURL request
      */
-    private function exec_curl($path, $data = '')
+    protected function exec_curl($path, $data = '')
     {
         $url = $this->baseurl.$path;
 
