@@ -35,6 +35,6 @@ $loginresults     = $unifi_connection->login();
 $results          = $unifi_connection->create_site($description);
 
 /**
- * provide feedback (the newly created vouchers) in json format
+ * provide feedback in json format
  */
-echo json_encode($vouchers, JSON_PRETTY_PRINT);
+echo json_encode($results, JSON_PRETTY_PRINT);

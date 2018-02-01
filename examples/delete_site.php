@@ -24,7 +24,7 @@ $site_id = '<short site name of a site the credentials used have access to>';
 
 
 /**
- * the site to delete, may not be the same site as referenced by $site_id
+ * the site to delete, must not be the same site as referenced by $site_id
  */
 $site_to_delete = '<_id value of the site>';
 
@@ -36,6 +36,6 @@ $loginresults     = $unifi_connection->login();
 $results          = $unifi_connection->delete_site($site_to_delete);
 
 /**
- * provide feedback (the newly created vouchers) in json format
+ * provide feedback in json format
  */
-echo json_encode($vouchers, JSON_PRETTY_PRINT);
+echo json_encode($results, JSON_PRETTY_PRINT);
