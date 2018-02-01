@@ -4,12 +4,6 @@ A PHP class which provides access to Ubiquiti's **UniFi Controller API**, versio
 
 This class can be installed using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
-### Donations
-
-If you find this PHP API client class useful and wish to support it's further development, please use the PayPal donate button below. All donations go to the project maintainer.
-
-[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=M7TVNVX3Z44VN)
-
 ## Methods and functions supported
 
 The class currently supports the following functions/methods to get/post/put/delete data through the UniFi Controller API:
