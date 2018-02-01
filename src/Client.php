@@ -46,9 +46,9 @@ class Client
      * optional parameter <baseurl>    = string; base URL of the UniFi controller, must include "https://" prefix and port suffix (:8443)
      * optional parameter <site>       = string; short site name to access, defaults to "default"
      * optional parameter <version>    = string; the version number of the controller, defaults to "5.4.16"
-     * optional parameter <ssl_verify> = boolean; whether to validate the controller's SSL certificate or not, true is recommended for
-     *                                   production environments to prevent potential MitM attacks, default is to not validate the
-     *                                   controller certificate
+     * optional parameter <ssl_verify> = boolean; whether to validate the controller's SSL certificate or not, a value of true is
+     *                                   recommended for production environments to prevent potential MitM attacks, default (false) is to
+     *                                   not validate the controller certificate
      */
     function __construct($user, $password, $baseurl = '', $site = '', $version = '', $ssl_verify = false)
     {
@@ -178,8 +178,8 @@ class Client
      */
     public function set_site($site)
     {
+        $this->check_site($site);
         $this->site = trim($site);
-        $this->check_site($this->site);
         return $this->site;
     }
 
@@ -208,6 +208,16 @@ class Client
 
         trigger_error('Error: the parameter for set_debug() must be boolean');
         return false;
+    }
+
+    /**
+     * Get debug mode
+     * --------------
+     * get the value of private property debug, returns the current boolean value for debug
+     */
+    public function get_debug()
+    {
+        return $this->debug;
     }
 
     /**
@@ -242,6 +252,12 @@ class Client
      * Get Cookie from UniFi Controller
      * --------------------------------
      * returns the UniFi controller cookie
+     *
+     * NOTES:
+     * - when the results from this method are stored in $_SESSION['unificookie'], the class will initially not
+     *   log in to the controller when a subsequent request is made using a new instance. This speeds up the
+     *   overall request considerably. If that subsequent request fails (e.g. cookies have expired), a new login
+     *   is executed automatically and the value of $_SESSION['unificookie'] is updated.
      */
     public function get_cookie()
     {
@@ -879,6 +895,18 @@ class Client
     }
 
     /**
+     * List all admins
+     * ---------------
+     * returns an array containing administrator objects for all sites
+     */
+    public function list_all_admins()
+    {
+        if (!$this->is_loggedin) return false;
+        $response = $this->exec_curl('/api/stat/admin');
+        return $this->process_response($response);
+    }
+
+    /**
      * List wlan_groups
      * ----------------
      * returns an array containing known wlan_groups
@@ -1255,6 +1283,9 @@ class Client
      * required parameter <ht>(default=20)
      * required parameter <tx_power_mode>
      * required parameter <tx_power>(default=0)
+     *
+     * NOTES:
+     * - only supported on pre-5.X.X controller versions
      */
     public function set_ap_radiosettings($ap_id, $radio, $channel, $ht, $tx_power_mode, $tx_power)
     {
