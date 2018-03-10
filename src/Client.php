@@ -882,6 +882,22 @@ class Client
     }
 
     /**
+     * Change a site's name
+     * -------------
+     * return true on success
+     * required parameter <site_name> = the long name for the site
+     *
+     * NOTES: immediately after being changed, the site will be available in the output of the "list_sites" function
+     */
+    public function set_site_name($site_name)
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = json_encode(['cmd' => 'update-site', 'desc' => $site_name]);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
      * List admins
      * -----------
      * returns an array containing administrator objects for selected site
@@ -1352,6 +1368,21 @@ class Client
             'site_id'           => $site_id
         ];
         $json     = json_encode($json, JSON_UNESCAPED_SLASHES);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/set/setting/guest_access', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+
+    /**
+     * Update guestlogin settings, base
+     * ------------------------------------------
+     * return true on success
+     * required parameter <network_settings> = stdClass object or associative array containing the configuration to apply to the guestlogin, must be a (partial)
+     *                                         object/array structured in the same manner as is returned by list_settings() for the guest_access.
+     */
+    public function set_guestlogin_settings_base($guestlogin_settings) {
+        if (!$this->is_loggedin) return false;
+        $json     = json_encode($guestlogin_settings);
         $response = $this->exec_curl('/api/s/'.$this->site.'/set/setting/guest_access', 'json='.$json);
         return $this->process_response_boolean($response);
     }
