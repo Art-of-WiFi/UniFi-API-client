@@ -898,6 +898,125 @@ class Client
     }
 
     /**
+     * Set site country
+     * -----------
+     * required parameter <settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
+     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_country($country_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json  		   = json_encode($setting);
+        $response      = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/country/'.trim($country_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+	
+    /**
+     * Set site locale
+     * -----------
+     * required parameter <settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
+     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_locale($locale_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json  		   = json_encode($setting);
+        $response      = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/locale/'.trim($locale_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Set site snmp
+     * -----------
+     * required parameter <settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
+     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_snmp($snmp_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json  		   = json_encode($setting);
+        $response      = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/snmp/'.trim($snmp_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Set site mgmt
+     * -----------
+     * required parameter <settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
+     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_mgmt($mgmt_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json  		   = json_encode($setting);
+        $response      = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/mgmt/'.trim($mgmt_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Set site guest access
+     * -----------
+     * required parameter <settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
+     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_guest_access($guest_access_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json  		   = json_encode($setting);
+        $response      = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/guest_access/'.trim($guest_access_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Set site ntp
+     * -----------
+     * required parameter <settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
+     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_ntp($ntp_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json  		   = json_encode($setting);
+        $response      = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/ntp/'.trim($ntp_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Set site connectivity
+     * -----------
+     * required parameter <settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
+     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_connectivity($connectivity_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json  		   = json_encode($setting);
+        $response      = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/connectivity/'.trim($connectivity_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
      * List admins
      * -----------
      * returns an array containing administrator objects for selected site
