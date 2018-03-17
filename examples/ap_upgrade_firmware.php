@@ -14,13 +14,6 @@ $site_id = 'default';
 // AP MAC address formatted with colons
 $device_mac = 'de:ad:be:ef:01:23';
 
-// If you have Debian/Ubuntu, grab the controller package version
-// Need to have exec function enabled for php-cli
-$controller_version  = exec("apt-cache show unifi | grep Version | sed 's/Version: //g;  s/-.*//g;'");
-
-// Or, you can just give this manually:
-// $controller_version = '5.7.20';
-
 /**
  * initialize the Unifi API connection class, log in to the controller and request the alarms collection
  * (this example assumes you have already assigned the correct values to the variables used)
@@ -38,4 +31,3 @@ $results = $unifi_connection->upgrade_device($device_mac);
 echo json_encode($results, JSON_PRETTY_PRINT);
 
 ?>
-
