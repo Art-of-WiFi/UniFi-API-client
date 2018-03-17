@@ -19,7 +19,7 @@ $device_mac = 'de:ad:be:ef:01:23';
  * (this example assumes you have already assigned the correct values to the variables used)
  */
 
-$unifi_connection = new UniFi_API\Client($controller_user, $controller_password, $controller_url, $site_id, $controller_version, false);
+$unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion, false);
 $login            = $unifi_connection->login();
 
 // Run the actual upgrade
