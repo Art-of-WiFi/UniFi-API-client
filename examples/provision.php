@@ -80,18 +80,6 @@ foreach($unifi_connection->list_sites() as $site){
 	}
 }
 
-// If debug, create Fake site entries array, otherwise unset test shops
-if($debug === true) {
-	$active_shops = array();
-	$active_shops[965] = "j103b83q";
-	$active_shops[943] = "winkels";
-} else {
-	unset($active_shops[943]);
-	unset($active_shops[965]);
-	unset($close_shops[943]);
-	unset($close_shops[965]);
-}
-
 // Any sites we need to create before we can continue?
 foreach($todo_shops as $filnr => $city){
 	$filnr = sprintf("%04d", $filnr);
@@ -114,6 +102,19 @@ if(count($todo_shops > 0)) {
 			$active_shops[floatval($matches[1])] = $site->name;
 		}
 	}
+}
+
+// If debug, create Fake site entries array, otherwise unset test shops
+if($debug === true) {
+	$close_shops = array();
+	$active_shops = array();
+	$active_shops[965] = "j103b83q";
+	$active_shops[943] = "winkels";
+} else {
+	unset($active_shops[943]);
+	unset($active_shops[965]);
+	unset($close_shops[943]);
+	unset($close_shops[965]);
 }
 // We should have 0 todo shops now
 // print_r($todo_shops);
@@ -139,7 +140,9 @@ foreach($active_shops as $filnr => $siteid) {
 
 	if(isset($close_shops[floatval($filnr)])) {
 		echo "Delete site {$siteid} with id ". $usergroups[0]->site_id ." for shop {$filnr}\n";
-		$delete = $unifi_connection->delete_site($usergroups[0]->site_id);
+		if($debug===false) {
+			$delete = $unifi_connection->delete_site($usergroups[0]->site_id);
+		}
 		if($delete === false) {
 			echo "Failed to delete site for {$filnr}, id {$siteid}\n";
 		}
@@ -183,32 +186,35 @@ foreach($active_shops as $filnr => $siteid) {
 		//print_r($wlannetworks);
 	}
 
+
 	foreach($sitesettings as $key => $values) {
-		echo "Update site setting {$key} id {$setting_id[$key]} for {$filnr}, id {$siteid}\n";
-		switch($key){
-			case "country":
-				$update_site[$key] = $unifi_connection->set_site_country($setting_id[$key], $sitesettings[$key]);
-				break;
-			case "locale":
-				$update_site[$key] = $unifi_connection->set_site_locale($setting_id[$key], $sitesettings[$key]);
-				break;
-			case "connectivity ":
-				$update_site[$key] = $unifi_connection->set_site_connectivity($setting_id[$key], $sitesettings[$key]);
-				break;
-			case "mgmt":
-				$update_site[$key] = $unifi_connection->set_site_mgmt($setting_id[$key], $sitesettings[$key]);
-				break;
-			case "guest_access":
-				$update_site[$key] = $unifi_connection->set_site_guest_access($setting_id[$key], $sitesettings[$key]);
-				break;
-			case "snmp":
-				$update_site[$key] = $unifi_connection->set_site_snmp($setting_id[$key], $sitesettings[$key]);
-				break;
-			case "ntp":
-				$update_site[$key] = $unifi_connection->set_site_ntp($setting_id[$key], $sitesettings[$key]);
-				break;
-			default:
-				break;	
+		if(compare_array_item($sitesettings[$key], $setting[$key])) {
+			echo "Update site setting {$key} id {$setting_id[$key]} for {$filnr}, id {$siteid}\n";
+			switch($key){
+				case "country":
+					$update_site[$key] = $unifi_connection->set_site_country($setting_id[$key], $sitesettings[$key]);
+					break;
+				case "locale":
+					$update_site[$key] = $unifi_connection->set_site_locale($setting_id[$key], $sitesettings[$key]);
+					break;
+				case "connectivity ":
+					$update_site[$key] = $unifi_connection->set_site_connectivity($setting_id[$key], $sitesettings[$key]);
+					break;
+				case "mgmt":
+					$update_site[$key] = $unifi_connection->set_site_mgmt($setting_id[$key], $sitesettings[$key]);
+					break;
+				case "guest_access":
+					$update_site[$key] = $unifi_connection->set_site_guest_access($setting_id[$key], $sitesettings[$key]);
+					break;
+				case "snmp":
+					$update_site[$key] = $unifi_connection->set_site_snmp($setting_id[$key], $sitesettings[$key]);
+					break;
+				case "ntp":
+					$update_site[$key] = $unifi_connection->set_site_ntp($setting_id[$key], $sitesettings[$key]);
+					break;
+				default:
+					break;	
+			}
 		}
 		if($update_site[$key] === false)
 			echo "Failed to update setting {$key} for {$filnr}, id {$siteid} ". print_r($sitesettings[$key], true) ."\n";
@@ -225,7 +231,7 @@ foreach($active_shops as $filnr => $siteid) {
 			echo "Failed to add network {$key} for {$filnr}, id {$siteid}\n";
 		
 		// Do we need to update?
-		if($wired[$key] === true) {
+		if(compare_array_item($wirednetworks[$key], $wired[$key])) {
 			echo "Update network {$key} id {$wired_id[$key]} for {$filnr}, id {$siteid}\n";
 			$updatenetwork[$key] = $unifi_connection->set_networksettings_base($wired_id[$key], $wirednetworks[$key]);
 		}
@@ -246,7 +252,7 @@ foreach($active_shops as $filnr => $siteid) {
 			refresh_wlans();
 
 		// Do we need to update?
-		if($wlan[$key] === true) {
+		if(compare_array_item($wlannetworks[$key], $wlan[$key])) {
 			echo "Update wlan {$key} id {$wlan_id[$key]} for {$filnr}, id {$siteid}\n";
 			$updatewlan[$key] = $unifi_connection->set_wlansettings_base($wlan_id[$key], $wlannetworks[$key]);
 		}
@@ -254,9 +260,25 @@ foreach($active_shops as $filnr => $siteid) {
 			echo "Failed to update wlan {$key} for {$filnr}, id {$siteid} ". print_r($wlannetworks[$key], true) . print_r($wlan_id, true) ."\n";
 
 	}
+	
+	// Any devices for adoption?
+	$devices[$filnr] = $unifi_connection->list_devices();
+	foreach($devices[$filnr] as $device) {
+		if($device->adopted == 1)
+			continue;
+		
+		// Does this unadopted device belong to this shop network?
+		if(netMatch($wirednetworks['LAN']['ip_subnet'], $device->ip)) {
+			// Adopt device in IP range. adopt_device($mac)
+			echo "Adopting device {$device->mac} with ip {$device->ip} in network {$wirednetworks['LAN']['ip_subnet']} for shop {$filnr}\n";
+			$unifi_connection->adopt_device($device->mac);
+			// print_r($device);
+		}
+	}
 
-	if($debug===true)
-		break;
+	if($debug===true) {
+		//break;
+	}
 }
 
 $logout = $unifi_connection->logout();
@@ -280,7 +302,7 @@ function refresh_networks() {
 		// Check if template networks exist
 		foreach($wirednetworks as $key => $values) {
 			if(($network->name == "$key")) {
-				$wired[$key] = true;
+				$wired[$key] = $network;
 				$wired_id[$key] = $network->_id;
 				$shasite_id = $network->site_id;
 			}
@@ -306,7 +328,7 @@ function refresh_wlans() {
 		// Check if template networks exist
 		foreach($wlannetworks as $key => $values) {
 			if($network->name == "$key") {
-				$wlan[$key] = true;
+				$wlan[$key] = $network;
 				$wlan_id[$key] = $network->_id;
 				$shasite_id = $network->site_id;
 			}
@@ -318,6 +340,7 @@ function fetch_site_conf() {
 	global $unifi_connection;
 	global $siteconf;
 	global $siteid;
+	global $sitesettings;
 	global $setting;
 	global $setting_id;
 	
@@ -333,4 +356,34 @@ function fetch_site_conf() {
 	}
 }
 
+// Return true or false
+function compare_array_item($setting, $existing) {
+	$existing = (array)$existing;
+	unset($setting['site_id']);
+	unset($setting['_id']);
+	unset($existing['_id']);
+	unset($existing['site_id']);
+	foreach($setting as $key => $value) {
+		if(!is_array($setting[$key])) {
+			if($setting[$key] != $existing[$key]){
+				echo "setting key {$key} value {$value} differs from {$existing[$key]} - ";
+				// print_r($setting);
+				// print_r($existing);
+				return true;
+			}
+		}
+		if(is_array($setting[$key])) {
+			$diff = array();
+			$diff = array_diff_assoc($setting[$key], $existing[$key]);
+			if(!empty($diff)) {
+				echo "setting subkey {$key} differs diff count ". count($diff)."\n";
+				// print_r($diff);
+				// print_r($setting);
+				// print_r($existing);
+				return true;
+			}
+		}
+	}
+	return false;
+}
 ?>
