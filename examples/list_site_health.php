@@ -3,7 +3,7 @@
  * PHP API usage example
  *
  * contributed by: Art of WiFi
- * description: example to pull site health metrics from the Unifi controller and output the results
+ * description: example to pull site health metrics from the UniFi controller and output the results
  *              in json format
  */
 

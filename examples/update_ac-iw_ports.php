@@ -3,9 +3,9 @@
  * PHP API usage example
  *
  * contributed by: Art of WiFi
- * description: example basic PHP script to update the port settings of an AC-IW device when using a controller
+ * description: example basic PHP script to update the port settings of an AC-IW device
  *              FYI: the AC-IW device has three ports, one for the wired uplink and two with external connectors
- * note: requires version 5.5.X or higher (to be verified)
+ * note: requires controller version 5.5.X or higher (to be verified)
  */
 
 /**
@@ -25,19 +25,19 @@ require_once('config.php');
 $site_id = '<short site name of a site the credentials used have access to>';
 
 /**
- * the MAC address of the AC-IW device to modify
+ * the MAC address of the AC-IW device to re-configure
  */
 $device_mac = '<enter MAC address>';
 
 /**
- * port configuration to apply to port #1 of the AC-IW device
- * NOTE: available port configurations are available through list_portconf()
+ * port configuration id to apply to port #1 of the AC-IW device
+ * NOTE: port configurations are available through list_portconf()
  */
 $port_conf_id_port_1 = '<_id of port configuration to apply to port #1>';
 
 /**
- * port configuration to apply to port #2 of the AC-IW device
- * NOTE: available port configurations are available through list_portconf()
+ * port configuration id to apply to port #2 of the AC-IW device
+ * NOTE: port configurations are available through list_portconf()
  */
 $port_conf_id_port_2 = '<_id of port configuration to apply to port #2>';
 

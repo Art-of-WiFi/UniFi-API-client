@@ -3,7 +3,7 @@
  * PHP API usage example
  *
  * contributed by: Art of WiFi
- * description: example to pull connected user numbers for Access Points from the Unifi controller and output the results
+ * description: example to pull connected user numbers for Access Points from the UniFi controller and output the results
  *              in raw HTML format
  */
 
@@ -36,7 +36,7 @@ $aps_array        = $unifi_connection->list_aps();
  */
 header('Content-Type: text/html; charset=utf-8');
 foreach ($aps_array as $ap) {
-	if ($ap->type === 'uap') {
-		echo '<b>AP name:</b>' . $ap->name . ' <b>model:</b>' . $ap->model . ' <b># connected clients:</b>' . $ap->num_sta . '<br>';
-	}
+    if ($ap->type === 'uap') {
+        echo '<b>AP name:</b>' . $ap->name . ' <b>model:</b>' . $ap->model . ' <b># connected clients:</b>' . $ap->num_sta . '<br>';
+    }
 }
