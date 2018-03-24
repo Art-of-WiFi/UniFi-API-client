@@ -13,9 +13,3 @@ If you would like to share your own example file(s), please open an issue and in
 ## Important Disclaimer
 
 Use these examples at your own risk!
-
-## Provisioning script
-
-The example provision script easily creates a large number of sites with comparable network configuration. It sets the LAN config 
-to site specific configuration. Copy the settings.template.php and config.template.php to their respective files for testing. This is meant as a
-basic provisioning only system. Currently used against controller 5.6.30.

@@ -13,7 +13,6 @@
  * This source file is subject to the MIT license that is bundled
  * with this package in the file LICENSE.md
  */
-
 namespace UniFi_API;
 
 /**
@@ -43,12 +42,12 @@ class Client
      * return a new class instance
      * required parameter <user>       = string; user name to use when connecting to the UniFi controller
      * required parameter <password>   = string; password to use when connecting to the UniFi controller
-     * optional parameter <baseurl>    = string; base URL of the UniFi controller, must include "https://" prefix and port suffix (:8443)
+     * optional parameter <baseurl>    = string; base URL of the UniFi controller, *must* include "https://" prefix and port suffix (:8443)
      * optional parameter <site>       = string; short site name to access, defaults to "default"
      * optional parameter <version>    = string; the version number of the controller, defaults to "5.4.16"
      * optional parameter <ssl_verify> = boolean; whether to validate the controller's SSL certificate or not, a value of true is
-     *                                   recommended for production environments to prevent potential MitM attacks, default (false) is to
-     *                                   not validate the controller certificate
+     *                                   recommended for production environments to prevent potential MitM attacks, default value (false)
+     *                                   is to not validate the controller certificate
      */
     function __construct($user, $password, $baseurl = '', $site = '', $version = '', $ssl_verify = false)
     {
@@ -883,11 +882,11 @@ class Client
 
     /**
      * Change a site's name
-     * -------------
+     * --------------------
      * return true on success
-     * required parameter <site_name> = the long name for the site
+     * required parameter <site_name> = string; the long name for the site
      *
-     * NOTES: immediately after being changed, the site will be available in the output of the "list_sites" function
+     * NOTES: immediately after being changed, the site will be available in the output of the list_sites() function
      */
     public function set_site_name($site_name)
     {
@@ -899,120 +898,121 @@ class Client
 
     /**
      * Set site country
-     * -----------
-     * required parameter <settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
-     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
-     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * ----------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "country" key.
+     *                                Valid country codes can be obtained using the list_country_codes() function/method.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      * return true on success
      */
     public function set_site_country($country_id, $setting)
     {
         if (!$this->is_loggedin) return false;
         $this->request_type = 'PUT';
-        $json  		   = json_encode($setting);
-        $response      = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/country/'.trim($country_id), 'json='.$json);
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/country/'.trim($country_id), 'json='.$json);
         return $this->process_response_boolean($response);
     }
-	
+
     /**
      * Set site locale
-     * -----------
-     * required parameter <settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
-     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
-     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * ---------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "locale" key.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      * return true on success
      */
     public function set_site_locale($locale_id, $setting)
     {
         if (!$this->is_loggedin) return false;
         $this->request_type = 'PUT';
-        $json  		   = json_encode($setting);
-        $response      = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/locale/'.trim($locale_id), 'json='.$json);
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/locale/'.trim($locale_id), 'json='.$json);
         return $this->process_response_boolean($response);
     }
 
     /**
      * Set site snmp
-     * -----------
-     * required parameter <settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
-     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
-     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * -------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "snmp" key.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      * return true on success
      */
     public function set_site_snmp($snmp_id, $setting)
     {
         if (!$this->is_loggedin) return false;
         $this->request_type = 'PUT';
-        $json  		   = json_encode($setting);
-        $response      = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/snmp/'.trim($snmp_id), 'json='.$json);
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/snmp/'.trim($snmp_id), 'json='.$json);
         return $this->process_response_boolean($response);
     }
 
     /**
      * Set site mgmt
-     * -----------
-     * required parameter <settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
-     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
-     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * -------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "mgmt" key.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      * return true on success
      */
     public function set_site_mgmt($mgmt_id, $setting)
     {
         if (!$this->is_loggedin) return false;
         $this->request_type = 'PUT';
-        $json  		   = json_encode($setting);
-        $response      = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/mgmt/'.trim($mgmt_id), 'json='.$json);
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/mgmt/'.trim($mgmt_id), 'json='.$json);
         return $this->process_response_boolean($response);
     }
 
     /**
      * Set site guest access
-     * -----------
-     * required parameter <settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
-     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
-     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * ---------------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "guest_access" key.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      * return true on success
      */
     public function set_site_guest_access($guest_access_id, $setting)
     {
         if (!$this->is_loggedin) return false;
         $this->request_type = 'PUT';
-        $json  		   = json_encode($setting);
-        $response      = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/guest_access/'.trim($guest_access_id), 'json='.$json);
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/guest_access/'.trim($guest_access_id), 'json='.$json);
         return $this->process_response_boolean($response);
     }
 
     /**
      * Set site ntp
-     * -----------
-     * required parameter <settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
-     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
-     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * ------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "ntp" key.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      * return true on success
      */
     public function set_site_ntp($ntp_id, $setting)
     {
         if (!$this->is_loggedin) return false;
         $this->request_type = 'PUT';
-        $json  		   = json_encode($setting);
-        $response      = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/ntp/'.trim($ntp_id), 'json='.$json);
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/ntp/'.trim($ntp_id), 'json='.$json);
         return $this->process_response_boolean($response);
     }
 
     /**
      * Set site connectivity
-     * -----------
-     * required parameter <settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
-     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
-     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * ---------------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "connectivity" key.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      * return true on success
      */
     public function set_site_connectivity($connectivity_id, $setting)
     {
         if (!$this->is_loggedin) return false;
         $this->request_type = 'PUT';
-        $json  		   = json_encode($setting);
-        $response      = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/connectivity/'.trim($connectivity_id), 'json='.$json);
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/connectivity/'.trim($connectivity_id), 'json='.$json);
         return $this->process_response_boolean($response);
     }
 
@@ -1238,6 +1238,18 @@ class Client
     {
         if (!$this->is_loggedin) return false;
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/current-channel');
+        return $this->process_response($response);
+    }
+
+    /**
+     * List country codes
+     * ------------------
+     * returns an array of available country codes
+     */
+    public function list_country_codes()
+    {
+        if (!$this->is_loggedin) return false;
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/ccode');
         return $this->process_response($response);
     }
 
@@ -1491,7 +1503,6 @@ class Client
         return $this->process_response_boolean($response);
     }
 
-
     /**
      * Update guestlogin settings, base
      * ------------------------------------------
@@ -1501,7 +1512,7 @@ class Client
      */
     public function set_guestlogin_settings_base($guestlogin_settings) {
         if (!$this->is_loggedin) return false;
-        $json     = json_encode($guestlogin_settings);
+        $json     = json_encode($guestlogin_settings, JSON_UNESCAPED_SLASHES);
         $response = $this->exec_curl('/api/s/'.$this->site.'/set/setting/guest_access', 'json='.$json);
         return $this->process_response_boolean($response);
     }
