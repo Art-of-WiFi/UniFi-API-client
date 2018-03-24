@@ -3,7 +3,7 @@
  * PHP API usage example
  *
  * contributed by: Art of WiFi
- * description: example basic PHP script to update WLAN settings when using a controller version 5.5.X or higher
+ * description: example basic PHP script to update WLAN settings of a device when using a controller version 5.5.X or higher
  *              where set_ap_radiosettings() throws an error
  */
 

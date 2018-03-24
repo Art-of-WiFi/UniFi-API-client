@@ -3,7 +3,9 @@
  * PHP API usage example
  *
  * contributed by: Art of WiFi
- * description: example basic PHP script to auth a guest device and attach a note to it
+ * description: example basic PHP script to auth a guest device and attach a note to it,
+ *              this requires the device to be connected to the WLAN/LAN at moment of
+ *              authorization
  */
 
 /**
