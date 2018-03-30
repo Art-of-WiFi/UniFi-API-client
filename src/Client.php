@@ -1042,6 +1042,76 @@ class Client
     }
 
     /**
+     * Invite a new admin for access to the current site
+     * -------------------------------------------------
+     * returns true on success
+     * required parameter <name>           = string, name to assign to the new admin user
+     * required parameter <email>          = email address to assign to the new admin user
+     * optional parameter <enable_sso>     = boolean, whether or not SSO will be allowed for the new admin
+     *                                       default value is true which enables the SSO capability
+     * optional parameter <readonly>       = boolean, whether or not the new admin will have readonly
+     *                                       permissions, default value is true which gives the new admin
+     *                                       administrator permissions
+     * optional parameter <device_adopt>   = boolean, whether or not the new admin will have permissions to
+     *                                       adopt devices, default value is false. Only applies when readonly
+     *                                       is true.
+     * optional parameter <device_restart> = boolean, whether or not the new admin will have permissions to
+     *                                       restart devices, default value is false. Only applies when readonly
+     *                                       is true.
+     *
+     * NOTES:
+     * after issuing a valid request, an invite will be sent to the email address provided
+     */
+    public function invite_admin($name, $email, $enable_sso = true, $readonly = false, $device_adopt = false, $device_restart = false)
+    {
+        if (!$this->is_loggedin) return false;
+        $email_valid = filter_var(trim($email), FILTER_VALIDATE_EMAIL);
+        if (!$email_valid) {
+            trigger_error('The email address provided is invalid!');
+            return false;
+        }
+
+        $json = ['name' => trim($name), 'email' => trim($email), 'for_sso' => $enable_sso, 'cmd' => 'invite-admin'];
+        if ($readonly) {
+            $json['role'] = 'readonly';
+            $permissions = [];
+            if ($device_adopt) {
+                $permissions[] = "API_DEVICE_ADOPT";
+            }
+
+            if ($device_restart) {
+                $permissions[] = "API_DEVICE_RESTART";
+            }
+
+            if (count($permissions) > 0) {
+                $json['permissions'] = $permissions;
+            }
+        }
+
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Revoke an admin
+     * ---------------
+     * returns true on success
+     * required parameter <admin_id> = id of the admin to revoke which can be obtained using the
+     *                                 list_all_admins() method/function
+     *
+     * NOTES:
+     * only non-superadmins account can be revoked
+     */
+    public function revoke_admin($admin_id)
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = json_encode(['admin' => $admin_id, 'cmd' => 'revoke-admin']);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
      * List wlan_groups
      * ----------------
      * returns an array containing known wlan_groups
@@ -1245,6 +1315,10 @@ class Client
      * List country codes
      * ------------------
      * returns an array of available country codes
+     *
+     * NOTES:
+     * these codes following the ISO standard:
+     * https://en.wikipedia.org/wiki/ISO_3166-1_numeric
      */
     public function list_country_codes()
     {
@@ -1278,8 +1352,8 @@ class Client
     }
 
     /**
-     * List port configuration
-     * -----------------------
+     * List port configurations
+     * ------------------------
      * returns an array of port configurations
      */
     public function list_portconf()

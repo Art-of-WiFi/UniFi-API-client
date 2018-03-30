@@ -31,6 +31,8 @@ The class currently supports the following functions/methods to get/post/put/del
 - disable_ap()
 - edit_usergroup()
 - extend_guest_validity()
+- invite_admin()
+- revoke_admin()
 - led_override()
 - list_admins()
 - list_all_admins()
@@ -232,7 +234,7 @@ If you would like to contribute code (improvements), please open an issue and in
 This class is based on the work done by the following developers:
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
 - fbagnol: https://github.com/fbagnol/class.unifi.php
-- and the API as published by Ubiquiti: https://dl.ubnt.com/unifi/5.6.18-8261dc5066/unifi_sh_api
+- and the API as published by Ubiquiti: https://dl.ubnt.com/unifi/5.7.20/unifi_sh_api
 
 ## Important Disclaimer
 
