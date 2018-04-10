@@ -1060,7 +1060,8 @@ class Client
      *                                       is true.
      *
      * NOTES:
-     * after issuing a valid request, an invite will be sent to the email address provided
+     * - after issuing a valid request, an invite will be sent to the email address provided
+     * - issuing this command against an existing admin will trigger a "re-invite"
      */
     public function invite_admin($name, $email, $enable_sso = true, $readonly = false, $device_adopt = false, $device_restart = false)
     {
@@ -1916,24 +1917,6 @@ class Client
     }
 
     /**
-     * Upgrade a device to the latest firmware
-     * ---------------------------------------
-     * return true on success
-     * required parameter <device_mac> = MAC address of the device to upgrade
-     *
-     * NOTES:
-     * - updates the device to the latest firmware known to the controller
-     */
-    public function upgrade_device($device_mac)
-    {
-        if (!$this->is_loggedin) return false;
-        $json     = ['mac' => $device_mac];
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr/upgrade', 'json='.$json);
-        return $this->process_response_boolean($response);
-    }
-
-    /**
      * Upgrade a device to a specific firmware file
      * --------------------------------------------
      * return true on success
@@ -1950,6 +1933,38 @@ class Client
         $json     = ['url' => filter_var($firmware_url, FILTER_SANITIZE_URL), 'mac' => $device_mac];
         $json     = json_encode($json, JSON_UNESCAPED_SLASHES);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr/upgrade-external', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Start rolling upgrade
+     * ---------------------
+     * return true on success
+     *
+     * NOTES:
+     * - updates all access points to the latest firmware known to the controller in a
+     *   staggered/rolling fashion
+     */
+    public function start_rolling_upgrade()
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = ['cmd' => 'set-rollupgrade'];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Cancel rolling upgrade
+     * ---------------------
+     * return true on success
+     */
+    public function cancel_rolling_upgrade()
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = ['cmd' => 'unset-rollupgrade'];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
         return $this->process_response_boolean($response);
     }
 

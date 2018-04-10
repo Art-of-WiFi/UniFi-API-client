@@ -120,6 +120,8 @@ The class currently supports the following functions/methods to get/post/put/del
 - unset_locate_ap() (deprecated but still available as alias)
 - upgrade_device()
 - upgrade_device_external()
+- start_rolling_upgrade()
+- cancel_rolling_upgrade()
 
 Internal functions, getters/setters:
 
