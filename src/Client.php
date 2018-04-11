@@ -1917,6 +1917,24 @@ class Client
     }
 
     /**
+     * Upgrade a device to the latest firmware
+     * ---------------------------------------
+     * return true on success
+     * required parameter <device_mac> = MAC address of the device to upgrade
+     *
+     * NOTES:
+     * - updates the device to the latest firmware known to the controller
+     */
+    public function upgrade_device($device_mac)
+    {
+        if (!$this->is_loggedin) return false;
+        $json     = ['mac' => $device_mac];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr/upgrade', 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
      * Upgrade a device to a specific firmware file
      * --------------------------------------------
      * return true on success
