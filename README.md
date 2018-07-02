@@ -1,6 +1,6 @@
 ## UniFi Controller API client class
 
-A PHP class which provides access to Ubiquiti's **UniFi Controller API**, versions 4.x.x and 5.x.x of the UniFi Controller software are supported (version 5.7.23 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+A PHP class which provides access to Ubiquiti's **UniFi Controller API**, versions 4.X.X and 5.X.X of the UniFi Controller software are supported (version 5.8.24 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 This class can be installed using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
@@ -20,6 +20,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - create_radius_account()
 - create_site()
 - create_usergroup()
+- create_user()
 - create_voucher()
 - create_wlan()
 - delete_device()
@@ -31,7 +32,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - disable_ap()
 - edit_usergroup()
 - extend_guest_validity()
-- forget_sta() (supported on controller version 5.9.* and higher)
+- forget_sta() (supported on controller version 5.9.X and higher)
 - invite_admin()
 - revoke_admin()
 - led_override()
@@ -103,12 +104,15 @@ The class currently supports the following functions/methods to get/post/put/del
 - stat_allusers()
 - stat_auths()
 - stat_client()
-- stat_5minutes_aps() (supported on controller version 5.5.* and higher)
+- stat_5minutes_aps() (supported on controller version 5.5.X and higher)
 - stat_hourly_aps()
 - stat_daily_aps()
-- stat_5minutes_site() (supported on controller version 5.5.* and higher)
+- stat_5minutes_site() (supported on controller version 5.5.X and higher)
 - stat_hourly_site()
 - stat_daily_site()
+- stat_5minutes_user (supported on controller version 5.7.X and higher)
+- stat_hourly_user() (supported on controller version 5.7.X and higher)
+- stat_daily_user() (supported on controller version 5.7.X and higher)
 - stat_payment()
 - stat_sessions()
 - stat_sites()
@@ -237,7 +241,7 @@ If you would like to contribute code (improvements), please open an issue and in
 This class is based on the work done by the following developers:
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
 - fbagnol: https://github.com/fbagnol/class.unifi.php
-- and the API as published by Ubiquiti: https://dl.ubnt.com/unifi/5.7.23/unifi_sh_api
+- and the API as published by Ubiquiti: https://dl.ubnt.com/unifi/5.8.24/unifi_sh_api
 
 ## Important Disclaimer
 

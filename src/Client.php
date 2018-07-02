@@ -440,7 +440,7 @@ class Client
     /**
      * 5 minutes site stats method
      * ---------------------------
-     * returns an array of 5 minutes stats objects for the current site
+     * returns an array of 5-minute stats objects for the current site
      * optional parameter <start> = Unix timestamp in seconds
      * optional parameter <end>   = Unix timestamp in seconds
      *
@@ -508,7 +508,7 @@ class Client
     /**
      * 5 minutes stats method for a single access point or all access points
      * ---------------------------------------------------------------------
-     * returns an array of 5 minutes stats objects
+     * returns an array of 5-minute stats objects
      * optional parameter <start> = Unix timestamp in seconds
      * optional parameter <end>   = Unix timestamp in seconds
      * optional parameter <mac>   = AP MAC address to return stats for
@@ -576,6 +576,92 @@ class Client
         if (!is_null($mac)) $json['mac'] = strtolower($mac);
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/daily.ap', 'json='.$json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * 5 minutes stats method for a single user/client device
+     * ------------------------------------------------------
+     * returns an array of 5-minute stats objects
+     * required parameter <mac>     = MAC address of user/client device to return stats for
+     * optional parameter <start>   = Unix timestamp in seconds
+     * optional parameter <end>     = Unix timestamp in seconds
+     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
+     *                                rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
+     *                                default is ['rx_bytes', 'tx_bytes']
+     *
+     * NOTES:
+     * - defaults to the past 12 hours
+     * - only supported with UniFi controller versions 5.8.X and higher
+     * - make sure that the retention policy for 5 minutes stats is set to the correct value in
+     *   the controller settings
+     * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance section
+     */
+    public function stat_5minutes_user($mac, $start = null, $end = null, $attribs = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $end      = is_null($end) ? ((time())*1000) : intval($end);
+        $start    = is_null($start) ? $end-(12*3600*1000) : intval($start);
+        $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
+        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => $mac];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/5minutes.user', 'json='.$json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * Hourly stats method for a a single user/client device
+     * -----------------------------------------------------
+     * returns an array of hourly stats objects
+     * required parameter <mac>     = MAC address of user/client device to return stats for
+     * optional parameter <start>   = Unix timestamp in seconds
+     * optional parameter <end>     = Unix timestamp in seconds
+     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
+     *                                rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
+     *                                default is ['rx_bytes', 'tx_bytes']
+     *
+     * NOTES:
+     * - defaults to the past 7*24 hours
+     * - only supported with UniFi controller versions 5.8.X and higher
+     * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance section
+     */
+    public function stat_hourly_user($mac, $start = null, $end = null, $attribs = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $end      = is_null($end) ? ((time())*1000) : intval($end);
+        $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
+        $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
+        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => $mac];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/hourly.user', 'json='.$json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * Daily stats method for a single user/client device
+     * --------------------------------------------------
+     * returns an array of daily stats objects
+     * required parameter <mac>     = MAC address of user/client device to return stats for
+     * optional parameter <start>   = Unix timestamp in seconds
+     * optional parameter <end>     = Unix timestamp in seconds
+     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
+     *                                rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
+     *                                default is ['rx_bytes', 'tx_bytes']
+     *
+     * NOTES:
+     * - defaults to the past 7*24 hours
+     * - only supported with UniFi controller versions 5.8.X and higher
+     * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance section
+     */
+    public function stat_daily_user($mac, $start = null, $end = null, $attribs = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $end      = is_null($end) ? ((time())*1000) : intval($end);
+        $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
+        $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
+        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => $mac];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/daily.user', 'json='.$json);
         return $this->process_response($response);
     }
 
