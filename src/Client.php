@@ -1793,11 +1793,12 @@ class Client
      * List network settings (using REST)
      * ----------------------------------
      * returns an array of (non-wireless) networks and their settings
+     * optional parameter <network_id> = string; network id to get specific network data
      */
-    public function list_networkconf()
+    public function list_networkconf($network_id = "")
     {
         if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/networkconf');
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/networkconf/'.trim($network_id));
         return $this->process_response($response);
     }
 
