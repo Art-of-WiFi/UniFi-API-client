@@ -849,6 +849,8 @@ class Client
         if($use_fixedip){
             if($network_id){ $data["network_id"] = $network_id; }
             if($fixed_ip){ $data["fixed_ip"] = $fixed_ip; }
+        }
+        $json     = json_encode($data);
         $response = $this->exec_curl('/api/s/'.$this->site.'/rest/user/'.trim($client_id), $json);
         return $this->process_response($response);
     }
