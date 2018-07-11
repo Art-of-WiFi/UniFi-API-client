@@ -832,6 +832,24 @@ class Client
     }
 
     /**
+     * Update client fixedip (using REST)
+     * ------------------------------
+     * returns an array containing a single object with attributes of the updated client on success
+     * required parameter <client_id>   = id of the client
+     * required parameter <use_fixedip> = boolean defining whether if use_fixedip is true or false
+     * required parameter <fixed_ip>    = value of client's fixed_ip field
+     *
+     */
+    public function edit_client_fixedip($client_id, $use_fixedip, $fixed_ip)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json     = json_encode(['_id' => $client_id, 'use_fixedip' => $use_fixedip, "fixed_ip" => $fixed_ip]);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/user/'.trim($client_id), $json);
+        return $this->process_response($response);
+    }
+
+    /**
      * Create user group (using REST)
      * ---------------------------
      * returns an array containing a single object with attributes of the new usergroup ("_id", "name", "qos_rate_max_down", "qos_rate_max_up", "site_id") on success
