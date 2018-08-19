@@ -849,10 +849,43 @@ class Client
     }
 
     /**
+<<<<<<< HEAD
      * Delete user group (using REST)
      * ------------------------------
      * returns true on success
      * required parameter <group_id> = id of the user group
+=======
+     * Update client fixedip (using REST)
+     * ------------------------------
+     * returns an array containing a single object with attributes of the updated client on success
+     * required parameter <client_id>   = id of the client
+     * required parameter <use_fixedip> = boolean defining whether if use_fixedip is true or false
+     * optional parameter <network_id>  = network id where the ip belongs to
+     * optional parameter <fixed_ip>    = value of client's fixed_ip field
+     *
+     */
+    public function edit_client_fixedip($client_id, $use_fixedip, $network_id = null, $fixed_ip = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $data = ['_id' => $client_id, 'use_fixedip' => $use_fixedip];
+        if($use_fixedip){
+            if($network_id){ $data["network_id"] = $network_id; }
+            if($fixed_ip){ $data["fixed_ip"] = $fixed_ip; }
+        }
+        $json     = json_encode($data);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/user/'.trim($client_id), $json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * Create user group (using REST)
+     * ---------------------------
+     * returns an array containing a single object with attributes of the new usergroup ("_id", "name", "qos_rate_max_down", "qos_rate_max_up", "site_id") on success
+     * required parameter <group_name> = name of the user group
+     * optional parameter <group_dn>   = limit download bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
+     * optional parameter <group_up>   = limit upload bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
+>>>>>>> 287c67c39e9480e0d2edc5635f9c2c820dedbe92
      */
     public function delete_usergroup($group_id)
     {
@@ -1843,11 +1876,12 @@ class Client
      * List network settings (using REST)
      * ----------------------------------
      * returns an array of (non-wireless) networks and their settings
+     * optional parameter <network_id> = string; network id to get specific network data
      */
-    public function list_networkconf()
+    public function list_networkconf($network_id = "")
     {
         if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/networkconf');
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/networkconf/'.trim($network_id));
         return $this->process_response($response);
     }
 
