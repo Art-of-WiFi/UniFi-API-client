@@ -666,6 +666,28 @@ class Client
     }
 
     /**
+     * Method to fetch speed test results
+     * ----------------------------------
+     * returns an array of speed test result objects
+     * optional parameter <start> = Unix timestamp in milliseconds
+     * optional parameter <end>   = Unix timestamp in milliseconds
+     *
+     * NOTES:
+     * - defaults to the past 24 hours
+     * - requires a USG
+     */
+    public function stat_speedtest_results($start = null, $end = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $end      = is_null($end) ? ((time())*1000) : intval($end);
+        $start    = is_null($start) ? $end-(24*3600*1000) : intval($start);
+        $json     = ['attrs' => ['xput_download','xput_upload','latency','time'], 'start' => $start, 'end' => $end];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/archive.speedtest', 'json='.$json);
+        return $this->process_response($response);
+    }
+
+    /**
      * Show all login sessions
      * -----------------------
      * returns an array of login session objects for all devices or a single device
@@ -1044,6 +1066,20 @@ class Client
     {
         if (!$this->is_loggedin) return false;
         $response = $this->exec_curl('/api/s/'.$this->site.'/rest/rogueknown');
+        return $this->process_response($response);
+    }
+
+    /**
+     * List auto backups
+     * ---------------------------
+     * return an array containing objects with backup details on success
+     */
+    public function list_backups()
+    {
+        if (!$this->is_loggedin) return false;
+        $mac      = strtolower($mac);
+        $json     = json_encode(['cmd' => 'list-backups']);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/backup', 'json='.$json);
         return $this->process_response($response);
     }
 

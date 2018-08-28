@@ -1,4 +1,5 @@
 ## API client class usage examples
+
 This directory contains some PHP code examples which demonstrate usage of the PHP API client class and can be used as a good starting point for your own custom code.
 
 ### Usage
