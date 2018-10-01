@@ -13,6 +13,7 @@
  * This source file is subject to the MIT license that is bundled
  * with this package in the file LICENSE.md
  */
+
 namespace UniFi_API;
 
 /**
@@ -23,16 +24,16 @@ class Client
     /**
      * private properties
      */
-    protected $baseurl            = 'https://127.0.0.1:8443';
-    protected $site               = 'default';
-    protected $version            = '5.6.39';
-    protected $debug              = false;
-    protected $is_loggedin        = false;
-    private $cookies              = '';
-    private $request_type         = 'POST';
-    private $connect_timeout      = 10;
-    private $last_results_raw     = null;
-    private $last_error_message   = null;
+    protected $baseurl = 'https://127.0.0.1:8443';
+    protected $site = 'default';
+    protected $version = '5.6.39';
+    protected $debug = false;
+    protected $is_loggedin = false;
+    private $cookies = '';
+    private $request_type = 'POST';
+    private $connect_timeout = 10;
+    private $last_results_raw = null;
+    private $last_error_message = null;
     private $curl_ssl_verify_peer = false;
     private $curl_ssl_verify_host = false;
 
@@ -58,9 +59,15 @@ class Client
         $this->user     = trim($user);
         $this->password = trim($password);
 
-        if (!empty($baseurl)) $this->baseurl = trim($baseurl);
-        if (!empty($site)) $this->site       = trim($site);
-        if (!empty($version)) $this->version = trim($version);
+        if (!empty($baseurl)) {
+            $this->baseurl = trim($baseurl);
+        }
+        if (!empty($site)) {
+            $this->site = trim($site);
+        }
+        if (!empty($version)) {
+            $this->version = trim($version);
+        }
         if ($ssl_verify === true) {
             $this->curl_ssl_verify_peer = true;
             $this->curl_ssl_verify_host = 2;
@@ -76,12 +83,16 @@ class Client
         /**
          * if user has $_SESSION['unificookie'] set, do not logout here
          */
-        if (isset($_SESSION['unificookie'])) return;
+        if (isset($_SESSION['unificookie'])) {
+            return;
+        }
 
         /**
          * logout, if needed
          */
-        if ($this->is_loggedin) $this->logout();
+        if ($this->is_loggedin) {
+            $this->logout();
+        }
     }
 
     /**
@@ -94,13 +105,15 @@ class Client
         /**
          * if user has $_SESSION['unificookie'] set, skip the login
          */
-        if (isset($_SESSION['unificookie'])) return $this->is_loggedin = true;
+        if (isset($_SESSION['unificookie'])) {
+            return $this->is_loggedin = true;
+        }
 
         $ch = $this->get_curl_obj();
 
         curl_setopt($ch, CURLOPT_HEADER, 1);
-        curl_setopt($ch, CURLOPT_REFERER, $this->baseurl.'/login');
-        curl_setopt($ch, CURLOPT_URL, $this->baseurl.'/api/login');
+        curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
+        curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/login');
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
 
         /**
@@ -108,17 +121,19 @@ class Client
          */
         $content = curl_exec($ch);
 
-        if (curl_errno($ch)) trigger_error('cURL error: '.curl_error($ch));
+        if (curl_errno($ch)) {
+            trigger_error('cURL error: ' . curl_error($ch));
+        }
 
         if ($this->debug) {
             curl_setopt($ch, CURLOPT_VERBOSE, true);
 
             print '<pre>';
-            print PHP_EOL.'-----------LOGIN-------------'.PHP_EOL;
-            print_r (curl_getinfo($ch));
-            print PHP_EOL.'----------RESPONSE-----------'.PHP_EOL;
+            print PHP_EOL . '-----------LOGIN-------------' . PHP_EOL;
+            print_r(curl_getinfo($ch));
+            print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
             print $content;
-            print PHP_EOL.'-----------------------------'.PHP_EOL;
+            print PHP_EOL . '-----------------------------' . PHP_EOL;
             print '</pre>';
         }
 
@@ -126,7 +141,7 @@ class Client
         $body        = trim(substr($content, $header_size));
         $code        = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        curl_close ($ch);
+        curl_close($ch);
 
         preg_match_all('|Set-Cookie: (.*);|U', substr($content, 0, $header_size), $results);
 
@@ -134,11 +149,14 @@ class Client
             $this->cookies = implode(';', $results[1]);
             if (!empty($body)) {
                 if (($code >= 200) && ($code < 400)) {
-                    if (strpos($this->cookies, 'unifises') !== false) return $this->is_loggedin = true;
+                    if (strpos($this->cookies, 'unifises') !== false) {
+                        return $this->is_loggedin = true;
+                    }
                 }
 
                 if ($code === 400) {
                     trigger_error('We have received an HTTP response status: 400. Probably a controller login failure');
+
                     return $code;
                 }
             }
@@ -154,10 +172,13 @@ class Client
      */
     public function logout()
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->exec_curl('/logout');
         $this->is_loggedin = false;
         $this->cookies     = '';
+
         return true;
     }
 
@@ -179,6 +200,7 @@ class Client
     {
         $this->check_site($site);
         $this->site = trim($site);
+
         return $this->site;
     }
 
@@ -202,10 +224,12 @@ class Client
     {
         if ($enable === true || $enable === false) {
             $this->debug = $enable;
+
             return true;
         }
 
         trigger_error('Error: the parameter for set_debug() must be boolean');
+
         return false;
     }
 
@@ -229,7 +253,10 @@ class Client
     public function get_last_results_raw($return_json = false)
     {
         if ($this->last_results_raw !== null) {
-            if ($return_json) return json_encode($this->last_results_raw, JSON_PRETTY_PRINT);
+            if ($return_json) {
+                return json_encode($this->last_results_raw, JSON_PRETTY_PRINT);
+            }
+
             return $this->last_results_raw;
         }
 
@@ -243,7 +270,10 @@ class Client
      */
     public function get_last_error_message()
     {
-        if ($this->last_error_message !== null) return $this->last_error_message;
+        if ($this->last_error_message !== null) {
+            return $this->last_error_message;
+        }
+
         return false;
     }
 
@@ -260,7 +290,10 @@ class Client
      */
     public function get_cookie()
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
         return $this->cookies;
     }
 
@@ -281,19 +314,30 @@ class Client
      */
     public function authorize_guest($mac, $minutes, $up = null, $down = null, $MBytes = null, $ap_mac = null)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $mac  = strtolower($mac);
         $json = ['cmd' => 'authorize-guest', 'mac' => $mac, 'minutes' => intval($minutes)];
 
         /**
          * if we have received values for up/down/MBytes/ap_mac we append them to the payload array to be submitted
          */
-        if (isset($up))     $json['up']     = intval($up);
-        if (isset($down))   $json['down']   = intval($down);
-        if (isset($MBytes)) $json['bytes']  = intval($MBytes);
-        if (isset($ap_mac)) $json['ap_mac'] = $ap_mac;
+        if (isset($up)) {
+            $json['up'] = intval($up);
+        }
+        if (isset($down)) {
+            $json['down'] = intval($down);
+        }
+        if (isset($MBytes)) {
+            $json['bytes'] = intval($MBytes);
+        }
+        if (isset($ap_mac)) {
+            $json['ap_mac'] = $ap_mac;
+        }
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -305,10 +349,13 @@ class Client
      */
     public function unauthorize_guest($mac)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $mac      = strtolower($mac);
         $json     = json_encode(['cmd' => 'unauthorize-guest', 'mac' => $mac]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -320,10 +367,13 @@ class Client
      */
     public function reconnect_sta($mac)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $mac      = strtolower($mac);
         $json     = json_encode(['cmd' => 'kick-sta', 'mac' => $mac]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -335,10 +385,13 @@ class Client
      */
     public function block_sta($mac)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $mac      = strtolower($mac);
         $json     = json_encode(['cmd' => 'block-sta', 'mac' => $mac]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -350,10 +403,13 @@ class Client
      */
     public function unblock_sta($mac)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $mac      = strtolower($mac);
         $json     = json_encode(['cmd' => 'unblock-sta', 'mac' => $mac]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -368,9 +424,12 @@ class Client
      */
     public function forget_sta($macs)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['cmd' => 'forget-sta', 'macs' => $macs]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -386,17 +445,22 @@ class Client
      */
     public function create_user($mac, $user_group_id, $name = null, $note = null)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'POST';
         $new_user           = ['mac' => $mac, 'usergroup_id' => $user_group_id];
-        if (!is_null($name)) $new_user['name'] = $name;
+        if (!is_null($name)) {
+            $new_user['name'] = $name;
+        }
         if (!is_null($note)) {
-            $new_user['note'] = $note;
+            $new_user['note']  = $note;
             $new_user['noted'] = true;
         }
-        $json               = ['objects' => [['data' => $new_user]]];
-        $json               = json_encode($json);
-        $response           = $this->exec_curl('/api/s/'.$this->site.'/group/user', 'json='.$json);
+        $json     = ['objects' => [['data' => $new_user]]];
+        $json     = json_encode($json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/group/user', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -412,10 +476,13 @@ class Client
      */
     public function set_sta_note($user_id, $note = null)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $noted    = (is_null($note)) || (empty($note)) ? false : true;
         $json     = json_encode(['note' => $note, 'noted' => $noted]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/upd/user/'.trim($user_id), 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/user/' . trim($user_id), 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -431,9 +498,12 @@ class Client
      */
     public function set_sta_name($user_id, $name = null)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['name' => $name]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/upd/user/'.trim($user_id), 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/user/' . trim($user_id), 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -452,12 +522,24 @@ class Client
      */
     public function stat_5minutes_site($start = null, $end = null)
     {
-        if (!$this->is_loggedin) return false;
-        $end         = is_null($end) ? ((time())*1000) : intval($end);
-        $start       = is_null($start) ? $end-(12*3600*1000) : intval($start);
-        $attributes  = ['bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'];
-        $json        = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
-        $response    = $this->exec_curl('/api/s/'.$this->site.'/stat/report/5minutes.site', 'json='.$json);
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $end        = is_null($end) ? ((time()) * 1000) : intval($end);
+        $start      = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
+        $attributes = [
+            'bytes',
+            'wan-tx_bytes',
+            'wan-rx_bytes',
+            'wlan_bytes',
+            'num_sta',
+            'lan-num_sta',
+            'wlan-num_sta',
+            'time'
+        ];
+        $json       = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
+        $response   = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.site', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -474,12 +556,24 @@ class Client
      */
     public function stat_hourly_site($start = null, $end = null)
     {
-        if (!$this->is_loggedin) return false;
-        $end         = is_null($end) ? ((time())*1000) : intval($end);
-        $start       = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
-        $attributes  = ['bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'];
-        $json        = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
-        $response    = $this->exec_curl('/api/s/'.$this->site.'/stat/report/hourly.site', 'json='.$json);
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $end        = is_null($end) ? ((time()) * 1000) : intval($end);
+        $start      = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $attributes = [
+            'bytes',
+            'wan-tx_bytes',
+            'wan-rx_bytes',
+            'wlan_bytes',
+            'num_sta',
+            'lan-num_sta',
+            'wlan-num_sta',
+            'time'
+        ];
+        $json       = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
+        $response   = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.site', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -496,12 +590,24 @@ class Client
      */
     public function stat_daily_site($start = null, $end = null)
     {
-        if (!$this->is_loggedin) return false;
-        $end        = is_null($end) ? ((time()-(time() % 3600))*1000) : intval($end);
-        $start      = is_null($start) ? $end-(52*7*24*3600*1000) : intval($start);
-        $attributes = ['bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta', 'wlan-num_sta', 'time'];
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $end        = is_null($end) ? ((time() - (time() % 3600)) * 1000) : intval($end);
+        $start      = is_null($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
+        $attributes = [
+            'bytes',
+            'wan-tx_bytes',
+            'wan-rx_bytes',
+            'wlan_bytes',
+            'num_sta',
+            'lan-num_sta',
+            'wlan-num_sta',
+            'time'
+        ];
         $json       = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
-        $response   = $this->exec_curl('/api/s/'.$this->site.'/stat/report/daily.site', 'json='.$json);
+        $response   = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.site', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -521,13 +627,18 @@ class Client
      */
     public function stat_5minutes_aps($start = null, $end = null, $mac = null)
     {
-        if (!$this->is_loggedin) return false;
-        $end      = is_null($end) ? ((time())*1000) : intval($end);
-        $start    = is_null($start) ? $end-(12*3600*1000) : intval($start);
-        $json     = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) $json['mac'] = strtolower($mac);
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $end   = is_null($end) ? ((time()) * 1000) : intval($end);
+        $start = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
+        $json  = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        if (!is_null($mac)) {
+            $json['mac'] = strtolower($mac);
+        }
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/5minutes.ap', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.ap', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -545,13 +656,18 @@ class Client
      */
     public function stat_hourly_aps($start = null, $end = null, $mac = null)
     {
-        if (!$this->is_loggedin) return false;
-        $end      = is_null($end) ? ((time())*1000) : intval($end);
-        $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
-        $json     = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) $json['mac'] = strtolower($mac);
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $end   = is_null($end) ? ((time()) * 1000) : intval($end);
+        $start = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $json  = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        if (!is_null($mac)) {
+            $json['mac'] = strtolower($mac);
+        }
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/hourly.ap', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.ap', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -569,13 +685,18 @@ class Client
      */
     public function stat_daily_aps($start = null, $end = null, $mac = null)
     {
-        if (!$this->is_loggedin) return false;
-        $end      = is_null($end) ? ((time())*1000) : intval($end);
-        $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
-        $json     = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) $json['mac'] = strtolower($mac);
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $end   = is_null($end) ? ((time()) * 1000) : intval($end);
+        $start = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $json  = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        if (!is_null($mac)) {
+            $json['mac'] = strtolower($mac);
+        }
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/daily.ap', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.ap', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -599,13 +720,16 @@ class Client
      */
     public function stat_5minutes_user($mac, $start = null, $end = null, $attribs = null)
     {
-        if (!$this->is_loggedin) return false;
-        $end      = is_null($end) ? ((time())*1000) : intval($end);
-        $start    = is_null($start) ? $end-(12*3600*1000) : intval($start);
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $end      = is_null($end) ? ((time()) * 1000) : intval($end);
+        $start    = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
         $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => $mac];
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/5minutes.user', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.user', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -627,13 +751,16 @@ class Client
      */
     public function stat_hourly_user($mac, $start = null, $end = null, $attribs = null)
     {
-        if (!$this->is_loggedin) return false;
-        $end      = is_null($end) ? ((time())*1000) : intval($end);
-        $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $end      = is_null($end) ? ((time()) * 1000) : intval($end);
+        $start    = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
         $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => $mac];
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/hourly.user', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.user', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -655,13 +782,16 @@ class Client
      */
     public function stat_daily_user($mac, $start = null, $end = null, $attribs = null)
     {
-        if (!$this->is_loggedin) return false;
-        $end      = is_null($end) ? ((time())*1000) : intval($end);
-        $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $end      = is_null($end) ? ((time()) * 1000) : intval($end);
+        $start    = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
         $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => $mac];
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/daily.user', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.user', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -678,12 +808,15 @@ class Client
      */
     public function stat_speedtest_results($start = null, $end = null)
     {
-        if (!$this->is_loggedin) return false;
-        $end      = is_null($end) ? ((time())*1000) : intval($end);
-        $start    = is_null($start) ? $end-(24*3600*1000) : intval($start);
-        $json     = ['attrs' => ['xput_download','xput_upload','latency','time'], 'start' => $start, 'end' => $end];
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $end      = is_null($end) ? ((time()) * 1000) : intval($end);
+        $start    = is_null($start) ? $end - (24 * 3600 * 1000) : intval($start);
+        $json     = ['attrs' => ['xput_download', 'xput_upload', 'latency', 'time'], 'start' => $start, 'end' => $end];
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/archive.speedtest', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/archive.speedtest', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -701,14 +834,21 @@ class Client
      */
     public function stat_sessions($start = null, $end = null, $mac = null, $type = 'all')
     {
-        if (!$this->is_loggedin) return false;
-        if (!in_array($type, ['all', 'guest', 'user'])) return false;
-        $end      = is_null($end) ? time() : intval($end);
-        $start    = is_null($start) ? $end-(7*24*3600) : intval($start);
-        $json     = ['type'=> $type, 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) $json['mac'] = strtolower($mac);
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        if (!in_array($type, ['all', 'guest', 'user'])) {
+            return false;
+        }
+        $end   = is_null($end) ? time() : intval($end);
+        $start = is_null($start) ? $end - (7 * 24 * 3600) : intval($start);
+        $json  = ['type' => $type, 'start' => $start, 'end' => $end];
+        if (!is_null($mac)) {
+            $json['mac'] = strtolower($mac);
+        }
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/session', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/session', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -721,10 +861,13 @@ class Client
      */
     public function stat_sta_sessions_latest($mac, $limit = null)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $limit    = is_null($limit) ? 5 : intval($limit);
-        $json     = json_encode(['mac' => $mac, '_limit' => $limit, '_sort'=> '-assoc_time']);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/session', 'json='.$json);
+        $json     = json_encode(['mac' => $mac, '_limit' => $limit, '_sort' => '-assoc_time']);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/session', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -740,11 +883,14 @@ class Client
      */
     public function stat_auths($start = null, $end = null)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $end      = is_null($end) ? time() : intval($end);
-        $start    = is_null($start) ? $end-(7*24*3600) : intval($start);
+        $start    = is_null($start) ? $end - (7 * 24 * 3600) : intval($start);
         $json     = json_encode(['start' => $start, 'end' => $end]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/authorization', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/authorization', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -760,9 +906,12 @@ class Client
      */
     public function stat_allusers($historyhours = 8760)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['type' => 'all', 'conn' => 'all', 'within' => intval($historyhours)]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/alluser', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/alluser', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -774,9 +923,12 @@ class Client
      */
     public function list_guests($within = 8760)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['within' => intval($within)]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/guest', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/guest', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -788,8 +940,11 @@ class Client
      */
     public function list_clients($client_mac = null)
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/sta/'.trim($client_mac));
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/sta/' . trim($client_mac));
+
         return $this->process_response($response);
     }
 
@@ -801,8 +956,11 @@ class Client
      */
     public function stat_client($client_mac)
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/user/'.trim($client_mac));
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/user/' . trim($client_mac));
+
         return $this->process_response($response);
     }
 
@@ -815,9 +973,12 @@ class Client
      */
     public function set_usergroup($user_id, $group_id)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['usergroup_id' => $group_id]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/upd/user/'.trim($user_id), 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/user/' . trim($user_id), 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -833,16 +994,25 @@ class Client
      */
     public function edit_client_fixedip($client_id, $use_fixedip, $network_id = null, $fixed_ip = null)
     {
-        if (!$this->is_loggedin) return false;
-        if (!is_bool($use_fixedip)) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        if (!is_bool($use_fixedip)) {
+            return false;
+        }
         $this->request_type = 'PUT';
-        $data = ['_id' => $client_id, 'use_fixedip' => $use_fixedip];
-        if($use_fixedip){
-            if($network_id){ $data["network_id"] = $network_id; }
-            if($fixed_ip){ $data["fixed_ip"] = $fixed_ip; }
+        $data               = ['_id' => $client_id, 'use_fixedip' => $use_fixedip];
+        if ($use_fixedip) {
+            if ($network_id) {
+                $data["network_id"] = $network_id;
+            }
+            if ($fixed_ip) {
+                $data["fixed_ip"] = $fixed_ip;
+            }
         }
         $json     = json_encode($data);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/user/'.trim($client_id), $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/user/' . trim($client_id), $json);
+
         return $this->process_response($response);
     }
 
@@ -853,8 +1023,11 @@ class Client
      */
     public function list_usergroups()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/list/usergroup');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/list/usergroup');
+
         return $this->process_response($response);
     }
 
@@ -868,10 +1041,17 @@ class Client
      */
     public function create_usergroup($group_name, $group_dn = -1, $group_up = -1)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'POST';
-        $json     = json_encode(['name' => $group_name, 'qos_rate_max_down' => intval($group_dn), 'qos_rate_max_up' => intval($group_up)]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/usergroup', $json);
+        $json               = json_encode([
+            'name'              => $group_name,
+            'qos_rate_max_down' => intval($group_dn),
+            'qos_rate_max_up'   => intval($group_up)
+        ]);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup', $json);
+
         return $this->process_response($response);
     }
 
@@ -887,10 +1067,19 @@ class Client
      */
     public function edit_usergroup($group_id, $site_id, $group_name, $group_dn = -1, $group_up = -1)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'PUT';
-        $json     = json_encode(['_id' => $group_id, 'name' => $group_name, 'qos_rate_max_down' => intval($group_dn), 'qos_rate_max_up' => intval($group_up), 'site_id' => $site_id]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/usergroup/'.trim($group_id), $json);
+        $json               = json_encode([
+            '_id'               => $group_id,
+            'name'              => $group_name,
+            'qos_rate_max_down' => intval($group_dn),
+            'qos_rate_max_up'   => intval($group_up),
+            'site_id'           => $site_id
+        ]);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup/' . trim($group_id), $json);
+
         return $this->process_response($response);
     }
 
@@ -902,9 +1091,12 @@ class Client
      */
     public function delete_usergroup($group_id)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'DELETE';
-        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/usergroup/'.trim($group_id));
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup/' . trim($group_id));
+
         return $this->process_response_boolean($response);
     }
 
@@ -915,8 +1107,11 @@ class Client
      */
     public function list_firewallgroups()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/firewallgroup');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup');
+
         return $this->process_response($response);
     }
 
@@ -931,11 +1126,20 @@ class Client
      */
     public function create_firewallgroup($group_name, $group_type, $group_members = [])
     {
-        if (!$this->is_loggedin) return false;
-        if (!in_array($group_type, ['address-group', 'ipv6-address-group', 'port-group'])) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        if (!in_array($group_type, ['address-group', 'ipv6-address-group', 'port-group'])) {
+            return false;
+        }
         $this->request_type = 'POST';
-        $json     = json_encode(['name' => $group_name, 'group_type' => $group_type, 'group_members' => $group_members]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/firewallgroup', $json);
+        $json               = json_encode([
+            'name'          => $group_name,
+            'group_type'    => $group_type,
+            'group_members' => $group_members
+        ]);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup', $json);
+
         return $this->process_response($response);
     }
 
@@ -955,11 +1159,23 @@ class Client
      */
     public function edit_firewallgroup($group_id, $site_id, $group_name, $group_type, $group_members = [])
     {
-        if (!$this->is_loggedin) return false;
-        if (!in_array($group_type, ['address-group', 'ipv6-address-group', 'port-group'])) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        if (!in_array($group_type, ['address-group', 'ipv6-address-group', 'port-group'])) {
+            return false;
+        }
         $this->request_type = 'PUT';
-        $json     = json_encode(['_id' => $group_id, 'name' => $group_name, 'group_type' => $group_type, 'group_members' => $group_members, 'site_id' => $site_id]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/firewallgroup/'.trim($group_id), $json);
+        $json               = json_encode([
+            '_id'           => $group_id,
+            'name'          => $group_name,
+            'group_type'    => $group_type,
+            'group_members' => $group_members,
+            'site_id'       => $site_id
+        ]);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id),
+            $json);
+
         return $this->process_response($response);
     }
 
@@ -971,9 +1187,12 @@ class Client
      */
     public function delete_firewallgroup($group_id)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'DELETE';
-        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/firewallgroup/'.trim($group_id));
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id));
+
         return $this->process_response_boolean($response);
     }
 
@@ -984,8 +1203,11 @@ class Client
      */
     public function list_health()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/health');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/health');
+
         return $this->process_response($response);
     }
 
@@ -998,9 +1220,12 @@ class Client
      */
     public function list_dashboard($five_minutes = false)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $url_suffix = $five_minutes ? '?scale=5minutes' : null;
-        $response   = $this->exec_curl('/api/s/'.$this->site.'/stat/dashboard'.$url_suffix);
+        $response   = $this->exec_curl('/api/s/' . $this->site . '/stat/dashboard' . $url_suffix);
+
         return $this->process_response($response);
     }
 
@@ -1011,8 +1236,11 @@ class Client
      */
     public function list_users()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/list/user');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/list/user');
+
         return $this->process_response($response);
     }
 
@@ -1024,8 +1252,11 @@ class Client
      */
     public function list_devices($device_mac = null)
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/device/'.trim($device_mac));
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/device/' . trim($device_mac));
+
         return $this->process_response($response);
     }
 
@@ -1038,8 +1269,11 @@ class Client
      */
     public function list_tags()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/tag');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/tag');
+
         return $this->process_response($response);
     }
 
@@ -1051,9 +1285,12 @@ class Client
      */
     public function list_rogueaps($within = 24)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['within' => intval($within)]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/rogueap', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/rogueap', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -1064,8 +1301,11 @@ class Client
      */
     public function list_known_rogueaps()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/rogueknown');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/rogueknown');
+
         return $this->process_response($response);
     }
 
@@ -1076,10 +1316,13 @@ class Client
      */
     public function list_backups()
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $mac      = strtolower($mac);
         $json     = json_encode(['cmd' => 'list-backups']);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/backup', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/backup', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -1090,8 +1333,11 @@ class Client
      */
     public function list_sites()
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $response = $this->exec_curl('/api/self/sites');
+
         return $this->process_response($response);
     }
 
@@ -1104,8 +1350,11 @@ class Client
      */
     public function stat_sites()
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $response = $this->exec_curl('/api/stat/sites');
+
         return $this->process_response($response);
     }
 
@@ -1119,9 +1368,12 @@ class Client
      */
     public function create_site($description)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['desc' => $description, 'cmd' => 'add-site']);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -1133,9 +1385,12 @@ class Client
      */
     public function delete_site($site_id)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['site' => $site_id, 'cmd' => 'delete-site']);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1149,9 +1404,12 @@ class Client
      */
     public function set_site_name($site_name)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['cmd' => 'update-site', 'desc' => $site_name]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1166,10 +1424,14 @@ class Client
      */
     public function set_site_country($country_id, $setting)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'PUT';
-        $json     = json_encode($setting);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/country/'.trim($country_id), 'json='.$json);
+        $json               = json_encode($setting);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/country/' . trim($country_id),
+            'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1183,10 +1445,14 @@ class Client
      */
     public function set_site_locale($locale_id, $setting)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'PUT';
-        $json     = json_encode($setting);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/locale/'.trim($locale_id), 'json='.$json);
+        $json               = json_encode($setting);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/locale/' . trim($locale_id),
+            'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1200,10 +1466,14 @@ class Client
      */
     public function set_site_snmp($snmp_id, $setting)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'PUT';
-        $json     = json_encode($setting);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/snmp/'.trim($snmp_id), 'json='.$json);
+        $json               = json_encode($setting);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/snmp/' . trim($snmp_id),
+            'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1217,10 +1487,14 @@ class Client
      */
     public function set_site_mgmt($mgmt_id, $setting)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'PUT';
-        $json     = json_encode($setting);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/mgmt/'.trim($mgmt_id), 'json='.$json);
+        $json               = json_encode($setting);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/mgmt/' . trim($mgmt_id),
+            'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1234,10 +1508,14 @@ class Client
      */
     public function set_site_guest_access($guest_access_id, $setting)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'PUT';
-        $json     = json_encode($setting);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/guest_access/'.trim($guest_access_id), 'json='.$json);
+        $json               = json_encode($setting);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/guest_access/' . trim($guest_access_id),
+            'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1251,10 +1529,14 @@ class Client
      */
     public function set_site_ntp($ntp_id, $setting)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'PUT';
-        $json     = json_encode($setting);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/ntp/'.trim($ntp_id), 'json='.$json);
+        $json               = json_encode($setting);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/ntp/' . trim($ntp_id),
+            'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1268,10 +1550,14 @@ class Client
      */
     public function set_site_connectivity($connectivity_id, $setting)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'PUT';
-        $json     = json_encode($setting);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/connectivity/'.trim($connectivity_id), 'json='.$json);
+        $json               = json_encode($setting);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/connectivity/' . trim($connectivity_id),
+            'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1282,9 +1568,12 @@ class Client
      */
     public function list_admins()
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['cmd' => 'get-admins']);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -1295,8 +1584,11 @@ class Client
      */
     public function list_all_admins()
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $response = $this->exec_curl('/api/stat/admin');
+
         return $this->process_response($response);
     }
 
@@ -1322,19 +1614,28 @@ class Client
      * - after issuing a valid request, an invite will be sent to the email address provided
      * - issuing this command against an existing admin will trigger a "re-invite"
      */
-    public function invite_admin($name, $email, $enable_sso = true, $readonly = false, $device_adopt = false, $device_restart = false)
-    {
-        if (!$this->is_loggedin) return false;
+    public function invite_admin(
+        $name,
+        $email,
+        $enable_sso = true,
+        $readonly = false,
+        $device_adopt = false,
+        $device_restart = false
+    ) {
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $email_valid = filter_var(trim($email), FILTER_VALIDATE_EMAIL);
         if (!$email_valid) {
             trigger_error('The email address provided is invalid!');
+
             return false;
         }
 
         $json = ['name' => trim($name), 'email' => trim($email), 'for_sso' => $enable_sso, 'cmd' => 'invite-admin'];
         if ($readonly) {
             $json['role'] = 'readonly';
-            $permissions = [];
+            $permissions  = [];
             if ($device_adopt) {
                 $permissions[] = "API_DEVICE_ADOPT";
             }
@@ -1349,7 +1650,8 @@ class Client
         }
 
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1365,9 +1667,12 @@ class Client
      */
     public function revoke_admin($admin_id)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['admin' => $admin_id, 'cmd' => 'revoke-admin']);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1378,8 +1683,11 @@ class Client
      */
     public function list_wlan_groups()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/list/wlangroup');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/list/wlangroup');
+
         return $this->process_response($response);
     }
 
@@ -1390,8 +1698,11 @@ class Client
      */
     public function stat_sysinfo()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/sysinfo');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/sysinfo');
+
         return $this->process_response($response);
     }
 
@@ -1406,6 +1717,7 @@ class Client
     public function stat_status()
     {
         $response = $this->exec_curl('/status');
+
         return $this->process_response_boolean($response);
     }
 
@@ -1416,8 +1728,11 @@ class Client
      */
     public function list_self()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/self');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/self');
+
         return $this->process_response($response);
     }
 
@@ -1429,9 +1744,12 @@ class Client
      */
     public function stat_voucher($create_time = null)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = (trim($create_time) != null) ? json_encode(['create_time' => intval($create_time)]) : json_encode([]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/voucher', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/voucher', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -1443,9 +1761,12 @@ class Client
      */
     public function stat_payment($within = null)
     {
-        if (!$this->is_loggedin) return false;
-        $url_suffix = (($within != null) ? '?within='.intval($within) : '');
-        $response   = $this->exec_curl('/api/s/'.$this->site.'/stat/payment'.$url_suffix);
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $url_suffix = (($within != null) ? '?within=' . intval($within) : '');
+        $response   = $this->exec_curl('/api/s/' . $this->site . '/stat/payment' . $url_suffix);
+
         return $this->process_response($response);
     }
 
@@ -1459,12 +1780,17 @@ class Client
      */
     public function create_hotspotop($name, $x_password, $note = null)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'POST';
-        $json     = ['name' => $name, 'x_password' => $x_password];
-        if (isset($note)) $json['note'] = trim($note);
+        $json               = ['name' => $name, 'x_password' => $x_password];
+        if (isset($note)) {
+            $json['note'] = trim($note);
+        }
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/hotspotop', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/hotspotop', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1475,8 +1801,11 @@ class Client
      */
     public function list_hotspotop()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/hotspotop');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/hotspotop');
+
         return $this->process_response($response);
     }
 
@@ -1495,16 +1824,39 @@ class Client
      *
      * NOTES: please use the stat_voucher() method/function to retrieve the newly created voucher(s) by create_time
      */
-    public function create_voucher($minutes, $count = 1, $quota = 0, $note = null, $up = null, $down = null, $MBytes = null)
-    {
-        if (!$this->is_loggedin) return false;
-        $json     = ['cmd' => 'create-voucher', 'expire' => intval($minutes), 'n' => intval($count), 'quota' => intval($quota)];
-        if (isset($note))   $json['note'] = trim($note);
-        if (isset($up))     $json['up'] = intval($up);
-        if (isset($down))   $json['down'] = intval($down);
-        if (isset($MBytes)) $json['bytes'] = intval($MBytes);
+    public function create_voucher(
+        $minutes,
+        $count = 1,
+        $quota = 0,
+        $note = null,
+        $up = null,
+        $down = null,
+        $MBytes = null
+    ) {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $json = [
+            'cmd'    => 'create-voucher',
+            'expire' => intval($minutes),
+            'n'      => intval($count),
+            'quota'  => intval($quota)
+        ];
+        if (isset($note)) {
+            $json['note'] = trim($note);
+        }
+        if (isset($up)) {
+            $json['up'] = intval($up);
+        }
+        if (isset($down)) {
+            $json['down'] = intval($down);
+        }
+        if (isset($MBytes)) {
+            $json['bytes'] = intval($MBytes);
+        }
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/hotspot', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/hotspot', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -1516,9 +1868,12 @@ class Client
      */
     public function revoke_voucher($voucher_id)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['_id' => $voucher_id, 'cmd' => 'delete-voucher']);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/hotspot', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/hotspot', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1530,9 +1885,12 @@ class Client
      */
     public function extend_guest_validity($guest_id)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['_id' => $guest_id, 'cmd' => 'extend']);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/hotspot', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/hotspot', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1543,8 +1901,11 @@ class Client
      */
     public function list_portforward_stats()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/portforward');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/portforward');
+
         return $this->process_response($response);
     }
 
@@ -1555,8 +1916,11 @@ class Client
      */
     public function list_dpi_stats()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/dpi');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/dpi');
+
         return $this->process_response($response);
     }
 
@@ -1567,8 +1931,11 @@ class Client
      */
     public function list_current_channels()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/current-channel');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/current-channel');
+
         return $this->process_response($response);
     }
 
@@ -1583,8 +1950,11 @@ class Client
      */
     public function list_country_codes()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/ccode');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/ccode');
+
         return $this->process_response($response);
     }
 
@@ -1595,8 +1965,11 @@ class Client
      */
     public function list_portforwarding()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/list/portforward');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/list/portforward');
+
         return $this->process_response($response);
     }
 
@@ -1607,8 +1980,11 @@ class Client
      */
     public function list_dynamicdns()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/list/dynamicdns');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/list/dynamicdns');
+
         return $this->process_response($response);
     }
 
@@ -1619,8 +1995,11 @@ class Client
      */
     public function list_portconf()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/list/portconf');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/list/portconf');
+
         return $this->process_response($response);
     }
 
@@ -1631,8 +2010,11 @@ class Client
      */
     public function list_extension()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/list/extension');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/list/extension');
+
         return $this->process_response($response);
     }
 
@@ -1643,8 +2025,11 @@ class Client
      */
     public function list_settings()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/get/setting');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/get/setting');
+
         return $this->process_response($response);
     }
 
@@ -1656,10 +2041,13 @@ class Client
      */
     public function adopt_device($mac)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $mac      = strtolower($mac);
         $json     = json_encode(['mac' => $mac, 'cmd' => 'adopt']);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1671,10 +2059,13 @@ class Client
      */
     public function restart_ap($mac)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $mac      = strtolower($mac);
         $json     = json_encode(['cmd' => 'restart', 'mac' => $mac]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1692,11 +2083,16 @@ class Client
      */
     public function disable_ap($ap_id, $disable)
     {
-        if (!$this->is_loggedin) return false;
-        if (!is_bool($disable)) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        if (!is_bool($disable)) {
+            return false;
+        }
         $this->request_type = 'PUT';
-        $json     = json_encode(['disabled' => $disable]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/device/'.trim($ap_id), $json);
+        $json               = json_encode(['disabled' => $disable]);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/device/' . trim($ap_id), $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1714,11 +2110,16 @@ class Client
      */
     public function led_override($device_id, $override_mode)
     {
-        if (!$this->is_loggedin) return false;
-        $this->request_type    = 'PUT';
-        if (!in_array($override_mode, ['off', 'on', 'default'])) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $this->request_type = 'PUT';
+        if (!in_array($override_mode, ['off', 'on', 'default'])) {
+            return false;
+        }
         $json     = json_encode(['led_override' => $override_mode]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/device/'.trim($device_id), $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/device/' . trim($device_id), $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1734,12 +2135,17 @@ class Client
      */
     public function locate_ap($mac, $enable)
     {
-        if (!$this->is_loggedin) return false;
-        if (!is_bool($enable)) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        if (!is_bool($enable)) {
+            return false;
+        }
         $mac      = strtolower($mac);
         $cmd      = (($enable) ? 'set-locate' : 'unset-locate');
         $json     = json_encode(['cmd' => $cmd, 'mac' => $mac]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1751,10 +2157,15 @@ class Client
      */
     public function site_leds($enable)
     {
-        if (!$this->is_loggedin) return false;
-        if (!is_bool($enable)) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        if (!is_bool($enable)) {
+            return false;
+        }
         $json     = json_encode(['led_enabled' => $enable]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/set/setting/mgmt', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/mgmt', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1774,9 +2185,20 @@ class Client
      */
     public function set_ap_radiosettings($ap_id, $radio, $channel, $ht, $tx_power_mode, $tx_power)
     {
-        if (!$this->is_loggedin) return false;
-        $json     = json_encode(['radio_table' => ['radio' => $radio, 'channel' => $channel, 'ht' => $ht, 'tx_power_mode' => $tx_power_mode, 'tx_power' =>$tx_power]]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/upd/device/'.trim($ap_id), 'json='.$json);
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $json     = json_encode([
+            'radio_table' => [
+                'radio'         => $radio,
+                'channel'       => $channel,
+                'ht'            => $ht,
+                'tx_power_mode' => $tx_power_mode,
+                'tx_power'      => $tx_power
+            ]
+        ]);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($ap_id), 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1791,11 +2213,17 @@ class Client
      * NOTES:
      * - can for example be used to turn WiFi off
      */
-    public function set_ap_wlangroup($wlantype_id, $device_id, $wlangroup_id) {
-        if (!$this->is_loggedin) return false;
-        if (!in_array($wlantype_id, ['ng', 'na'])) return false;
-        $json     = json_encode(['wlan_overrides' => [],'wlangroup_id_'.$wlantype_id => $wlangroup_id]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/upd/device/'.trim($device_id),'json='.$json);
+    public function set_ap_wlangroup($wlantype_id, $device_id, $wlangroup_id)
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        if (!in_array($wlantype_id, ['ng', 'na'])) {
+            return false;
+        }
+        $json     = json_encode(['wlan_overrides' => [], 'wlangroup_id_' . $wlantype_id => $wlangroup_id]);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($device_id), 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1825,8 +2253,10 @@ class Client
         $expire_unit,
         $site_id
     ) {
-        if (!$this->is_loggedin) return false;
-        $json = [
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $json     = [
             'portal_enabled'    => $portal_enabled,
             'portal_customized' => $portal_customized,
             'redirect_enabled'  => $redirect_enabled,
@@ -1837,7 +2267,8 @@ class Client
             'site_id'           => $site_id
         ];
         $json     = json_encode($json, JSON_UNESCAPED_SLASHES);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/set/setting/guest_access', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/guest_access', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1848,10 +2279,14 @@ class Client
      * required parameter <network_settings> = stdClass object or associative array containing the configuration to apply to the guestlogin, must be a (partial)
      *                                         object/array structured in the same manner as is returned by list_settings() for the guest_access.
      */
-    public function set_guestlogin_settings_base($guestlogin_settings) {
-        if (!$this->is_loggedin) return false;
+    public function set_guestlogin_settings_base($guestlogin_settings)
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode($guestlogin_settings, JSON_UNESCAPED_SLASHES);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/set/setting/guest_access', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/guest_access', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1864,9 +2299,12 @@ class Client
      */
     public function rename_ap($ap_id, $apname)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['name' => $apname]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/upd/device/'.trim($ap_id), 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($ap_id), 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1879,9 +2317,12 @@ class Client
      */
     public function move_device($mac, $site_id)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['site' => $site_id, 'mac' => $mac, 'cmd' => 'move-device']);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1893,9 +2334,12 @@ class Client
      */
     public function delete_device($mac)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = json_encode(['mac' => $mac, 'cmd' => 'delete-device']);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1907,8 +2351,11 @@ class Client
      */
     public function list_networkconf($network_id = '')
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/networkconf/'.trim($network_id));
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id));
+
         return $this->process_response($response);
     }
 
@@ -1922,10 +2369,13 @@ class Client
      */
     public function create_network($network_settings)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'POST';
         $json               = json_encode($network_settings);
-        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/networkconf', 'json='.$json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/networkconf', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -1939,10 +2389,14 @@ class Client
      */
     public function set_networksettings_base($network_id, $network_settings)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'PUT';
         $json               = json_encode($network_settings);
-        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/networkconf/'.trim($network_id), 'json='.$json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id),
+            'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -1954,9 +2408,12 @@ class Client
      */
     public function delete_network($network_id)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'DELETE';
-        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/networkconf/'.trim($network_id));
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id));
+
         return $this->process_response_boolean($response);
     }
 
@@ -1969,8 +2426,11 @@ class Client
      */
     public function list_wlanconf($wlan_id = null)
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/wlanconf/'.trim($wlan_id));
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id));
+
         return $this->process_response($response);
     }
 
@@ -2001,19 +2461,21 @@ class Client
         $x_passphrase,
         $usergroup_id,
         $wlangroup_id,
-        $enabled          = true,
-        $hide_ssid        = false,
-        $is_guest         = false,
-        $security         = 'open',
-        $wpa_mode         = 'wpa2',
-        $wpa_enc          = 'ccmp',
-        $vlan_enabled     = false,
-        $vlan             = null,
-        $uapsd_enabled    = false,
+        $enabled = true,
+        $hide_ssid = false,
+        $is_guest = false,
+        $security = 'open',
+        $wpa_mode = 'wpa2',
+        $wpa_enc = 'ccmp',
+        $vlan_enabled = false,
+        $vlan = null,
+        $uapsd_enabled = false,
         $schedule_enabled = false,
-        $schedule         = []
+        $schedule = []
     ) {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json = [
             'name'             => $name,
             'x_passphrase'     => $x_passphrase,
@@ -2030,9 +2492,12 @@ class Client
             'schedule_enabled' => $schedule_enabled,
             'schedule'         => $schedule,
         ];
-        if (!is_null($vlan) && $vlan_enabled) $json['vlan'] = $vlan;
+        if (!is_null($vlan) && $vlan_enabled) {
+            $json['vlan'] = $vlan;
+        }
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/add/wlanconf', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/add/wlanconf', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -2046,10 +2511,14 @@ class Client
      */
     public function set_wlansettings_base($wlan_id, $wlan_settings)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'PUT';
         $json               = json_encode($wlan_settings);
-        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/wlanconf/'.trim($wlan_id), 'json='.$json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id),
+            'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -2065,8 +2534,13 @@ class Client
     public function set_wlansettings($wlan_id, $x_passphrase, $name = null)
     {
         $payload = [];
-        if (!is_null($x_passphrase)) $payload['x_passphrase'] = trim($x_passphrase);
-        if (!is_null($name)) $payload['name'] = trim($name);
+        if (!is_null($x_passphrase)) {
+            $payload['x_passphrase'] = trim($x_passphrase);
+        }
+        if (!is_null($name)) {
+            $payload['name'] = trim($name);
+        }
+
         return $this->set_wlansettings_base($wlan_id, $payload);
     }
 
@@ -2079,9 +2553,12 @@ class Client
      */
     public function disable_wlan($wlan_id, $disable)
     {
-        if (!is_bool($disable)) return false;
+        if (!is_bool($disable)) {
+            return false;
+        }
         $action  = $disable ? false : true;
         $payload = ['enabled' => $action];
+
         return $this->set_wlansettings_base($wlan_id, $payload);
     }
 
@@ -2093,9 +2570,12 @@ class Client
      */
     public function delete_wlan($wlan_id)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'DELETE';
-        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/wlanconf/'.trim($wlan_id));
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id));
+
         return $this->process_response_boolean($response);
     }
 
@@ -2112,9 +2592,18 @@ class Client
      */
     public function set_wlan_mac_filter($wlan_id, $mac_filter_policy, $mac_filter_enabled, array $macs)
     {
-        if (!is_bool($mac_filter_enabled)) return false;
-        if (!in_array($mac_filter_policy, ['allow', 'deny'])) return false;
-        $payload = ['mac_filter_enabled' => (bool)$mac_filter_enabled, 'mac_filter_policy' => $mac_filter_policy, 'mac_filter_list' => $macs];
+        if (!is_bool($mac_filter_enabled)) {
+            return false;
+        }
+        if (!in_array($mac_filter_policy, ['allow', 'deny'])) {
+            return false;
+        }
+        $payload = [
+            'mac_filter_enabled' => (bool)$mac_filter_enabled,
+            'mac_filter_policy'  => $mac_filter_policy,
+            'mac_filter_list'    => $macs
+        ];
+
         return $this->set_wlansettings_base($wlan_id, $payload);
     }
 
@@ -2128,10 +2617,19 @@ class Client
      */
     public function list_events($historyhours = 720, $start = 0, $limit = 3000)
     {
-        if (!$this->is_loggedin) return false;
-        $json     = ['_sort' => '-time', 'within' => intval($historyhours), 'type' => null, '_start' => intval($start), '_limit' => intval($limit)];
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $json     = [
+            '_sort'  => '-time',
+            'within' => intval($historyhours),
+            'type'   => null,
+            '_start' => intval($start),
+            '_limit' => intval($limit)
+        ];
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/event', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/event', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -2142,8 +2640,11 @@ class Client
      */
     public function list_alarms()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/list/alarm');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/list/alarm');
+
         return $this->process_response($response);
     }
 
@@ -2155,9 +2656,12 @@ class Client
      */
     public function count_alarms($archived = null)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $url_suffix = ($archived === false) ? '?archived=false' : null;
-        $response   = $this->exec_curl('/api/s/'.$this->site.'/cnt/alarm'.$url_suffix);
+        $response   = $this->exec_curl('/api/s/' . $this->site . '/cnt/alarm' . $url_suffix);
+
         return $this->process_response($response);
     }
 
@@ -2170,11 +2674,16 @@ class Client
      */
     public function archive_alarm($alarm_id = null)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'POST';
         $json               = json_encode(['cmd' => 'archive-all-alarms']);
-        if (!is_null($alarm_id)) $json = json_encode(['_id' => $alarm_id, 'cmd' => 'archive-alarm']);
-        $response           = $this->exec_curl('/api/s/'.$this->site.'/cmd/evtmgr', 'json='.$json);
+        if (!is_null($alarm_id)) {
+            $json = json_encode(['_id' => $alarm_id, 'cmd' => 'archive-alarm']);
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/evtmgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -2189,10 +2698,13 @@ class Client
      */
     public function upgrade_device($device_mac)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = ['mac' => $device_mac];
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr/upgrade', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr/upgrade', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -2209,10 +2721,13 @@ class Client
      */
     public function upgrade_device_external($firmware_url, $device_mac)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = ['url' => filter_var($firmware_url, FILTER_SANITIZE_URL), 'mac' => $device_mac];
         $json     = json_encode($json, JSON_UNESCAPED_SLASHES);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr/upgrade-external', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr/upgrade-external', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -2227,10 +2742,13 @@ class Client
      */
     public function start_rolling_upgrade()
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = ['cmd' => 'set-rollupgrade'];
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -2241,10 +2759,13 @@ class Client
      */
     public function cancel_rolling_upgrade()
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = ['cmd' => 'unset-rollupgrade'];
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -2261,10 +2782,13 @@ class Client
      */
     public function power_cycle_switch_port($switch_mac, $port_idx)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = ['mac' => $switch_mac, 'port_idx' => intval($port_idx), 'cmd' => 'power-cycle'];
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -2276,10 +2800,13 @@ class Client
      */
     public function spectrum_scan($ap_mac)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $json     = ['cmd' => 'spectrum-scan', 'mac' => $ap_mac];
         $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', 'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -2291,8 +2818,11 @@ class Client
      */
     public function spectrum_scan_state($ap_mac)
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/spectrum-scan/'.trim($ap_mac));
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/spectrum-scan/' . trim($ap_mac));
+
         return $this->process_response($response);
     }
 
@@ -2306,10 +2836,14 @@ class Client
      */
     public function set_device_settings_base($device_id, $device_settings)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'PUT';
         $json               = json_encode($device_settings);
-        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/device/'.trim($device_id), 'json='.$json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/device/' . trim($device_id),
+            'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -2323,8 +2857,11 @@ class Client
      */
     public function list_radius_profiles()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/radiusprofile');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/radiusprofile');
+
         return $this->process_response($response);
     }
 
@@ -2338,8 +2875,11 @@ class Client
      */
     public function list_radius_accounts()
     {
-        if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/account');
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/account');
+
         return $this->process_response($response);
     }
 
@@ -2386,20 +2926,27 @@ class Client
      */
     public function create_radius_account($name, $x_password, $tunnel_type, $tunnel_medium_type, $vlan = null)
     {
-        if (!$this->is_loggedin) return false;
-        $tunnel_types        = [1,2,3,4,5,6,7,8,9,10,11,12,13];
-        $tunnel_medium_types = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
-        if (!in_array($tunnel_type, $tunnel_types) || !in_array($tunnel_medium_type, $tunnel_medium_types)) return false;
-        $this->request_type  = 'POST';
-        $account_details     = [
+        if (!$this->is_loggedin) {
+            return false;
+        }
+        $tunnel_types        = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+        $tunnel_medium_types = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        if (!in_array($tunnel_type, $tunnel_types) || !in_array($tunnel_medium_type, $tunnel_medium_types)) {
+            return false;
+        }
+        $this->request_type = 'POST';
+        $account_details    = [
             'name'               => $name,
             'x_password'         => $x_password,
-            'tunnel_type'        => (int) $tunnel_type,
-            'tunnel_medium_type' => (int) $tunnel_medium_type
+            'tunnel_type'        => (int)$tunnel_type,
+            'tunnel_medium_type' => (int)$tunnel_medium_type
         ];
-        if (isset($vlan)) $account_details['vlan'] = (int) $vlan;
+        if (isset($vlan)) {
+            $account_details['vlan'] = (int)$vlan;
+        }
         $json     = json_encode($account_details);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/account', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/account', 'json=' . $json);
+
         return $this->process_response($response);
     }
 
@@ -2417,10 +2964,14 @@ class Client
      */
     public function set_radius_account_base($account_id, $account_details)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'PUT';
         $json               = json_encode($account_details);
-        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/account/'.trim($account_id), 'json='.$json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/account/' . trim($account_id),
+            'json=' . $json);
+
         return $this->process_response_boolean($response);
     }
 
@@ -2435,9 +2986,12 @@ class Client
      */
     public function delete_radius_account($account_id)
     {
-        if (!$this->is_loggedin) return false;
+        if (!$this->is_loggedin) {
+            return false;
+        }
         $this->request_type = 'DELETE';
-        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/account/'.trim($account_id));
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/account/' . trim($account_id));
+
         return $this->process_response_boolean($response);
     }
 
@@ -2542,15 +3096,22 @@ class Client
         if (isset($response->meta->rc)) {
             if ($response->meta->rc === 'ok') {
                 $this->last_error_message = null;
-                if (is_array($response->data)) return $response->data;
+                if (is_array($response->data)) {
+                    return $response->data;
+                }
+
                 return true;
             } elseif ($response->meta->rc === 'error') {
                 /**
                  * we have an error:
                  * set $this->set last_error_message if the returned error message is available
                  */
-                if (isset($response->meta->msg)) $this->last_error_message = $response->meta->msg;
-                if ($this->debug) trigger_error('Debug: Last error message: '.$this->last_error_message);
+                if (isset($response->meta->msg)) {
+                    $this->last_error_message = $response->meta->msg;
+                }
+                if ($this->debug) {
+                    trigger_error('Debug: Last error message: ' . $this->last_error_message);
+                }
             }
         }
 
@@ -2568,14 +3129,19 @@ class Client
         if (isset($response->meta->rc)) {
             if ($response->meta->rc === 'ok') {
                 $this->last_error_message = null;
+
                 return true;
             } elseif ($response->meta->rc === 'error') {
                 /**
                  * we have an error:
                  * set $this->last_error_message if the returned error message is available
                  */
-                if (isset($response->meta->msg)) $this->last_error_message = $response->meta->msg;
-                if ($this->debug) trigger_error('Debug: Last error message: '.$this->last_error_message);
+                if (isset($response->meta->msg)) {
+                    $this->last_error_message = $response->meta->msg;
+                }
+                if ($this->debug) {
+                    trigger_error('Debug: Last error message: ' . $this->last_error_message);
+                }
             }
         }
 
@@ -2636,6 +3202,7 @@ class Client
 
             if ($error !== '') {
                 trigger_error('JSON decode error: ' . $error);
+
                 return false;
             }
         }
@@ -2651,12 +3218,14 @@ class Client
         $url_valid = filter_var($this->baseurl, FILTER_VALIDATE_URL);
         if (!$url_valid) {
             trigger_error('The URL provided is incomplete or invalid!');
+
             return false;
         }
 
         $base_url_components = parse_url($this->baseurl);
         if (empty($base_url_components['port'])) {
             trigger_error('The URL provided does not have a port suffix, normally this is :8443');
+
             return false;
         }
 
@@ -2678,7 +3247,9 @@ class Client
      */
     private function update_unificookie()
     {
-        if (isset($_SESSION['unificookie'])) $this->cookies = $_SESSION['unificookie'];
+        if (isset($_SESSION['unificookie'])) {
+            $this->cookies = $_SESSION['unificookie'];
+        }
     }
 
     /**
@@ -2686,23 +3257,26 @@ class Client
      */
     protected function exec_curl($path, $data = '')
     {
-        $url = $this->baseurl.$path;
+        $url = $this->baseurl . $path;
 
-        $ch  = $this->get_curl_obj();
+        $ch = $this->get_curl_obj();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLINFO_HEADER_OUT, true);
 
         if (trim($data) != '') {
             curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
             if ($this->request_type === 'PUT') {
-                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json','Content-Length: '.strlen($data)]);
+                curl_setopt($ch, CURLOPT_HTTPHEADER,
+                    ['Content-Type: application/json', 'Content-Length: ' . strlen($data)]);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             } else {
                 curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
             }
         } else {
             curl_setopt($ch, CURLOPT_POST, false);
-            if ($this->request_type === 'DELETE') curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+            if ($this->request_type === 'DELETE') {
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+            }
         }
 
         /**
@@ -2710,17 +3284,19 @@ class Client
          */
         $content = curl_exec($ch);
         if (curl_errno($ch)) {
-            trigger_error('cURL error: '.curl_error($ch));
+            trigger_error('cURL error: ' . curl_error($ch));
         }
 
         /**
          * has the session timed out?
          */
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $http_code            = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         $json_decoded_content = json_decode($content, true);
 
         if ($http_code == 401 && isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
-            if ($this->debug) error_log('cURL debug: Needed to reconnect to UniFi Controller');
+            if ($this->debug) {
+                error_log('cURL debug: Needed to reconnect to UniFi Controller');
+            }
 
             /**
              * explicitly unset the old cookie now
@@ -2752,14 +3328,14 @@ class Client
 
         if ($this->debug) {
             print '<pre>';
-            print PHP_EOL.'---------cURL INFO-----------'.PHP_EOL;
-            print_r (curl_getinfo($ch));
-            print PHP_EOL.'-------URL & PAYLOAD---------'.PHP_EOL;
-            print $url.PHP_EOL;
+            print PHP_EOL . '---------cURL INFO-----------' . PHP_EOL;
+            print_r(curl_getinfo($ch));
+            print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
+            print $url . PHP_EOL;
             print $data;
-            print PHP_EOL.'----------RESPONSE-----------'.PHP_EOL;
+            print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
             print $content;
-            print PHP_EOL.'-----------------------------'.PHP_EOL;
+            print PHP_EOL . '-----------------------------' . PHP_EOL;
             print '</pre>';
         }
 
@@ -2785,7 +3361,9 @@ class Client
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
 
-        if ($this->debug) curl_setopt($ch, CURLOPT_VERBOSE, true);
+        if ($this->debug) {
+            curl_setopt($ch, CURLOPT_VERBOSE, true);
+        }
 
         if ($this->cookies != '') {
             curl_setopt($ch, CURLOPT_COOKIESESSION, true);
@@ -2793,5 +3371,60 @@ class Client
         }
 
         return $ch;
+    }
+
+    public function get_cookies()
+    {
+        return $this->cookies;
+    }
+
+    public function get_request_type()
+    {
+        return $this->request_type;
+    }
+
+    public function get_ssl_verify_peer()
+    {
+        return $this->curl_ssl_verify_peer;
+    }
+
+    public function get_ssl_verify_host()
+    {
+        return $this->curl_ssl_verify_host;
+    }
+
+    public function set_cookies($cookie_value)
+    {
+        $this->cookies = $cookie_value;
+    }
+
+    public function set_request_type($request_type)
+    {
+        $this->request_type = $request_type;
+    }
+
+    public function set_connection_timeout($timeout)
+    {
+        $this->connect_timeout = $timeout;
+    }
+
+    public function set_last_results_raw($last_results)
+    {
+        $this->last_results_raw = $last_results;
+    }
+
+    public function set_last_error_message($last_error_message)
+    {
+        $this->last_error_message = $last_error_message;
+    }
+
+    public function set_ssl_verify_peer($ssl_verify_peer)
+    {
+        $this->curl_ssl_verify_peer = $ssl_verify_peer;
+    }
+
+    public function set_ssl_verify_host($ssl_verify_host)
+    {
+        $this->curl_ssl_verify_host = $ssl_verify_host;
     }
 }
