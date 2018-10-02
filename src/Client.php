@@ -540,6 +540,7 @@ class Client
         if (!is_null($mac)) {
             $json['mac'] = strtolower($mac);
         }
+
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.ap', 'json=' . $json);
 
@@ -600,6 +601,7 @@ class Client
         if (!is_null($mac)) {
             $json['mac'] = strtolower($mac);
         }
+
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.ap', 'json=' . $json);
 
@@ -728,11 +730,11 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? ((time())*1000) : intval($end);
-        $start    = is_null($start) ? $end-(12*3600*1000) : intval($start);
+        $end      = is_null($end) ? ((time()) * 1000) : intval($end);
+        $start    = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
         $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/5minutes.gw', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site.'/stat/report/5minutes.gw', 'json=' . $json);
 
         return $this->process_response($response);
     }
@@ -758,11 +760,11 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? ((time())*1000) : intval($end);
-        $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
+        $end      = is_null($end) ? ((time()) * 1000) : intval($end);
+        $start    = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
         $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/hourly.gw', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site.'/stat/report/hourly.gw', 'json=' . $json);
 
         return $this->process_response($response);
     }
@@ -788,11 +790,11 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? ((time()-(time() % 3600))*1000) : intval($end);
-        $start    = is_null($start) ? $end-(52*7*24*3600*1000) : intval($start);
+        $end      = is_null($end) ? ((time() - (time() % 3600)) * 1000) : intval($end);
+        $start    = is_null($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
         $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/daily.gw', 'json='.$json);
+        $response = $this->exec_curl('/api/s/' . $this->site.'/stat/report/daily.gw', 'json=' . $json);
 
         return $this->process_response($response);
     }
@@ -2699,7 +2701,7 @@ class Client
 
         $macs    = array_map('strtolower', $macs);
         $payload = [
-            'mac_filter_enabled' => (bool)$mac_filter_enabled,
+            'mac_filter_enabled' => (bool) $mac_filter_enabled,
             'mac_filter_policy'  => $mac_filter_policy,
             'mac_filter_list'    => $macs
         ];
@@ -3054,11 +3056,11 @@ class Client
         $account_details    = [
             'name'               => $name,
             'x_password'         => $x_password,
-            'tunnel_type'        => (int)$tunnel_type,
-            'tunnel_medium_type' => (int)$tunnel_medium_type
+            'tunnel_type'        => (int) $tunnel_type,
+            'tunnel_medium_type' => (int) $tunnel_medium_type
         ];
         if (isset($vlan)) {
-            $account_details['vlan'] = (int)$vlan;
+            $account_details['vlan'] = (int) $vlan;
         }
 
         $json     = json_encode($account_details);

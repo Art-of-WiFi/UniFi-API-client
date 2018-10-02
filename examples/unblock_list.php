@@ -29,14 +29,13 @@ $debug=false;
 /**
  * the MAC addresses of the device(s) to unblock
  */
-$macs_to_unblock = explode(',',$argv[1]);
+$macs_to_unblock = explode(',', $argv[1]);
 
 /**
  * The site to authorize the device with
  */
 $site_id = 'MUST_DEFINE_THIS';
-if ($site_id == "MUST_DEFINE_THIS")
-{
+if ($site_id == "MUST_DEFINE_THIS") {
     print 'ERROR: set the site id in your script';
     return;
 }
@@ -48,10 +47,9 @@ $unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $
 $set_debug_mode   = $unifi_connection->set_debug($debug);
 $loginresults     = $unifi_connection->login(); // always true regardless of site id
 
-foreach ($macs_to_unblock as &$mac)
-{
+foreach ($macs_to_unblock as &$mac) {
     // block_result is always true even if mac address does not exist :(
-    $block_result   = $unifi_connection->unblock_sta($mac);
+    $block_result = $unifi_connection->unblock_sta($mac);
 
     /**
      * NOTE:
@@ -63,22 +61,17 @@ foreach ($macs_to_unblock as &$mac)
      */
     sleep(1);
 
-    $getid_result   = $unifi_connection->stat_client($mac);
+    $getid_result = $unifi_connection->stat_client($mac);
 
-    if (property_exists($getid_result[0], "oui")) // this field(manufacturer) seems to exist on valid mac addresses
-    {
-        if (property_exists($getid_result[0], "name"))
-        {
+    if (property_exists($getid_result[0], "oui")) {
+        // this field(manufacturer) seems to exist on valid mac addresses
+        if (property_exists($getid_result[0], "name")) {
             $name = $getid_result[0]->name;
-        }
-        else
-        {
+        } else {
             $name = $getid_result[0]->hostname;
         }
         print 'unblocked ' . $name . PHP_EOL;
-    }
-    else
-    {
+    } else {
         print 'ERROR: could not unblock ' . $mac . PHP_EOL;
         print '       check mac address is valid and part of your network' . PHP_EOL;
     }

@@ -67,7 +67,7 @@ $data             = $unifi_connection->list_devices($device_mac);
 $device_id        = $data[0]->device_id;
 $update_device    = $unifi_connection->set_device_settings_base($device_id, $new_ports_config);
 
-if(!$update_device){
+if (!$update_device) {
     $error = $unifi_connection->get_last_results_raw();
     echo json_encode($error, JSON_PRETTY_PRINT);
 }

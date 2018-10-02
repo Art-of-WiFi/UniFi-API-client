@@ -58,13 +58,13 @@ $data             = $unifi_connection->list_devices($ap_mac);
 $radio_table      = $data[0]->radio_table;
 $device_id        = $data[0]->device_id;
 
-foreach($radio_table as $radio){
-    if($radio->radio === 'ng'){
+foreach ($radio_table as $radio) {
+    if ($radio->radio === 'ng') {
         $radio->tx_power_mode = $ng_tx_power_mode;
         $radio->channel = $ng_channel;
     }
 
-    if($radio->radio === 'na'){
+    if ($radio->radio === 'na') {
         $radio->tx_power_mode = $na_tx_power_mode;
         $radio->channel = $na_channel;
     }
@@ -72,7 +72,7 @@ foreach($radio_table as $radio){
 
 $update_device = $unifi_connection->set_device_settings_base($device_id, ['radio_table' => $radio_table]);
 
-if(!$update_device){
+if (!$update_device) {
     $error = $unifi_connection->get_last_results_raw();
     echo json_encode($error, JSON_PRETTY_PRINT);
 }
