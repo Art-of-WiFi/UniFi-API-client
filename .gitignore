@@ -4,3 +4,6 @@
 # ignore accidentally generated vendor directory and composer.lock file, just in case...
 /vendor/
 /composer.lock
+
+# ignore XML files
+*.xml
