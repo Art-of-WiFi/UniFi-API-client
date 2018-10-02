@@ -282,8 +282,7 @@ class Client
     public function authorize_guest($mac, $minutes, $up = null, $down = null, $MBytes = null, $ap_mac = null)
     {
         if (!$this->is_loggedin) return false;
-        $mac  = strtolower($mac);
-        $json = ['cmd' => 'authorize-guest', 'mac' => $mac, 'minutes' => intval($minutes)];
+        $json = ['cmd' => 'authorize-guest', 'mac' => strtolower($mac), 'minutes' => intval($minutes)];
 
         /**
          * if we have received values for up/down/MBytes/ap_mac we append them to the payload array to be submitted
@@ -291,7 +290,7 @@ class Client
         if (isset($up))     $json['up']     = intval($up);
         if (isset($down))   $json['down']   = intval($down);
         if (isset($MBytes)) $json['bytes']  = intval($MBytes);
-        if (isset($ap_mac)) $json['ap_mac'] = $ap_mac;
+        if (isset($ap_mac)) $json['ap_mac'] = strtolower($ap_mac);
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json);
         return $this->process_response_boolean($response);
@@ -306,8 +305,7 @@ class Client
     public function unauthorize_guest($mac)
     {
         if (!$this->is_loggedin) return false;
-        $mac      = strtolower($mac);
-        $json     = json_encode(['cmd' => 'unauthorize-guest', 'mac' => $mac]);
+        $json     = json_encode(['cmd' => 'unauthorize-guest', 'mac' => strtolower($mac)]);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json);
         return $this->process_response_boolean($response);
     }
@@ -321,8 +319,7 @@ class Client
     public function reconnect_sta($mac)
     {
         if (!$this->is_loggedin) return false;
-        $mac      = strtolower($mac);
-        $json     = json_encode(['cmd' => 'kick-sta', 'mac' => $mac]);
+        $json     = json_encode(['cmd' => 'kick-sta', 'mac' => strtolower($mac)]);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json);
         return $this->process_response_boolean($response);
     }
@@ -336,8 +333,7 @@ class Client
     public function block_sta($mac)
     {
         if (!$this->is_loggedin) return false;
-        $mac      = strtolower($mac);
-        $json     = json_encode(['cmd' => 'block-sta', 'mac' => $mac]);
+        $json     = json_encode(['cmd' => 'block-sta', 'mac' => strtolower($mac)]);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json);
         return $this->process_response_boolean($response);
     }
@@ -351,8 +347,7 @@ class Client
     public function unblock_sta($mac)
     {
         if (!$this->is_loggedin) return false;
-        $mac      = strtolower($mac);
-        $json     = json_encode(['cmd' => 'unblock-sta', 'mac' => $mac]);
+        $json     = json_encode(['cmd' => 'unblock-sta', 'mac' => strtolower($mac)]);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json);
         return $this->process_response_boolean($response);
     }
@@ -369,6 +364,7 @@ class Client
     public function forget_sta($macs)
     {
         if (!$this->is_loggedin) return false;
+        $macs     = array_map('strtolower', $macs);
         $json     = json_encode(['cmd' => 'forget-sta', 'macs' => $macs]);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/stamgr', 'json='.$json);
         return $this->process_response_boolean($response);
@@ -388,7 +384,7 @@ class Client
     {
         if (!$this->is_loggedin) return false;
         $this->request_type = 'POST';
-        $new_user           = ['mac' => $mac, 'usergroup_id' => $user_group_id];
+        $new_user           = ['mac' => strtolower($mac), 'usergroup_id' => $user_group_id];
         if (!is_null($name)) $new_user['name'] = $name;
         if (!is_null($note)) {
             $new_user['note'] = $note;
@@ -603,7 +599,7 @@ class Client
         $end      = is_null($end) ? ((time())*1000) : intval($end);
         $start    = is_null($start) ? $end-(12*3600*1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
-        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => $mac];
+        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/5minutes.user', 'json='.$json);
         return $this->process_response($response);
@@ -631,7 +627,7 @@ class Client
         $end      = is_null($end) ? ((time())*1000) : intval($end);
         $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
-        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => $mac];
+        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/hourly.user', 'json='.$json);
         return $this->process_response($response);
@@ -659,9 +655,90 @@ class Client
         $end      = is_null($end) ? ((time())*1000) : intval($end);
         $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
-        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => $mac];
+        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/daily.user', 'json='.$json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * 5 minutes gateway stats method
+     * -------------------------------
+     * returns an array of 5-minute stats objects for the gateway belonging to the current site
+     * optional parameter <start> = Unix timestamp in milliseconds
+     * optional parameter <end>   = Unix timestamp in milliseconds
+     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
+     *                                mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
+     *                                lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
+     *                                default is ['time', 'mem', 'cpu', 'loadavg_5']
+     *
+     * NOTES:
+     * - defaults to the past 12 hours
+     * - this function/method is only supported on controller versions 5.5.* and later
+     * - make sure that the retention policy for 5 minutes stats is set to the correct value in
+     *   the controller settings
+     * - requires a USG
+     */
+    public function stat_5minutes_gateway($start = null, $end = null, $attribs = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $end      = is_null($end) ? ((time())*1000) : intval($end);
+        $start    = is_null($start) ? $end-(12*3600*1000) : intval($start);
+        $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
+        $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/5minutes.gw', 'json='.$json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * Hourly gateway stats method
+     * ----------------------------
+     * returns an array of hourly stats objects for the gateway belonging to the current site
+     * optional parameter <start> = Unix timestamp in milliseconds
+     * optional parameter <end>   = Unix timestamp in milliseconds
+     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
+     *                                mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
+     *                                lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
+     *                                default is ['time', 'mem', 'cpu', 'loadavg_5']
+     *
+     * NOTES:
+     * - defaults to the past 7*24 hours
+     * - requires a USG
+     */
+    public function stat_hourly_gateway($start = null, $end = null, $attribs = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $end      = is_null($end) ? ((time())*1000) : intval($end);
+        $start    = is_null($start) ? $end-(7*24*3600*1000) : intval($start);
+        $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
+        $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/hourly.gw', 'json='.$json);
+        return $this->process_response($response);
+    }
+
+    /**
+     * Daily gateway stats method
+     * ---------------------------
+     * returns an array of daily stats objects for the gateway belonging to the current site
+     * optional parameter <start> = Unix timestamp in milliseconds
+     * optional parameter <end>   = Unix timestamp in milliseconds
+     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
+     *                                mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
+     *                                lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
+     *                                default is ['time', 'mem', 'cpu', 'loadavg_5']
+     *
+     * NOTES:
+     * - defaults to the past 52*7*24 hours
+     * - requires a USG
+     */
+    public function stat_daily_gateway($start = null, $end = null, $attribs = null)
+    {
+        if (!$this->is_loggedin) return false;
+        $end      = is_null($end) ? ((time()-(time() % 3600))*1000) : intval($end);
+        $start    = is_null($start) ? $end-(52*7*24*3600*1000) : intval($start);
+        $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
+        $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/report/daily.gw', 'json='.$json);
         return $this->process_response($response);
     }
 
@@ -723,7 +800,7 @@ class Client
     {
         if (!$this->is_loggedin) return false;
         $limit    = is_null($limit) ? 5 : intval($limit);
-        $json     = json_encode(['mac' => $mac, '_limit' => $limit, '_sort'=> '-assoc_time']);
+        $json     = json_encode(['mac' => strtolower($mac), '_limit' => $limit, '_sort'=> '-assoc_time']);
         $response = $this->exec_curl('/api/s/'.$this->site.'/stat/session', 'json='.$json);
         return $this->process_response($response);
     }
@@ -789,7 +866,7 @@ class Client
     public function list_clients($client_mac = null)
     {
         if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/sta/'.trim($client_mac));
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/sta/'.strtolower(trim($client_mac)));
         return $this->process_response($response);
     }
 
@@ -802,7 +879,7 @@ class Client
     public function stat_client($client_mac)
     {
         if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/user/'.trim($client_mac));
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/user/'.strtolower(trim($client_mac)));
         return $this->process_response($response);
     }
 
@@ -1025,7 +1102,7 @@ class Client
     public function list_devices($device_mac = null)
     {
         if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/device/'.trim($device_mac));
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/device/'.strtolower(trim($device_mac)));
         return $this->process_response($response);
     }
 
@@ -1077,7 +1154,6 @@ class Client
     public function list_backups()
     {
         if (!$this->is_loggedin) return false;
-        $mac      = strtolower($mac);
         $json     = json_encode(['cmd' => 'list-backups']);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/backup', 'json='.$json);
         return $this->process_response($response);
@@ -1657,8 +1733,7 @@ class Client
     public function adopt_device($mac)
     {
         if (!$this->is_loggedin) return false;
-        $mac      = strtolower($mac);
-        $json     = json_encode(['mac' => $mac, 'cmd' => 'adopt']);
+        $json     = json_encode(['mac' => strtolower($mac), 'cmd' => 'adopt']);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
         return $this->process_response_boolean($response);
     }
@@ -1672,8 +1747,7 @@ class Client
     public function restart_ap($mac)
     {
         if (!$this->is_loggedin) return false;
-        $mac      = strtolower($mac);
-        $json     = json_encode(['cmd' => 'restart', 'mac' => $mac]);
+        $json     = json_encode(['cmd' => 'restart', 'mac' => strtolower($mac)]);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
         return $this->process_response_boolean($response);
     }
@@ -1736,9 +1810,8 @@ class Client
     {
         if (!$this->is_loggedin) return false;
         if (!is_bool($enable)) return false;
-        $mac      = strtolower($mac);
         $cmd      = (($enable) ? 'set-locate' : 'unset-locate');
-        $json     = json_encode(['cmd' => $cmd, 'mac' => $mac]);
+        $json     = json_encode(['cmd' => $cmd, 'mac' => strtolower($mac)]);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
         return $this->process_response_boolean($response);
     }
@@ -1880,7 +1953,7 @@ class Client
     public function move_device($mac, $site_id)
     {
         if (!$this->is_loggedin) return false;
-        $json     = json_encode(['site' => $site_id, 'mac' => $mac, 'cmd' => 'move-device']);
+        $json     = json_encode(['site' => $site_id, 'mac' => strtolower($mac), 'cmd' => 'move-device']);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
         return $this->process_response_boolean($response);
     }
@@ -1894,7 +1967,7 @@ class Client
     public function delete_device($mac)
     {
         if (!$this->is_loggedin) return false;
-        $json     = json_encode(['mac' => $mac, 'cmd' => 'delete-device']);
+        $json     = json_encode(['mac' => strtolower($mac), 'cmd' => 'delete-device']);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/sitemgr', 'json='.$json);
         return $this->process_response_boolean($response);
     }
@@ -2114,6 +2187,7 @@ class Client
     {
         if (!is_bool($mac_filter_enabled)) return false;
         if (!in_array($mac_filter_policy, ['allow', 'deny'])) return false;
+        $macs    = array_map('strtolower', $macs);
         $payload = ['mac_filter_enabled' => (bool)$mac_filter_enabled, 'mac_filter_policy' => $mac_filter_policy, 'mac_filter_list' => $macs];
         return $this->set_wlansettings_base($wlan_id, $payload);
     }
@@ -2190,7 +2264,7 @@ class Client
     public function upgrade_device($device_mac)
     {
         if (!$this->is_loggedin) return false;
-        $json     = ['mac' => $device_mac];
+        $json     = ['mac' => strtolower($device_mac)];
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr/upgrade', 'json='.$json);
         return $this->process_response_boolean($response);
@@ -2210,7 +2284,7 @@ class Client
     public function upgrade_device_external($firmware_url, $device_mac)
     {
         if (!$this->is_loggedin) return false;
-        $json     = ['url' => filter_var($firmware_url, FILTER_SANITIZE_URL), 'mac' => $device_mac];
+        $json     = ['url' => filter_var($firmware_url, FILTER_SANITIZE_URL), 'mac' => strtolower($device_mac)];
         $json     = json_encode($json, JSON_UNESCAPED_SLASHES);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr/upgrade-external', 'json='.$json);
         return $this->process_response_boolean($response);
@@ -2262,7 +2336,7 @@ class Client
     public function power_cycle_switch_port($switch_mac, $port_idx)
     {
         if (!$this->is_loggedin) return false;
-        $json     = ['mac' => $switch_mac, 'port_idx' => intval($port_idx), 'cmd' => 'power-cycle'];
+        $json     = ['mac' => strtolower($switch_mac), 'port_idx' => intval($port_idx), 'cmd' => 'power-cycle'];
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
         return $this->process_response_boolean($response);
@@ -2277,7 +2351,7 @@ class Client
     public function spectrum_scan($ap_mac)
     {
         if (!$this->is_loggedin) return false;
-        $json     = ['cmd' => 'spectrum-scan', 'mac' => $ap_mac];
+        $json     = ['cmd' => 'spectrum-scan', 'mac' => strtolower($ap_mac)];
         $json     = json_encode($json);
         $response = $this->exec_curl('/api/s/'.$this->site.'/cmd/devmgr', 'json='.$json);
         return $this->process_response_boolean($response);
@@ -2292,7 +2366,7 @@ class Client
     public function spectrum_scan_state($ap_mac)
     {
         if (!$this->is_loggedin) return false;
-        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/spectrum-scan/'.trim($ap_mac));
+        $response = $this->exec_curl('/api/s/'.$this->site.'/stat/spectrum-scan/'.strtolower(trim($ap_mac)));
         return $this->process_response($response);
     }
 
@@ -2776,7 +2850,7 @@ class Client
     /**
      * Get the cURL object
      */
-    private function get_curl_obj()
+    protected function get_curl_obj()
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_POST, true);
