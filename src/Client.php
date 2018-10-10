@@ -212,15 +212,15 @@ class Client
         /**
          * if we have received values for up/down/MBytes/ap_mac we append them to the payload array to be submitted
          */
-        if (isset($up)) {
+        if (!empty($up)) {
             $json['up'] = intval($up);
         }
 
-        if (isset($down)) {
+        if (!empty($down)) {
             $json['down'] = intval($down);
         }
 
-        if (isset($MBytes)) {
+        if (!empty($MBytes)) {
             $json['bytes'] = intval($MBytes);
         }
 
@@ -1907,15 +1907,15 @@ class Client
             $json['note'] = trim($note);
         }
 
-        if (isset($up)) {
+        if (!empty($up)) {
             $json['up'] = intval($up);
         }
 
-        if (isset($down)) {
+        if (!empty($down)) {
             $json['down'] = intval($down);
         }
 
-        if (isset($MBytes)) {
+        if (!empty($MBytes)) {
             $json['bytes'] = intval($MBytes);
         }
 
