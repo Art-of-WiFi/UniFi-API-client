@@ -2,7 +2,7 @@
 
 A PHP class which provides access to Ubiquiti's **UniFi Controller API**, versions 4.X.X and 5.X.X of the UniFi Controller software are supported (version 5.8.24 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
-This class can be installed using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
+This class can be installed manually or using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
 ## Methods and functions supported
 
@@ -32,6 +32,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - delete_usergroup()
 - delete_wlan()
 - disable_ap()
+- edit_client_fixedip()
 - edit_firewallgroup()
 - edit_usergroup()
 - extend_guest_validity()
@@ -43,6 +44,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - list_all_admins()
 - list_alarms()
 - list_aps() (deprecated but still available as alias)
+- list_backups()
 - list_clients()
 - list_country_codes()
 - list_current_channels()
@@ -111,6 +113,9 @@ The class currently supports the following functions/methods to get/post/put/del
 - stat_5minutes_aps() (supported on controller version 5.5.X and higher)
 - stat_hourly_aps()
 - stat_daily_aps()
+- stat_5minutes_gateway() (supported on controller version 5.7.X and higher)
+- stat_hourly_gateway() (supported on controller version 5.7.X and higher)
+- stat_daily_gateway() (supported on controller version 5.7.X and higher)
 - stat_5minutes_site() (supported on controller version 5.5.X and higher)
 - stat_hourly_site()
 - stat_daily_site()
@@ -120,6 +125,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - stat_payment()
 - stat_sessions()
 - stat_sites()
+- stat_speedtest_results()
 - stat_sta_sessions_latest()
 - stat_status()
 - stat_sysinfo()
@@ -224,7 +230,7 @@ Please refer to the `examples/` directory for some more detailed examples which 
 
 #### IMPORTANT NOTES:
 
-1. The last parameter (`true`) that is passed to the constructor, enables validation of the controller's SSL certificate which is otherwise **disabled** by default. It is highly recommended to enable this feature in production environments where you have a valid SSL cert installed on the UniFi Controller, and which is associated with the FQDN of the server as used in the `controller_url` parameter. This option was added with API client version 1.1.16.
+1. The last optional parameter that is passed to the constructor in the above example (`true`), enables validation of the controller's SSL certificate which is otherwise **disabled** by default. It is highly recommended to enable this feature in production environments where you have a valid SSL cert installed on the UniFi Controller, and which is associated with the FQDN of the server as used in the `controller_url` parameter. This option was added with API client version 1.1.16.
 
 2. In the example above, `$site_id` is the 8 character short site "name" which is visible in the URL when managing the site in the UniFi Controller:
 
@@ -234,7 +240,7 @@ Please refer to the `examples/` directory for some more detailed examples which 
 
 ## Need help or have suggestions?
 
-There is still work to be done to add functionality and improve the usability of this class, so all suggestions/comments are welcome. Please use the github [issue](https://github.com/Art-of-WiFi/UniFi-API-client/issues) list or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/PHP-class-to-access-the-UniFi-controller-API-updates-and/td-p/1512870) to share your ideas/questions.
+There is still work to be done to add functionality and further improve the usability of this class, so all suggestions/comments are welcome. Please use the GitHub [issue list](https://github.com/Art-of-WiFi/UniFi-API-client/issues) or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/PHP-class-to-access-the-UniFi-controller-API-updates-and/td-p/1512870) to share your suggestions and questions.
 
 ## Contribute
 

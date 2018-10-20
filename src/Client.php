@@ -25,6 +25,8 @@ class Client
      * private properties
      */
     protected $baseurl            = 'https://127.0.0.1:8443';
+    protected $user               = '';
+    protected $password           = '';
     protected $site               = 'default';
     protected $version            = '5.6.39';
     protected $debug              = false;
@@ -50,7 +52,7 @@ class Client
      *                                   recommended for production environments to prevent potential MitM attacks, default value (false)
      *                                   is to not validate the controller certificate
      */
-    function __construct($user, $password, $baseurl = '', $site = '', $version = '', $ssl_verify = false)
+    public function __construct($user, $password, $baseurl = '', $site = '', $version = '', $ssl_verify = false)
     {
         if (!extension_loaded('curl')) {
             trigger_error('The PHP curl extension is not loaded. Please correct this before proceeding!');
@@ -81,7 +83,7 @@ class Client
         $this->update_unificookie();
     }
 
-    function __destruct()
+    public function __destruct()
     {
         /**
          * if user has $_SESSION['unificookie'] set, do not logout here
@@ -734,7 +736,7 @@ class Client
         $start    = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
         $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
-        $response = $this->exec_curl('/api/s/' . $this->site.'/stat/report/5minutes.gw', 'json=' . $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.gw', 'json=' . $json);
 
         return $this->process_response($response);
     }
@@ -764,7 +766,7 @@ class Client
         $start    = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
         $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
-        $response = $this->exec_curl('/api/s/' . $this->site.'/stat/report/hourly.gw', 'json=' . $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.gw', 'json=' . $json);
 
         return $this->process_response($response);
     }
@@ -794,7 +796,7 @@ class Client
         $start    = is_null($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
         $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
-        $response = $this->exec_curl('/api/s/' . $this->site.'/stat/report/daily.gw', 'json=' . $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.gw', 'json=' . $json);
 
         return $this->process_response($response);
     }
