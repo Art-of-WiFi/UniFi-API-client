@@ -1158,15 +1158,16 @@ class Client
     /**
      * List firewall groups (using REST)
      * ----------------------------------
-     * returns an array containing the current firewall groups on success
+     * returns an array containing the current firewall groups or the selected firewall group on success
+     * optional parameter <group_id> = id of the single firewall group to list
      */
-    public function list_firewallgroups()
+    public function list_firewallgroups($group_id = null)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup');
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id));
 
         return $this->process_response($response);
     }
@@ -1255,6 +1256,22 @@ class Client
         $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id));
 
         return $this->process_response_boolean($response);
+    }
+
+    /**
+     * List firewall rules (using REST)
+     * ----------------------------------
+     * returns an array containing the current firewall rules on success
+     */
+    public function list_firewallrules()
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallrule');
+
+        return $this->process_response($response);
     }
 
     /**
@@ -2773,7 +2790,7 @@ class Client
             return false;
         }
 
-        $json     = [
+        $json = [
             '_sort'  => '-time',
             'within' => intval($historyhours),
             'type'   => null,
@@ -3161,6 +3178,28 @@ class Client
 
         $this->request_type = 'DELETE';
         $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/account/' . trim($account_id));
+
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Execute specific command
+     * ------------------------
+     * return true on success
+     * required parameter <command>  = string; command to execute, known valid values
+     *                                 'reset-dpi': reset all DPI counters for the current site
+     *
+     * NOTE:
+     * the provided <command> parameter isn't validated so make sure you're using a correct value
+     */
+    public function cmd_stat($command)
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $json     = json_encode(['cmd' => trim($command)]);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stat', 'json=' . $json);
 
         return $this->process_response_boolean($response);
     }

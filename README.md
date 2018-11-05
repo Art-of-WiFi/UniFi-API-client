@@ -1,6 +1,6 @@
 ## UniFi Controller API client class
 
-A PHP class which provides access to Ubiquiti's **UniFi Controller API**, versions 4.X.X and 5.X.X of the UniFi Controller software are supported (version 5.8.24 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+A PHP class which provides access to Ubiquiti's **UniFi Controller API**, versions 4.X.X and 5.X.X of the UniFi Controller software are supported (version 5.9.29 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 This class can be installed manually or using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
@@ -139,6 +139,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - upgrade_device_external()
 - start_rolling_upgrade()
 - cancel_rolling_upgrade()
+- cmd_stat()
 
 Internal functions, getters/setters:
 

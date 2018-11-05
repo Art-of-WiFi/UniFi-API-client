@@ -9,6 +9,17 @@ Then update the contents of your new config.php with your controller details and
 
 Also make sure to update the path for the composer autoloader file (`vendor/autoload.php`) or the file containing the Class itself (`src/Client.php`) in your `require_once()` statement as required.
 
+#### Executing scripts from the CLI
+
+Most of the included example scripts can be run from the CLI or shell as follows after the necessary credentials and parameters have been added or updated:
+
+
+```sh
+$ php list_site_health.php
+```
+
+NOTE: this does require the `php-cli` module to be installed
+
 ### Contribute
 
 If you would like to share your own example file(s), please open an issue and include your code there or else create a pull request.
