@@ -4,6 +4,94 @@ A PHP class which provides access to Ubiquiti's **UniFi Controller API**, versio
 
 This class can be installed manually or using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
+## Requirements
+
+- a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.0.7 and cURL 7.37.0)
+- network connectivity between this web server and the server and port (normally TCP port 8443) where the UniFi Controller is running
+
+## Installation ##
+
+You can use [Composer](#composer), [Git](#git) or simply [Download the Release](#download-the-release) to install the API client class.
+
+### Composer
+
+The preferred method is via [composer](https://getcomposer.org). Follow the [installation instructions](https://getcomposer.org/doc/00-intro.md) if you do not already have composer installed.
+
+Once composer is installed, simply execute this command from the shell in your project directory:
+
+```sh
+composer require art-of-wifi/unifi-api-client
+```
+
+ Or you can manually add the package to your composer.json file:
+
+```javascript
+{
+    "require": {
+        "art-of-wifi/unifi-api-client": "^1.1"
+    }
+}
+```
+
+Finally, be sure to include the autoloader in your code:
+
+```php
+require_once('vendor/autoload.php');
+```
+
+### Git
+
+Execute the following `git` command from the shell in your project directory:
+
+```sh
+git clone https://github.com/Art-of-WiFi/UniFi-API-client.git
+```
+
+When git is done cloning, include the file containing the class like so in your code:
+
+```php
+require_once('path/to/src/Client.php');
+```
+
+### Download the Release
+
+If you prefer not to use composer or git, you can simply [download the package](https://github.com/Art-of-WiFi/UniFi-API-client/archive/master.zip), uncompress the zip file, then include the file containing the class in your code like so:
+
+```php
+require_once('path/to/src/Client.php');
+```
+
+## Example usage
+
+A basic example how to use the class:
+
+```php
+/**
+ * load the class using the composer autoloader
+ */
+require_once('vendor/autoload.php');
+
+/**
+ * initialize the Unifi API connection class, log in to the controller and request the alarms collection
+ * (this example assumes you have already assigned the correct values to the variables used)
+ */
+$unifi_connection = new UniFi_API\Client($controller_user, $controller_password, $controller_url, $site_id, $controller_version, true);
+$login            = $unifi_connection->login();
+$results          = $unifi_connection->list_alarms(); // returns a PHP array containing alarm objects
+```
+
+Please refer to the `examples/` directory for some more detailed examples which you can use as a starting point for your own PHP code.
+
+#### IMPORTANT NOTES:
+
+1. The last optional parameter that is passed to the constructor in the above example (`true`), enables validation of the controller's SSL certificate which is otherwise **disabled** by default. It is highly recommended to enable this feature in production environments where you have a valid SSL cert installed on the UniFi Controller, and which is associated with the FQDN of the server as used in the `controller_url` parameter. This option was added with API client version 1.1.16.
+
+2. In the example above, `$site_id` is the 8 character short site "name" which is visible in the URL when managing the site in the UniFi Controller:
+
+   `https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
+
+   In this case, `jl3z2shm` is the value required for $site_id.
+
 ## Methods and functions supported
 
 The class currently supports the following functions/methods to get/post/put/delete data through the UniFi Controller API:
@@ -152,94 +240,6 @@ Internal functions, getters/setters:
 - get_last_error_message()
 
 Please refer to the source code for more details on the functions/methods and their parameters.
-
-## Requirements
-
-- a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.0.7 and cURL 7.37.0)
-- network connectivity between this web server and the server and port (normally TCP port 8443) where the UniFi Controller is running
-
-## Installation ##
-
-You can use [Composer](#composer), [Git](#git) or simply [Download the Release](#download-the-release) to install the API client class.
-
-### Composer
-
-The preferred method is via [composer](https://getcomposer.org). Follow the [installation instructions](https://getcomposer.org/doc/00-intro.md) if you do not already have composer installed.
-
-Once composer is installed, simply execute this command from the shell in your project directory:
-
-```sh
-composer require art-of-wifi/unifi-api-client
-```
-
- Or you can manually add the package to your composer.json file:
-
-```javascript
-{
-    "require": {
-        "art-of-wifi/unifi-api-client": "^1.1"
-    }
-}
-```
-
-Finally, be sure to include the autoloader in your code:
-
-```php
-require_once('vendor/autoload.php');
-```
-
-### Git
-
-Execute the following `git` command from the shell in your project directory:
-
-```sh
-git clone https://github.com/Art-of-WiFi/UniFi-API-client.git
-```
-
-When git is done cloning, include the file containing the class like so in your code:
-
-```php
-require_once('path/to/src/Client.php');
-```
-
-### Download the Release
-
-If you prefer not to use composer or git, you can simply [download the package](https://github.com/Art-of-WiFi/UniFi-API-client/archive/master.zip), uncompress the zip file, then include the file containing the class in your code like so:
-
-```php
-require_once('path/to/src/Client.php');
-```
-
-## Example usage
-
-A basic example how to use the class:
-
-```php
-/**
- * load the class using the composer autoloader
- */
-require_once('vendor/autoload.php');
-
-/**
- * initialize the Unifi API connection class, log in to the controller and request the alarms collection
- * (this example assumes you have already assigned the correct values to the variables used)
- */
-$unifi_connection = new UniFi_API\Client($controller_user, $controller_password, $controller_url, $site_id, $controller_version, true);
-$login            = $unifi_connection->login();
-$results          = $unifi_connection->list_alarms(); // returns a PHP array containing alarm objects
-```
-
-Please refer to the `examples/` directory for some more detailed examples which you can use as a starting point for your own PHP code.
-
-#### IMPORTANT NOTES:
-
-1. The last optional parameter that is passed to the constructor in the above example (`true`), enables validation of the controller's SSL certificate which is otherwise **disabled** by default. It is highly recommended to enable this feature in production environments where you have a valid SSL cert installed on the UniFi Controller, and which is associated with the FQDN of the server as used in the `controller_url` parameter. This option was added with API client version 1.1.16.
-
-2. In the example above, `$site_id` is the 8 character short site "name" which is visible in the URL when managing the site in the UniFi Controller:
-
-   `https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
-
-   In this case, `jl3z2shm` is the value required for $site_id.
 
 ## Need help or have suggestions?
 

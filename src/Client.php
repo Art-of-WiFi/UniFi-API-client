@@ -148,7 +148,7 @@ class Client
 
         curl_close($ch);
 
-        preg_match_all('|Set-Cookie: (.*);|U', substr($content, 0, $header_size), $results);
+        preg_match_all('|Set-Cookie: (.*);|Ui', substr($content, 0, $header_size), $results);
 
         if (isset($results[1])) {
             $this->cookies = implode(';', $results[1]);
