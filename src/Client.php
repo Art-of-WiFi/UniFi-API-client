@@ -143,26 +143,27 @@ class Client
         }
 
         $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $headers     = substr($content, 0, $header_size);
         $body        = trim(substr($content, $header_size));
-        $code        = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $http_code   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         curl_close($ch);
 
-        preg_match_all('|Set-Cookie: (.*);|Ui', substr($content, 0, $header_size), $results);
+        preg_match_all('|Set-Cookie: (.*);|Ui', $headers, $results);
 
         if (isset($results[1])) {
             $this->cookies = implode(';', $results[1]);
             if (!empty($body)) {
-                if (($code >= 200) && ($code < 400)) {
+                if (($http_code >= 200) && ($http_code < 400)) {
                     if (strpos($this->cookies, 'unifises') !== false) {
                         return $this->is_loggedin = true;
                     }
                 }
 
-                if ($code === 400) {
+                if ($http_code === 400) {
                     trigger_error('We have received an HTTP response status: 400. Probably a controller login failure');
 
-                    return $code;
+                    return $http_code;
                 }
             }
         }
@@ -1700,8 +1701,8 @@ class Client
      * optional parameter <enable_sso>     = boolean, whether or not SSO will be allowed for the new admin
      *                                       default value is true which enables the SSO capability
      * optional parameter <readonly>       = boolean, whether or not the new admin will have readonly
-     *                                       permissions, default value is true which gives the new admin
-     *                                       administrator permissions
+     *                                       permissions, default value is false which gives the new admin
+     *                                       Administrator permissions
      * optional parameter <device_adopt>   = boolean, whether or not the new admin will have permissions to
      *                                       adopt devices, default value is false. Only applies when readonly
      *                                       is true.
@@ -1732,10 +1733,11 @@ class Client
             return false;
         }
 
-        $json = ['name' => trim($name), 'email' => trim($email), 'for_sso' => $enable_sso, 'cmd' => 'invite-admin'];
+        $permissions = [];
+        $json        = ['name' => trim($name), 'email' => trim($email), 'for_sso' => $enable_sso, 'cmd' => 'invite-admin', 'role' => 'admin'];
+
         if ($readonly) {
             $json['role'] = 'readonly';
-            $permissions  = [];
             if ($device_adopt) {
                 $permissions[] = "API_DEVICE_ADOPT";
             }
@@ -1743,14 +1745,58 @@ class Client
             if ($device_restart) {
                 $permissions[] = "API_DEVICE_RESTART";
             }
+        }
 
-            if (count($permissions) > 0) {
-                $json['permissions'] = $permissions;
+        $json['permissions'] = $permissions;
+        $json                = json_encode($json);
+        $response            = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Assign an existing admin to the current site
+     * --------------------------------------------
+     * returns true on success
+     * required parameter <admin_id>       = 24 char string; _id of the admin user to assign, can be obtained using the
+     *                                       list_all_admins() method/function
+     * optional parameter <readonly>       = boolean, whether or not the new admin will have readonly
+     *                                       permissions, default value is false which gives the new admin
+     *                                       Administrator permissions
+     * optional parameter <device_adopt>   = boolean, whether or not the new admin will have permissions to
+     *                                       adopt devices, default value is false. Only applies when readonly
+     *                                       is true.
+     * optional parameter <device_restart> = boolean, whether or not the new admin will have permissions to
+     *                                       restart devices, default value is false. Only applies when readonly
+     *                                       is true.
+     */
+    public function assign_existing_admin(
+        $admin_id,
+        $readonly       = false,
+        $device_adopt   = false,
+        $device_restart = false
+    ) {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $permissions = [];
+        $json        = ['cmd' => 'grant-admin', 'admin' => trim($admin_id), 'role' => 'admin'];
+
+        if ($readonly) {
+            $json['role'] = 'readonly';
+            if ($device_adopt) {
+                $permissions[] = "API_DEVICE_ADOPT";
+            }
+
+            if ($device_restart) {
+                $permissions[] = "API_DEVICE_RESTART";
             }
         }
 
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+        $json['permissions'] = $permissions;
+        $json                = json_encode($json);
+        $response            = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
 
         return $this->process_response_boolean($response);
     }
@@ -1759,7 +1805,7 @@ class Client
      * Revoke an admin
      * ---------------
      * returns true on success
-     * required parameter <admin_id> = id of the admin to revoke which can be obtained using the
+     * required parameter <admin_id> = id of the admin to revoke, can be obtained using the
      *                                 list_all_admins() method/function
      *
      * NOTES:
@@ -1771,7 +1817,7 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['admin' => $admin_id, 'cmd' => 'revoke-admin']);
+        $json     = json_encode(['cmd' => 'revoke-admin', 'admin' => $admin_id]);
         $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
 
         return $this->process_response_boolean($response);
@@ -3721,9 +3767,9 @@ class Client
         return $this->curl_ssl_verify_host;
     }
 
-    public function set_cookies($cookie_value)
+    public function set_cookies($cookies_value)
     {
-        $this->cookies = $cookie_value;
+        $this->cookies = $cookies_value;
     }
 
     public function set_request_type($request_type)

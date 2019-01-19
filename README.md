@@ -1,12 +1,12 @@
 ## UniFi Controller API client class
 
-A PHP class which provides access to Ubiquiti's **UniFi Controller API**, versions 4.X.X and 5.X.X of the UniFi Controller software are supported (version 5.9.29 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+A PHP class which provides access to Ubiquiti's [**UniFi SDN Controller API**](https://unifi-sdn.ui.com/), versions 4.X.X and 5.X.X of the UniFi SDN Controller software are supported (version 5.10.5 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 This class can be installed manually or using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
 ## Requirements
 
-- a web server with PHP and cURL modules installed (tested on apache2 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.0.7 and cURL 7.37.0)
+- a web server with PHP and cURL modules installed (tested on Apache 2.4 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.2.10 and cURL 7.58.0)
 - network connectivity between this web server and the server and port (normally TCP port 8443) where the UniFi Controller is running
 
 ## Installation ##
@@ -84,17 +84,17 @@ Please refer to the `examples/` directory for some more detailed examples which 
 
 #### IMPORTANT NOTES:
 
-1. The last optional parameter that is passed to the constructor in the above example (`true`), enables validation of the controller's SSL certificate which is otherwise **disabled** by default. It is highly recommended to enable this feature in production environments where you have a valid SSL cert installed on the UniFi Controller, and which is associated with the FQDN of the server as used in the `controller_url` parameter. This option was added with API client version 1.1.16.
-
-2. In the example above, `$site_id` is the 8 character short site "name" which is visible in the URL when managing the site in the UniFi Controller:
+1. In the example above, `$site_id` is the (usually 8 characters) short site "name" which is visible in the URL when managing the site in the UniFi SDN Controller:
 
    `https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
 
    In this case, `jl3z2shm` is the value required for $site_id.
 
+2. The last optional parameter that is passed to the constructor in the above example (`true`), enables validation of the controller's SSL certificate which is otherwise **disabled** by default. It is highly recommended to enable this feature in production environments where you have a valid SSL cert installed on the UniFi Controller, and which is associated with the FQDN of the server as used in the `controller_url` parameter. This option was added with API client version 1.1.16.
+
 ## Methods and functions supported
 
-The class currently supports the following functions/methods to get/post/put/delete data through the UniFi Controller API:
+The class currently supports the following functions/methods to get/post/put/delete data through the UniFi Controller API. Please refer to the source code for more details on the functions/methods and their respective parameters.
 
 - login()
 - logout()
@@ -239,8 +239,6 @@ Internal functions, getters/setters:
 - get_last_results_raw()
 - get_last_error_message()
 
-Please refer to the source code for more details on the functions/methods and their parameters.
-
 ## Need help or have suggestions?
 
 There is still work to be done to add functionality and further improve the usability of this class, so all suggestions/comments are welcome. Please use the GitHub [issue list](https://github.com/Art-of-WiFi/UniFi-API-client/issues) or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/PHP-class-to-access-the-UniFi-controller-API-updates-and/td-p/1512870) to share your suggestions and questions.
@@ -251,10 +249,10 @@ If you would like to contribute code (improvements), please open an issue and in
 
 ## Credits
 
-This class is based on the work done by the following developers:
+This class is based on the initial work done by the following developers:
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
 - fbagnol: https://github.com/fbagnol/class.unifi.php
-- and the API as published by Ubiquiti: https://dl.ubnt.com/unifi/5.8.24/unifi_sh_api
+- and the API as published by Ubiquiti: https://dl.ubnt.com/unifi/5.9.29/unifi_sh_api
 
 ## Important Disclaimer
 
