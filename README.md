@@ -84,11 +84,11 @@ Please refer to the `examples/` directory for some more detailed examples which 
 
 #### IMPORTANT NOTES:
 
-1. In the example above, `$site_id` is the (usually 8 characters) short site "name" which is visible in the URL when managing the site in the UniFi SDN Controller:
+1. In the above example, `$site_id` is the short site "name" (usually 8 characters long) that is visible in the URL when managing the site in the UniFi SDN Controller, for example with this URL:
 
    `https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
 
-   In this case, `jl3z2shm` is the value required for $site_id.
+   `jl3z2shm` is the short site "name" and the value to assign to $site_id.
 
 2. The last optional parameter that is passed to the constructor in the above example (`true`), enables validation of the controller's SSL certificate which is otherwise **disabled** by default. It is highly recommended to enable this feature in production environments where you have a valid SSL cert installed on the UniFi Controller, and which is associated with the FQDN of the server as used in the `controller_url` parameter. This option was added with API client version 1.1.16.
 

@@ -1522,7 +1522,7 @@ class Client
         $this->request_type = 'PUT';
         $json               = json_encode($setting);
         $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/country/' . trim($country_id),
-            'json=' . $json);
+                              'json=' . $json);
 
         return $this->process_response_boolean($response);
     }
@@ -1544,7 +1544,7 @@ class Client
         $this->request_type = 'PUT';
         $json               = json_encode($setting);
         $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/locale/' . trim($locale_id),
-            'json=' . $json);
+                              'json=' . $json);
 
         return $this->process_response_boolean($response);
     }
@@ -1566,7 +1566,7 @@ class Client
         $this->request_type = 'PUT';
         $json               = json_encode($setting);
         $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/snmp/' . trim($snmp_id),
-            'json=' . $json);
+                              'json=' . $json);
 
         return $this->process_response_boolean($response);
     }
@@ -1588,7 +1588,7 @@ class Client
         $this->request_type = 'PUT';
         $json               = json_encode($setting);
         $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/mgmt/' . trim($mgmt_id),
-            'json=' . $json);
+                              'json=' . $json);
 
         return $this->process_response_boolean($response);
     }
@@ -1610,7 +1610,7 @@ class Client
         $this->request_type = 'PUT';
         $json               = json_encode($setting);
         $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/guest_access/' . trim($guest_access_id),
-            'json=' . $json);
+                              'json=' . $json);
 
         return $this->process_response_boolean($response);
     }
@@ -1632,7 +1632,7 @@ class Client
         $this->request_type = 'PUT';
         $json               = json_encode($setting);
         $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/ntp/' . trim($ntp_id),
-            'json=' . $json);
+                              'json=' . $json);
 
         return $this->process_response_boolean($response);
     }
@@ -1654,7 +1654,7 @@ class Client
         $this->request_type = 'PUT';
         $json               = json_encode($setting);
         $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/connectivity/' . trim($connectivity_id),
-            'json=' . $json);
+                              'json=' . $json);
 
         return $this->process_response_boolean($response);
     }
@@ -1704,11 +1704,11 @@ class Client
      *                                       permissions, default value is false which gives the new admin
      *                                       Administrator permissions
      * optional parameter <device_adopt>   = boolean, whether or not the new admin will have permissions to
-     *                                       adopt devices, default value is false. Only applies when readonly
-     *                                       is true.
+     *                                       adopt devices, default value is false. With versions < 5.9.X this only applies
+     *                                       when readonly is true.
      * optional parameter <device_restart> = boolean, whether or not the new admin will have permissions to
-     *                                       restart devices, default value is false. Only applies when readonly
-     *                                       is true.
+     *                                       restart devices, default value is false. With versions < 5.9.X this only applies
+     *                                       when readonly is true.
      *
      * NOTES:
      * - after issuing a valid request, an invite will be sent to the email address provided
@@ -1738,13 +1738,14 @@ class Client
 
         if ($readonly) {
             $json['role'] = 'readonly';
-            if ($device_adopt) {
-                $permissions[] = "API_DEVICE_ADOPT";
-            }
+        }
 
-            if ($device_restart) {
-                $permissions[] = "API_DEVICE_RESTART";
-            }
+        if ($device_adopt) {
+            $permissions[] = "API_DEVICE_ADOPT";
+        }
+
+        if ($device_restart) {
+            $permissions[] = "API_DEVICE_RESTART";
         }
 
         $json['permissions'] = $permissions;
@@ -1764,11 +1765,11 @@ class Client
      *                                       permissions, default value is false which gives the new admin
      *                                       Administrator permissions
      * optional parameter <device_adopt>   = boolean, whether or not the new admin will have permissions to
-     *                                       adopt devices, default value is false. Only applies when readonly
-     *                                       is true.
+     *                                       adopt devices, default value is false. With versions < 5.9.X this only applies
+     *                                       when readonly is true.
      * optional parameter <device_restart> = boolean, whether or not the new admin will have permissions to
-     *                                       restart devices, default value is false. Only applies when readonly
-     *                                       is true.
+     *                                       restart devices, default value is false. With versions < 5.9.X this only applies
+     *                                       when readonly is true.
      */
     public function assign_existing_admin(
         $admin_id,
@@ -1785,13 +1786,14 @@ class Client
 
         if ($readonly) {
             $json['role'] = 'readonly';
-            if ($device_adopt) {
-                $permissions[] = "API_DEVICE_ADOPT";
-            }
+        }
 
-            if ($device_restart) {
-                $permissions[] = "API_DEVICE_RESTART";
-            }
+        if ($device_adopt) {
+            $permissions[] = "API_DEVICE_ADOPT";
+        }
+
+        if ($device_restart) {
+            $permissions[] = "API_DEVICE_RESTART";
         }
 
         $json['permissions'] = $permissions;
