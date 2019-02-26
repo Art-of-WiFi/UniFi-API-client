@@ -31,6 +31,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - disable_ap()
 - edit_usergroup()
 - extend_guest_validity()
+- forget_sta() (supported on controller version 5.9.X and higher)
 - invite_admin()
 - revoke_admin()
 - led_override()
@@ -77,6 +78,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - set_device_settings_base()
 - set_guestlogin_settings()
 - set_guestlogin_settings_base()
+- set_ips_settings_base() (supported on controller version 5.9.10 and higher)
 - set_locate_ap() (deprecated but still available as alias)
 - set_networksettings_base()
 - set_radius_account_base()
@@ -122,6 +124,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - upgrade_device_external()
 - start_rolling_upgrade()
 - cancel_rolling_upgrade()
+- cmd_stat()
 
 Internal functions, getters/setters:
 
@@ -236,7 +239,7 @@ If you would like to contribute code (improvements), please open an issue and in
 This class is based on the work done by the following developers:
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
 - fbagnol: https://github.com/fbagnol/class.unifi.php
-- and the API as published by Ubiquiti: https://dl.ubnt.com/unifi/5.7.20/unifi_sh_api
+- and the API as published by Ubiquiti: https://dl.ubnt.com/unifi/5.9.29/unifi_sh_api
 
 ## Important Disclaimer
 
