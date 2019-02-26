@@ -1017,6 +1017,40 @@ class Client
     }
 
     /**
+     * Set site porta
+     * ---------------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "connectivity" key.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_porta($porta_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/porta/'.trim($porta_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Set site usg
+     * ---------------------
+     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_settings() for the "connectivity" key.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * return true on success
+     */
+    public function set_site_usg($usg_id, $setting)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json     = json_encode($setting);
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/setting/usg/'.trim($usg_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
      * List admins
      * -----------
      * returns an array containing administrator objects for selected site
@@ -2047,6 +2081,96 @@ class Client
         $this->request_type = 'PUT';
         $json               = json_encode($device_settings);
         $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/device/'.trim($device_id), 'json='.$json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * List firewallgroup settings (using REST)
+     * -------------------------------
+     * returns an array of firewallgroups
+     */
+    public function list_firewallgroup()
+    {
+        if (!$this->is_loggedin) return false;
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/firewallgroup');
+        return $this->process_response($response);
+    }
+
+    /**
+     * Add site firewall groups, base (using REST)
+     * -----------------------------------------
+     * return true on success
+     * required parameter <fwgroup_settings> = stdClass object or associative array containing the configuration to apply to the site, must be a
+     *                                        (partial) object/array structured in the same manner as is returned by list_firewallgroup() for the device.
+     */
+    public function add_firewallgroup($fwgroup_settings)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'POST';
+        $json               = json_encode($fwgroup_settings);
+        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/firewallgroup', $json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Update site firewall groups, base (using REST)
+     * -----------------------------------------
+     * return true on success
+     * required parameter <fwgroup_id>       = 24 char string; _id of the group which can be found with the list_firewallgroup() function
+     * required parameter <fwgroup_settings> = stdClass object or associative array containing the configuration to apply to the site, must be a
+     *                                        (partial) object/array structured in the same manner as is returned by list_firewallgroup() for the device.
+     */
+    public function set_firewallgroup($fwgroup_id, $fwgroup_settings)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json               = json_encode($fwgroup_settings);
+        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/firewallgroup/'.$fwgroup_id, $json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * List firewallrules settings (using REST)
+     * -------------------------------
+     * returns an array of firewallrules
+     */
+    public function list_firewallrule()
+    {
+        if (!$this->is_loggedin) return false;
+        $response = $this->exec_curl('/api/s/'.$this->site.'/rest/firewallrule');
+        return $this->process_response($response);
+    }
+
+    /**
+     * Add site firewall groups, base (using REST)
+     * -----------------------------------------
+     * return true on success
+     * required parameter <fwrule_settings> = stdClass object or associative array containing the configuration to apply to the site, must be a
+     *                                        (partial) object/array structured in the same manner as is returned by list_firewallrules() for the device.
+     */
+    public function add_firewallrule($fwrule_settings)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'POST';
+        $json               = json_encode($fwrule_settings);
+        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/firewallrule', $json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Update site firewall groups, base (using REST)
+     * -----------------------------------------
+     * return true on success
+     * required parameter <fwrule_id>       = 24 char string; _id of the group which can be found with the list_firewallrules() function
+     * required parameter <fwrule_settings> = stdClass object or associative array containing the configuration to apply to the site, must be a
+     *                                        (partial) object/array structured in the same manner as is returned by list_firewallrules() for the device.
+     */
+    public function set_firewallrule($fwrule_id, $fwrule_settings)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json               = json_encode($fwrule_settings);
+        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/firewallrule/'.$fwrule_id, $json);
         return $this->process_response_boolean($response);
     }
 
