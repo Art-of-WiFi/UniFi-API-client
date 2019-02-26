@@ -74,6 +74,30 @@ $wlannetworks["UBNT-{$filnr}"] = array(
     'wpa_mode' => 'wpa2',
     'x_passphrase' => 'datisgeheim',
 );
+$wirednetworks['IPSEC-VPN'] = array(
+	'enabled' => true,
+	'ifname' => 'vti64',
+	'ipsec_dh_group' => 5,
+	'ipsec_dynamic_routing' => false,
+	'ipsec_encryption' => 'aes128',
+	'ipsec_hash' => 'sha1',
+	'ipsec_key_exchange' => 'ikev1',
+	'ipsec_local_ip' => gethostbyname($dyndns), // IP
+	'ipsec_peer_ip' => '1.2.3.4', // Remote IP
+	'ipsec_pfs' => true,
+	'ipsec_profile' => 'customized',
+	'is_nat' => false,
+	'name' => 'IPSEC-VPN',
+	'purpose' => 'site-vpn',
+	'remote_vpn_subnets' => 
+		array (
+		  0 => '10.10.10.0/22',
+		),
+	'route_distance' => 30,
+	'vpn_type' => 'ipsec-vpn',
+	'x_ipsec_pre_shared_key' => "Super_Secret_PSK_{$filnr}",
+	'site_id' => $shasite_id,
+ );
 $wlannetworks['CorporateWifi'] = array(
     'enabled' => true,
     'is_guest' => false,
@@ -132,12 +156,12 @@ $sitesettings['locale'] = array(
     'key' => 'locale',
     'site_id' => $shasite_id,
     'timezone' => 'Europe/Amsterdam',
-);/*
+);
 $sitesettings['porta'] = array(
     'key' => 'porta',
     'site_id' => $shasite_id,
     'ugw3_wan2_enabled' => false,
-);*/
+);
 $sitesettings['snmp'] = array(
     'community' => 'esenempee',
     'key' => 'snmp',
@@ -154,6 +178,43 @@ $sitesettings['auto_speedtest'] = array(
     'key' => 'auto_speedtest',
     'site_id' => $shasite_id,
 );*/
+$sitesettings['usg'] = array(
+	'broadcast_ping' => false,
+	'firewall_guest_default_log' => false,
+	'firewall_lan_default_log' => false,
+	'firewall_wan_default_log' => false,
+	'ftp_module' => true,
+	'gre_module' => true,
+	'h323_module' => true,
+	'icmp_timeout' => 30,
+	'key' => 'usg',
+	'mdns_enabled' => false,
+	'mss_clamp' => 'auto',
+	'offload_accounting' => true,
+	'offload_l2_blocking' => true,
+	'offload_sch' => true,
+	'other_timeout' => 600,
+	'pptp_module' => true,
+	'receive_redirects' => false,
+	'send_redirects' => true,
+	'sip_module' => true,
+	'syn_cookies' => true,
+	'tcp_close_timeout' => 10,
+	'tcp_close_wait_timeout' => 60,
+	'tcp_established_timeout' => 7440,
+	'tcp_fin_wait_timeout' => 120,
+	'tcp_last_ack_timeout' => 30,
+	'tcp_syn_recv_timeout' => 60,
+	'tcp_syn_sent_timeout' => 120,
+	'tcp_time_wait_timeout' => 120,
+	'tftp_module' => true,
+	'udp_other_timeout' => 30,
+	'udp_stream_timeout' => 180,
+	'upnp_enabled' => false,
+	'upnp_nat_pmp_enabled' => true,
+	'upnp_secure_mode' => true,
+	'site_id' => $shasite_id,
+);
 $sitesettings['ntp'] = array(
     'key' => 'ntp',
     'ntp_server_1' => 'ntp.xs4all.nl',
@@ -195,3 +256,144 @@ $sitesettings['mgmt'] = array(
     'x_ssh_bind_wildcard' => false,
     'x_ssh_enabled' => true,
 );
+$fwgroups['Site6'] = array(
+	'group_members' => 
+	array (
+		0 => '2001:db8:1::/64',
+		1 => '2a01:db8:2::1',
+	),
+	'group_type' => 'ipv6-address-group',
+	'name' => 'Site6',
+	'site_id' => $shasite_id,
+);
+$fwgroups['Site4'] = array(
+	'group_members' => 
+		array (
+			0 => '1.2.3.4/27',
+			1 => '10.0.0.0/22',
+			2 => '5.6.7.8',
+		),
+	'group_type' => 'address-group',
+	'name' => 'Site4',
+	'site_id' => $shasite_id,
+);
+$fwgroups['ManagementPorts'] = array(
+   'group_members' => 
+		array (
+			0 => '22',
+			1 => '80',
+			2 => '443'
+		),
+	'group_type' => 'port-group',
+	'name' => 'ManagementPorts',
+	'site_id' => $shasite_id,
+);
+$fwrules['WanICMP4'] = array (
+	'action' => 'accept',
+	'dst_address' => '',
+	'dst_firewallgroup_ids' => 
+	array (
+		),
+	'dst_networkconf_id' => '',
+	'dst_networkconf_type' => 'NETv4',
+	'rule_index' => '2000',
+	'enabled' => true,
+	'icmp_typename' => '',
+	'ipsec' => '',
+	'logging' => false,
+	'name' => 'WanICMP4',
+	'protocol' => 'icmp',
+	'protocol_match_excepted' => false,
+	'ruleset' => 'WAN_LOCAL',
+	'src_address' => '',
+	'src_firewallgroup_ids' => 
+	array (
+		0 => $fwgroup_id['Site4'],
+	),
+	'src_mac_address' => '',
+	'src_networkconf_id' => '',
+	'src_networkconf_type' => 'NETv4',
+	'state_established' => true,
+	'state_invalid' => false,
+	'state_new' => true,
+	'state_related' => true,
+);
+$fwrules['WanICMP6'] = array (
+	'action' => 'accept',
+	'dst_address' => '',
+	'dst_firewallgroup_ids' => 
+	array (
+		),
+	'dst_networkconf_id' => '',
+	'dst_networkconf_type' => 'NETv4',
+	'rule_index' => '2000',
+	'enabled' => true,
+	'icmpv6_typename' => '',
+	'logging' => false,
+	'name' => 'WanICMP6',
+	'protocol_v6' => 'icmpv6',
+	'protocol_match_excepted' => false,
+	'ruleset' => 'WANv6_LOCAL',
+	'src_firewallgroup_ids' => 
+	array (
+		0 => $fwgroup_id['Site6'],
+	),
+	'src_mac_address' => '',
+	'state_established' => true,
+	'state_invalid' => false,
+	'state_new' => true,
+	'state_related' => true,
+);
+$switchconfig[0] = array (
+	'site_id' => $shasite_id,
+	'name' => "Switch-US24-{$filnr}",
+	'config_network' => array(
+		'dns1' => '1.2.3.4',
+		'dns2' => '5.6.7.8',
+		'dnssuffix' => 'ad.site.nl',
+		'gateway' => "{$octet1}.{$octet2}.{$octet3}.254",
+		'ip' => "{$octet1}.{$octet2}.{$octet3}.5",
+		'netmask' => '255.255.255.0',
+		'type' => 'dhcp',
+	)
+);
+$switchconfig[1] = array (
+	'site_id' => $shasite_id,
+	'name' => "Switch-US8-{$filnr}",
+	'config_network' => array(
+		'dns1' => '1.2.3.4.',
+		'dns2' => '5.6.7.8',
+		'dnssuffix' => 'ad.site.nl',
+		'gateway' => "{$octet1}.{$octet2}.{$octet3}.254",
+		'ip' => "{$octet1}.{$octet2}.{$octet3}.6",
+		'netmask' => '255.255.255.0',
+		'type' => 'dhcp'
+	),
+	'port_overrides' => array (
+		0 => array (
+			'port_idx' => 8,
+			'poe_mode' => 'passthrough',
+			'lldpmed_notify_enabled' => true,
+		)
+	)
+);
+$ugwconfig[0] = array (
+	'site_id' => $shasite_id,
+	'name' => "Router-{$filnr}",
+	'ethernet_overrides' => array (
+		0 => array(
+		 'ifname' => 'eth0',
+		 'networkgroup' => 'WAN',
+		),
+		1 => array(
+		 'ifname' => 'eth1',
+		 'networkgroup' => 'LAN',
+		),
+		2 => array(
+		 'ifname' => 'eth2',
+		 'networkgroup' => 'WAN2',
+		)
+	)
+);
+
+
