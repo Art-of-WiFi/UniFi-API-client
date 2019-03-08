@@ -11,7 +11,7 @@ This class can be installed manually or using composer/[packagist](https://packa
 
 ## Installation ##
 
-You can use [Composer](#composer), [Git](#git) or simply [Download the Release](#download-the-release) to install the API client class.
+You can use [Composer](#composer), [Git](#git) or simply [Download the Release](#download-the-release) to install the API client class, or easily run it in docker. 
 
 ### Composer
 
@@ -60,6 +60,15 @@ If you prefer not to use composer or git, you can simply [download the package](
 ```php
 require_once('path/to/src/Client.php');
 ```
+
+### Docker
+
+If you don't want to install PHP and all the dependencies on your host machine, you can quickly install and run it inside docker:
+
+```$ cd /usr/src; mkdir Art-of-WiFi; cd Art-of-WiFi; git clone --depth 1 https://github.com/Art-of-WiFi/UniFi-API-client.git
+$ docker run --rm -ti -p 8000:8000 -v /usr/src/Art-of-WiFi/UniFi-API-browser:/usr/src alpine sh -c "cd /usr/src && apk update && apk add php php-session php-curl composer && composer install && php -S 0:8000 || sh"
+```
+Point your browser to: http://127.0.0.1:8000 and just enter your Unifi Controller login details.
 
 ## Example usage
 
