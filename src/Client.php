@@ -1387,6 +1387,39 @@ class Client
     }
 
     /**
+     * Add dynamic DNS, base (using REST)
+     * -----------------------------------------
+     * return true on success
+     * required parameter <dynamicdns_settings> = stdClass object or associative array containing the configuration to apply to the site, must be a
+     *                                        (partial) object/array structured in the same manner as is returned by list_dynamicdns() for the device.
+     */
+    public function add_dynamicdns($dynamicdns_settings)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'POST';
+        $json               = json_encode($dynamicdns_settings);
+        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/dynamicdns', $json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Update site dynamicdns, base (using REST)
+     * -----------------------------------------
+     * return true on success
+     * required parameter <dynamicdns_id>       = 24 char string; _id of the group which can be found with the list_dynamicdns() function
+     * required parameter <dynamicdns_settings> = stdClass object or associative array containing the configuration to apply to the site, must be a
+     *                                        (partial) object/array structured in the same manner as is returned by list_dynamicdns() for the device.
+     */
+    public function set_dynamicdns($dynamicdns_id, $dynamicdns_settings)
+    {
+        if (!$this->is_loggedin) return false;
+        $this->request_type = 'PUT';
+        $json               = json_encode($dynamicdns_settings);
+        $response           = $this->exec_curl('/api/s/'.$this->site.'/rest/dynamicdns/'.$dynamicdns_id, $json);
+        return $this->process_response_boolean($response);
+    }
+
+    /**
      * List port configurations
      * ------------------------
      * returns an array of port configurations
