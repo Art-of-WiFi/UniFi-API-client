@@ -11,6 +11,7 @@ require_once('config.php');
 
 /**
  * site id of the AP to update
+ * https://github.com/Art-of-WiFi/UniFi-API-client#important-notes
  */
 $site_id = '<enter your site id here>';
 

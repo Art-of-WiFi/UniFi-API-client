@@ -1,6 +1,6 @@
 ## UniFi Controller API client class
 
-A PHP class which provides access to Ubiquiti's [**UniFi SDN Controller API**](https://unifi-sdn.ui.com/), versions 4.X.X and 5.X.X of the UniFi SDN Controller software are supported (version 5.10.5 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+A PHP class which provides access to Ubiquiti's [**UniFi SDN Controller API**](https://unifi-sdn.ui.com/), versions 4.X.X and 5.X.X of the UniFi SDN Controller software are supported (version 5.10.19 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 This class can be installed manually or using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
@@ -92,9 +92,9 @@ Please refer to the `examples/` directory for some more detailed examples which 
 
 2. The last optional parameter that is passed to the constructor in the above example (`true`), enables validation of the controller's SSL certificate which is otherwise **disabled** by default. It is highly recommended to enable this feature in production environments where you have a valid SSL cert installed on the UniFi Controller, and which is associated with the FQDN of the server as used in the `controller_url` parameter. This option was added with API client version 1.1.16.
 
-## Methods and functions supported
+## Functions/methods supported
 
-The class currently supports the following functions/methods to get/post/put/delete data through the UniFi Controller API. Please refer to the source code for more details on the functions/methods and their respective parameters.
+The class currently supports the following functions/methods to GET/POST/PUT/DELETE data through the UniFi Controller API. Please refer to the source code for more details on the functions/methods and their respective parameters.
 
 - login()
 - logout()
@@ -112,6 +112,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - create_user()
 - create_voucher()
 - create_wlan()
+- custom_api_request()
 - delete_device()
 - delete_firewallgroup()
 - delete_network()
@@ -126,6 +127,7 @@ The class currently supports the following functions/methods to get/post/put/del
 - extend_guest_validity()
 - forget_sta() (supported on controller version 5.9.X and higher)
 - invite_admin()
+- assign_existing_admin()
 - revoke_admin()
 - led_override()
 - list_admins()
@@ -249,10 +251,14 @@ If you would like to contribute code (improvements), please open an issue and in
 
 ## Credits
 
-This class is based on the initial work done by the following developers:
+This class is based on the initial work by the following developers:
+
 - domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
 - fbagnol: https://github.com/fbagnol/class.unifi.php
-- and the API as published by Ubiquiti: https://dl.ubnt.com/unifi/5.9.29/unifi_sh_api
+
+and the API as published by Ubiquiti:
+
+- https://dl.ubnt.com/unifi/5.10.19/unifi_sh_api
 
 ## Important Disclaimer
 

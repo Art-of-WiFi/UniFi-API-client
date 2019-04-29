@@ -19,6 +19,7 @@ require_once('config.php');
 
 /**
  * site id and MAC address of AP to query
+ * https://github.com/Art-of-WiFi/UniFi-API-client#important-notes
  */
 $site_id = '<enter your site id here>';
 $ap_mac  = '<enter MAC address of Access Point to check>';

@@ -210,29 +210,28 @@ class Client
             return false;
         }
 
-        $json = ['cmd' => 'authorize-guest', 'mac' => strtolower($mac), 'minutes' => intval($minutes)];
+        $payload = ['cmd' => 'authorize-guest', 'mac' => strtolower($mac), 'minutes' => intval($minutes)];
 
         /**
          * if we have received values for up/down/MBytes/ap_mac we append them to the payload array to be submitted
          */
         if (!empty($up)) {
-            $json['up'] = intval($up);
+            $payload['up'] = intval($up);
         }
 
         if (!empty($down)) {
-            $json['down'] = intval($down);
+            $payload['down'] = intval($down);
         }
 
         if (!empty($MBytes)) {
-            $json['bytes'] = intval($MBytes);
+            $payload['bytes'] = intval($MBytes);
         }
 
         if (isset($ap_mac)) {
-            $json['ap_mac'] = strtolower($ap_mac);
+            $payload['ap_mac'] = strtolower($ap_mac);
         }
 
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', 'json=' . $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -249,8 +248,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['cmd' => 'unauthorize-guest', 'mac' => strtolower($mac)]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', 'json=' . $json);
+        $payload  = ['cmd' => 'unauthorize-guest', 'mac' => strtolower($mac)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -267,8 +266,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['cmd' => 'kick-sta', 'mac' => strtolower($mac)]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', 'json=' . $json);
+        $payload  = ['cmd' => 'kick-sta', 'mac' => strtolower($mac)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -285,8 +284,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['cmd' => 'block-sta', 'mac' => strtolower($mac)]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', 'json=' . $json);
+        $payload  = ['cmd' => 'block-sta', 'mac' => strtolower($mac)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -303,8 +302,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['cmd' => 'unblock-sta', 'mac' => strtolower($mac)]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', 'json=' . $json);
+        $payload  = ['cmd' => 'unblock-sta', 'mac' => strtolower($mac)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -325,8 +324,8 @@ class Client
         }
 
         $macs     = array_map('strtolower', $macs);
-        $json     = json_encode(['cmd' => 'forget-sta', 'macs' => $macs]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', 'json=' . $json);
+        $payload  = ['cmd' => 'forget-sta', 'macs' => $macs];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -358,9 +357,8 @@ class Client
             $new_user['noted'] = true;
         }
 
-        $json     = ['objects' => [['data' => $new_user]]];
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/group/user', 'json=' . $json);
+        $payload  = ['objects' => [['data' => $new_user]]];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/group/user', $payload);
 
         return $this->process_response($response);
     }
@@ -382,8 +380,8 @@ class Client
         }
 
         $noted    = (is_null($note)) || (empty($note)) ? false : true;
-        $json     = json_encode(['note' => $note, 'noted' => $noted]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/user/' . trim($user_id), 'json=' . $json);
+        $payload  = ['note' => $note, 'noted' => $noted];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -404,8 +402,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['name' => $name]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/user/' . trim($user_id), 'json=' . $json);
+        $payload  = ['name' => $name];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -441,8 +439,8 @@ class Client
             'wlan-num_sta',
             'time'
         ];
-        $json       = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
-        $response   = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.site', 'json=' . $json);
+        $payload  = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.site', $payload);
 
         return $this->process_response($response);
     }
@@ -476,8 +474,8 @@ class Client
             'wlan-num_sta',
             'time'
         ];
-        $json       = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
-        $response   = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.site', 'json=' . $json);
+        $payload  = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.site', $payload);
 
         return $this->process_response($response);
     }
@@ -491,7 +489,7 @@ class Client
      *
      * NOTES:
      * - defaults to the past 52*7*24 hours
-     * - bytes" are no longer returned with controller version 4.9.1 and later
+     * - "bytes" are no longer returned with controller version 4.9.1 and later
      */
     public function stat_daily_site($start = null, $end = null)
     {
@@ -511,8 +509,8 @@ class Client
             'wlan-num_sta',
             'time'
         ];
-        $json       = json_encode(['attrs' => $attributes, 'start' => $start, 'end' => $end]);
-        $response   = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.site', 'json=' . $json);
+        $payload  = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.site', $payload);
 
         return $this->process_response($response);
     }
@@ -537,15 +535,14 @@ class Client
             return false;
         }
 
-        $end   = is_null($end) ? (time() * 1000) : intval($end);
-        $start = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
-        $json  = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        $end     = is_null($end) ? (time() * 1000) : intval($end);
+        $start   = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
+        $payload = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
-            $json['mac'] = strtolower($mac);
+            $payload['mac'] = strtolower($mac);
         }
 
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.ap', 'json=' . $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.ap', $payload);
 
         return $this->process_response($response);
     }
@@ -568,14 +565,14 @@ class Client
             return false;
         }
 
-        $end   = is_null($end) ? (time() * 1000) : intval($end);
-        $start = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $json  = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        $end     = is_null($end) ? (time() * 1000) : intval($end);
+        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $payload = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
-            $json['mac'] = strtolower($mac);
+            $payload['mac'] = strtolower($mac);
         }
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.ap', 'json=' . $json);
+
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.ap', $payload);
 
         return $this->process_response($response);
     }
@@ -598,15 +595,14 @@ class Client
             return false;
         }
 
-        $end   = is_null($end) ? (time() * 1000) : intval($end);
-        $start = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $json  = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        $end     = is_null($end) ? (time() * 1000) : intval($end);
+        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $payload = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
-            $json['mac'] = strtolower($mac);
+            $payload['mac'] = strtolower($mac);
         }
 
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.ap', 'json=' . $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.ap', $payload);
 
         return $this->process_response($response);
     }
@@ -638,9 +634,8 @@ class Client
         $end      = is_null($end) ? (time() * 1000) : intval($end);
         $start    = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
-        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.user', 'json=' . $json);
+        $payload  = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.user', $payload);
 
         return $this->process_response($response);
     }
@@ -670,9 +665,8 @@ class Client
         $end      = is_null($end) ? (time() * 1000) : intval($end);
         $start    = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
-        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.user', 'json=' . $json);
+        $payload  = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.user', $payload);
 
         return $this->process_response($response);
     }
@@ -702,9 +696,8 @@ class Client
         $end      = is_null($end) ? (time() * 1000) : intval($end);
         $start    = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
-        $json     = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.user', 'json=' . $json);
+        $payload  = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.user', $payload);
 
         return $this->process_response($response);
     }
@@ -736,8 +729,8 @@ class Client
         $end      = is_null($end) ? (time() * 1000) : intval($end);
         $start    = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
-        $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.gw', 'json=' . $json);
+        $payload  = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.gw', $payload);
 
         return $this->process_response($response);
     }
@@ -766,8 +759,8 @@ class Client
         $end      = is_null($end) ? (time() * 1000) : intval($end);
         $start    = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
-        $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.gw', 'json=' . $json);
+        $payload  = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.gw', $payload);
 
         return $this->process_response($response);
     }
@@ -796,8 +789,8 @@ class Client
         $end      = is_null($end) ? ((time() - (time() % 3600)) * 1000) : intval($end);
         $start    = is_null($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
         $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
-        $json     = json_encode(['attrs' => $attribs, 'start' => $start, 'end' => $end]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.gw', 'json=' . $json);
+        $payload  = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.gw', $payload);
 
         return $this->process_response($response);
     }
@@ -821,9 +814,8 @@ class Client
 
         $end      = is_null($end) ? (time() * 1000) : intval($end);
         $start    = is_null($start) ? $end - (24 * 3600 * 1000) : intval($start);
-        $json     = ['attrs' => ['xput_download', 'xput_upload', 'latency', 'time'], 'start' => $start, 'end' => $end];
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/archive.speedtest', 'json=' . $json);
+        $payload  = ['attrs' => ['xput_download', 'xput_upload', 'latency', 'time'], 'start' => $start, 'end' => $end];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/archive.speedtest', $payload);
 
         return $this->process_response($response);
     }
@@ -850,9 +842,8 @@ class Client
         $end      = is_null($end) ? (time() * 1000) : intval($end);
         $start    = is_null($start) ? $end - (24 * 3600 * 1000) : intval($start);
         $limit    = is_null($limit) ? 10000 : intval($limit);
-        $json     = ['start' => $start, 'end' => $end, '_limit' => $limit];
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/ips/event', 'json=' . $json);
+        $payload  = ['start' => $start, 'end' => $end, '_limit' => $limit];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/ips/event', $payload);
 
         return $this->process_response($response);
     }
@@ -879,15 +870,14 @@ class Client
             return false;
         }
 
-        $end   = is_null($end) ? time() : intval($end);
-        $start = is_null($start) ? $end - (7 * 24 * 3600) : intval($start);
-        $json  = ['type' => $type, 'start' => $start, 'end' => $end];
+        $end     = is_null($end) ? time() : intval($end);
+        $start   = is_null($start) ? $end - (7 * 24 * 3600) : intval($start);
+        $payload = ['type' => $type, 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
-            $json['mac'] = strtolower($mac);
+            $payload['mac'] = strtolower($mac);
         }
 
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/session', 'json=' . $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/session', $payload);
 
         return $this->process_response($response);
     }
@@ -906,8 +896,8 @@ class Client
         }
 
         $limit    = is_null($limit) ? 5 : intval($limit);
-        $json     = json_encode(['mac' => strtolower($mac), '_limit' => $limit, '_sort'=> '-assoc_time']);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/session', 'json=' . $json);
+        $payload  = ['mac' => strtolower($mac), '_limit' => $limit, '_sort'=> '-assoc_time'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/session', $payload);
 
         return $this->process_response($response);
     }
@@ -930,8 +920,8 @@ class Client
 
         $end      = is_null($end) ? time() : intval($end);
         $start    = is_null($start) ? $end - (7 * 24 * 3600) : intval($start);
-        $json     = json_encode(['start' => $start, 'end' => $end]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/authorization', 'json=' . $json);
+        $payload  = ['start' => $start, 'end' => $end];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/authorization', $payload);
 
         return $this->process_response($response);
     }
@@ -952,8 +942,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['type' => 'all', 'conn' => 'all', 'within' => intval($historyhours)]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/alluser', 'json=' . $json);
+        $payload  = ['type' => 'all', 'conn' => 'all', 'within' => intval($historyhours)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/alluser', $payload);
 
         return $this->process_response($response);
     }
@@ -970,8 +960,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['within' => intval($within)]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/guest', 'json=' . $json);
+        $payload  = ['within' => intval($within)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/guest', $payload);
 
         return $this->process_response($response);
     }
@@ -1023,8 +1013,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['usergroup_id' => $group_id]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/user/' . trim($user_id), 'json=' . $json);
+        $payload  = ['usergroup_id' => $group_id];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -1033,9 +1023,9 @@ class Client
      * Update client fixedip (using REST)
      * ------------------------------
      * returns an array containing a single object with attributes of the updated client on success
-     * required parameter <client_id>   = id of the client
+     * required parameter <client_id>   = _id value for the client
      * required parameter <use_fixedip> = boolean defining whether if use_fixedip is true or false
-     * optional parameter <network_id>  = network id where the ip belongs to
+     * optional parameter <network_id>  = _id value for the network where the ip belongs to
      * optional parameter <fixed_ip>    = value of client's fixed_ip field
      *
      */
@@ -1050,19 +1040,18 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $data               = ['_id' => $client_id, 'use_fixedip' => $use_fixedip];
+        $payload            = ['_id' => $client_id, 'use_fixedip' => $use_fixedip];
         if ($use_fixedip) {
             if ($network_id) {
-                $data["network_id"] = $network_id;
+                $payload['network_id'] = $network_id;
             }
 
             if ($fixed_ip) {
-                $data["fixed_ip"] = $fixed_ip;
+                $payload['fixed_ip'] = $fixed_ip;
             }
         }
 
-        $json     = json_encode($data);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/user/' . trim($client_id), $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/user/' . trim($client_id), $payload);
 
         return $this->process_response($response);
     }
@@ -1098,12 +1087,8 @@ class Client
         }
 
         $this->request_type = 'POST';
-        $json = json_encode([
-            'name'              => $group_name,
-            'qos_rate_max_down' => intval($group_dn),
-            'qos_rate_max_up'   => intval($group_up)
-        ]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup', $json);
+        $payload            = ['name' => $group_name, 'qos_rate_max_down' => intval($group_dn), 'qos_rate_max_up' => intval($group_up)];
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup', $payload);
 
         return $this->process_response($response);
     }
@@ -1112,8 +1097,8 @@ class Client
      * Modify user group (using REST)
      * ------------------------------
      * returns an array containing a single object with attributes of the updated usergroup on success
-     * required parameter <group_id>   = id of the user group
-     * required parameter <site_id>    = id of the site
+     * required parameter <group_id>   = _id value of the user group
+     * required parameter <site_id>    = _id value of the site
      * required parameter <group_name> = name of the user group
      * optional parameter <group_dn>   = limit download bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
      * optional parameter <group_up>   = limit upload bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
@@ -1125,15 +1110,15 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $json = json_encode([
+        $payload = [
             '_id'               => $group_id,
             'name'              => $group_name,
             'qos_rate_max_down' => intval($group_dn),
             'qos_rate_max_up'   => intval($group_up),
             'site_id'           => $site_id
-        ]);
+        ];
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup/' . trim($group_id), $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup/' . trim($group_id), $payload);
 
         return $this->process_response($response);
     }
@@ -1142,7 +1127,7 @@ class Client
      * Delete user group (using REST)
      * ------------------------------
      * returns true on success
-     * required parameter <group_id> = id of the user group
+     * required parameter <group_id> = _id value of the user group
      */
     public function delete_usergroup($group_id)
     {
@@ -1160,7 +1145,7 @@ class Client
      * List firewall groups (using REST)
      * ----------------------------------
      * returns an array containing the current firewall groups or the selected firewall group on success
-     * optional parameter <group_id> = id of the single firewall group to list
+     * optional parameter <group_id> = _id value of the single firewall group to list
      */
     public function list_firewallgroups($group_id = null)
     {
@@ -1193,12 +1178,8 @@ class Client
         }
 
         $this->request_type = 'POST';
-        $json = json_encode([
-            'name'          => $group_name,
-            'group_type'    => $group_type,
-            'group_members' => $group_members
-        ]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup', $json);
+        $payload            = ['name' => $group_name, 'group_type' => $group_type, 'group_members' => $group_members];
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup', $payload);
 
         return $this->process_response($response);
     }
@@ -1207,8 +1188,8 @@ class Client
      * Modify firewall group (using REST)
      * ----------------------------------
      * returns an array containing a single object with attributes of the updated firewall group on success
-     * required parameter <group_id>      = _id value of the firewall group
-     * required parameter <site_id>       = site_id value of the firewall group
+     * required parameter <group_id>      = _id value of the firewall group to modify
+     * required parameter <site_id>       = site_id value of the firewall group to modify
      * required parameter <group_name>    = name of the firewall group
      * required parameter <group_type>    = firewall group type; valid values are address-group, ipv6-address-group, port-group,
      *                                      group_type cannot be changed for an existing firewall group!
@@ -1228,15 +1209,15 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $json = json_encode([
+        $payload = [
             '_id'           => $group_id,
             'name'          => $group_name,
             'group_type'    => $group_type,
             'group_members' => $group_members,
             'site_id'       => $site_id
-        ]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id),
-            $json);
+        ];
+
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id), $payload);
 
         return $this->process_response($response);
     }
@@ -1245,7 +1226,7 @@ class Client
      * Delete firewall group (using REST)
      * ----------------------------------
      * returns true on success
-     * required parameter <group_id> = id of the firewall group
+     * required parameter <group_id> = _id value of the firewall group to delete
      */
     public function delete_firewallgroup($group_id)
     {
@@ -1373,8 +1354,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['within' => intval($within)]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/rogueap', 'json=' . $json);
+        $payload  = ['within' => intval($within)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/rogueap', $payload);
 
         return $this->process_response($response);
     }
@@ -1406,8 +1387,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['cmd' => 'list-backups']);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/backup', 'json=' . $json);
+        $payload  = ['cmd' => 'list-backups'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/backup', $payload);
 
         return $this->process_response($response);
     }
@@ -1460,8 +1441,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['desc' => $description, 'cmd' => 'add-site']);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+        $payload  = ['desc' => $description, 'cmd' => 'add-site'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
 
         return $this->process_response($response);
     }
@@ -1470,7 +1451,7 @@ class Client
      * Delete a site
      * -------------
      * return true on success
-     * required parameter <site_id> = 24 char string; _id of the site to delete
+     * required parameter <site_id> = 24 char string; _id value of the site to delete
      */
     public function delete_site($site_id)
     {
@@ -1478,17 +1459,17 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['site' => $site_id, 'cmd' => 'delete-site']);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+        $payload  = ['site' => $site_id, 'cmd' => 'delete-site'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
 
         return $this->process_response_boolean($response);
     }
 
     /**
-     * Change a site's name
-     * --------------------
+     * Change the current site's name
+     * ------------------------------
      * return true on success
-     * required parameter <site_name> = string; the long name for the site
+     * required parameter <site_name> = string; the new long name for the current site
      *
      * NOTES: immediately after being changed, the site will be available in the output of the list_sites() function
      */
@@ -1498,8 +1479,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['cmd' => 'update-site', 'desc' => $site_name]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+        $payload  = ['cmd' => 'update-site', 'desc' => $site_name];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -1507,22 +1488,20 @@ class Client
     /**
      * Set site country
      * ----------------
-     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     * required parameter <payload> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
      *                                object structured in the same manner as is returned by list_settings() for the "country" key.
      *                                Valid country codes can be obtained using the list_country_codes() function/method.
      *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      * return true on success
      */
-    public function set_site_country($country_id, $setting)
+    public function set_site_country($country_id, $payload)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
         $this->request_type = 'PUT';
-        $json               = json_encode($setting);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/country/' . trim($country_id),
-                              'json=' . $json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/country/' . trim($country_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -1530,21 +1509,19 @@ class Client
     /**
      * Set site locale
      * ---------------
-     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     * required parameter <payload> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
      *                                object structured in the same manner as is returned by list_settings() for the "locale" key.
      *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      * return true on success
      */
-    public function set_site_locale($locale_id, $setting)
+    public function set_site_locale($locale_id, $payload)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
         $this->request_type = 'PUT';
-        $json               = json_encode($setting);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/locale/' . trim($locale_id),
-                              'json=' . $json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/locale/' . trim($locale_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -1552,21 +1529,19 @@ class Client
     /**
      * Set site snmp
      * -------------
-     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     * required parameter <payload> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
      *                                object structured in the same manner as is returned by list_settings() for the "snmp" key.
      *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      * return true on success
      */
-    public function set_site_snmp($snmp_id, $setting)
+    public function set_site_snmp($snmp_id, $payload)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
         $this->request_type = 'PUT';
-        $json               = json_encode($setting);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/snmp/' . trim($snmp_id),
-                              'json=' . $json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/snmp/' . trim($snmp_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -1574,21 +1549,19 @@ class Client
     /**
      * Set site mgmt
      * -------------
-     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     * required parameter <payload> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
      *                                object structured in the same manner as is returned by list_settings() for the "mgmt" key.
      *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      * return true on success
      */
-    public function set_site_mgmt($mgmt_id, $setting)
+    public function set_site_mgmt($mgmt_id, $payload)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
         $this->request_type = 'PUT';
-        $json               = json_encode($setting);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/mgmt/' . trim($mgmt_id),
-                              'json=' . $json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/mgmt/' . trim($mgmt_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -1596,21 +1569,19 @@ class Client
     /**
      * Set site guest access
      * ---------------------
-     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     * required parameter <payload> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
      *                                object structured in the same manner as is returned by list_settings() for the "guest_access" key.
      *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      * return true on success
      */
-    public function set_site_guest_access($guest_access_id, $setting)
+    public function set_site_guest_access($guest_access_id, $payload)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
         $this->request_type = 'PUT';
-        $json               = json_encode($setting);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/guest_access/' . trim($guest_access_id),
-                              'json=' . $json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/guest_access/' . trim($guest_access_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -1618,21 +1589,19 @@ class Client
     /**
      * Set site ntp
      * ------------
-     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     * required parameter <payload> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
      *                                object structured in the same manner as is returned by list_settings() for the "ntp" key.
      *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      * return true on success
      */
-    public function set_site_ntp($ntp_id, $setting)
+    public function set_site_ntp($ntp_id, $payload)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
         $this->request_type = 'PUT';
-        $json               = json_encode($setting);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/ntp/' . trim($ntp_id),
-                              'json=' . $json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/ntp/' . trim($ntp_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -1640,21 +1609,19 @@ class Client
     /**
      * Set site connectivity
      * ---------------------
-     * required parameter <setting> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     * required parameter <payload> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
      *                                object structured in the same manner as is returned by list_settings() for the "connectivity" key.
      *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      * return true on success
      */
-    public function set_site_connectivity($connectivity_id, $setting)
+    public function set_site_connectivity($connectivity_id, $payload)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
         $this->request_type = 'PUT';
-        $json               = json_encode($setting);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/connectivity/' . trim($connectivity_id),
-                              'json=' . $json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/connectivity/' . trim($connectivity_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -1670,8 +1637,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['cmd' => 'get-admins']);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+        $payload  = ['cmd' => 'get-admins'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
 
         return $this->process_response($response);
     }
@@ -1734,23 +1701,22 @@ class Client
         }
 
         $permissions = [];
-        $json        = ['name' => trim($name), 'email' => trim($email), 'for_sso' => $enable_sso, 'cmd' => 'invite-admin', 'role' => 'admin'];
+        $payload     = ['name' => trim($name), 'email' => trim($email), 'for_sso' => $enable_sso, 'cmd' => 'invite-admin', 'role' => 'admin'];
 
         if ($readonly) {
-            $json['role'] = 'readonly';
+            $payload['role'] = 'readonly';
         }
 
         if ($device_adopt) {
-            $permissions[] = "API_DEVICE_ADOPT";
+            $permissions[] = 'API_DEVICE_ADOPT';
         }
 
         if ($device_restart) {
-            $permissions[] = "API_DEVICE_RESTART";
+            $permissions[] = 'API_DEVICE_RESTART';
         }
 
-        $json['permissions'] = $permissions;
-        $json                = json_encode($json);
-        $response            = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+        $payload['permissions'] = $permissions;
+        $response               = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -1759,7 +1725,7 @@ class Client
      * Assign an existing admin to the current site
      * --------------------------------------------
      * returns true on success
-     * required parameter <admin_id>       = 24 char string; _id of the admin user to assign, can be obtained using the
+     * required parameter <admin_id>       = 24 char string; _id value of the admin user to assign, can be obtained using the
      *                                       list_all_admins() method/function
      * optional parameter <readonly>       = boolean, whether or not the new admin will have readonly
      *                                       permissions, default value is false which gives the new admin
@@ -1782,23 +1748,22 @@ class Client
         }
 
         $permissions = [];
-        $json        = ['cmd' => 'grant-admin', 'admin' => trim($admin_id), 'role' => 'admin'];
+        $payload     = ['cmd' => 'grant-admin', 'admin' => trim($admin_id), 'role' => 'admin'];
 
         if ($readonly) {
-            $json['role'] = 'readonly';
+            $payload['role'] = 'readonly';
         }
 
         if ($device_adopt) {
-            $permissions[] = "API_DEVICE_ADOPT";
+            $permissions[] = 'API_DEVICE_ADOPT';
         }
 
         if ($device_restart) {
-            $permissions[] = "API_DEVICE_RESTART";
+            $permissions[] = 'API_DEVICE_RESTART';
         }
 
-        $json['permissions'] = $permissions;
-        $json                = json_encode($json);
-        $response            = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+        $payload['permissions'] = $permissions;
+        $response               = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -1807,7 +1772,7 @@ class Client
      * Revoke an admin
      * ---------------
      * returns true on success
-     * required parameter <admin_id> = id of the admin to revoke, can be obtained using the
+     * required parameter <admin_id> = _id value of the admin to revoke, can be obtained using the
      *                                 list_all_admins() method/function
      *
      * NOTES:
@@ -1819,8 +1784,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['cmd' => 'revoke-admin', 'admin' => $admin_id]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+        $payload  = ['cmd' => 'revoke-admin', 'admin' => $admin_id];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -1900,8 +1865,8 @@ class Client
             return false;
         }
 
-        $json     = (trim($create_time) != null) ? json_encode(['create_time' => intval($create_time)]) : json_encode([]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/voucher', 'json=' . $json);
+        $payload  = (trim($create_time) != null) ? ['create_time' => intval($create_time)] : [];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/voucher', $payload);
 
         return $this->process_response($response);
     }
@@ -1939,12 +1904,11 @@ class Client
         }
 
         $this->request_type = 'POST';
-        $json               = ['name' => $name, 'x_password' => $x_password];
+        $payload            = ['name' => $name, 'x_password' => $x_password];
         if (isset($note)) {
-            $json['note'] = trim($note);
+            $payload['note'] = trim($note);
         }
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/hotspotop', 'json=' . $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/hotspotop', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -1993,30 +1957,30 @@ class Client
             return false;
         }
 
-        $json = [
+        $payload = [
             'cmd'    => 'create-voucher',
             'expire' => intval($minutes),
             'n'      => intval($count),
             'quota'  => intval($quota)
         ];
+
         if (isset($note)) {
-            $json['note'] = trim($note);
+            $payload['note'] = trim($note);
         }
 
         if (!empty($up)) {
-            $json['up'] = intval($up);
+            $payload['up'] = intval($up);
         }
 
         if (!empty($down)) {
-            $json['down'] = intval($down);
+            $payload['down'] = intval($down);
         }
 
         if (!empty($MBytes)) {
-            $json['bytes'] = intval($MBytes);
+            $payload['bytes'] = intval($MBytes);
         }
 
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/hotspot', 'json=' . $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/hotspot', $payload);
 
         return $this->process_response($response);
     }
@@ -2025,7 +1989,7 @@ class Client
      * Revoke voucher
      * --------------
      * return true on success
-     * required parameter <voucher_id> = 24 char string; _id of the voucher to revoke
+     * required parameter <voucher_id> = 24 char string; _id value of the voucher to revoke
      */
     public function revoke_voucher($voucher_id)
     {
@@ -2033,8 +1997,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['_id' => $voucher_id, 'cmd' => 'delete-voucher']);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/hotspot', 'json=' . $json);
+        $payload  = ['_id' => $voucher_id, 'cmd' => 'delete-voucher'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/hotspot', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2043,7 +2007,7 @@ class Client
      * Extend guest validity
      * ---------------------
      * return true on success
-     * required parameter <guest_id> = 24 char string; _id of the guest to extend validity
+     * required parameter <guest_id> = 24 char string; _id value of the guest to extend validity
      */
     public function extend_guest_validity($guest_id)
     {
@@ -2051,8 +2015,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['_id' => $guest_id, 'cmd' => 'extend']);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/hotspot', 'json=' . $json);
+        $payload  = ['_id' => $guest_id, 'cmd' => 'extend'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/hotspot', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2217,8 +2181,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['mac' => strtolower($mac), 'cmd' => 'adopt']);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', 'json=' . $json);
+        $payload  = ['mac' => strtolower($mac), 'cmd' => 'adopt'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2235,8 +2199,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['cmd' => 'restart', 'mac' => strtolower($mac)]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', 'json=' . $json);
+        $payload  = ['cmd' => 'restart', 'mac' => strtolower($mac)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2264,8 +2228,8 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $json               = json_encode(['disabled' => $disable]);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/device/' . trim($ap_id), $json);
+        $payload            = ['disabled' => $disable];
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/device/' . trim($ap_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2293,8 +2257,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['led_override' => $override_mode]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/device/' . trim($device_id), $json);
+        $payload  = ['led_override' => $override_mode];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/device/' . trim($device_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2320,8 +2284,8 @@ class Client
         }
 
         $cmd      = (($enable) ? 'set-locate' : 'unset-locate');
-        $json     = json_encode(['cmd' => $cmd, 'mac' => strtolower($mac)]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', 'json=' . $json);
+        $payload  = ['cmd' => $cmd, 'mac' => strtolower($mac)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2342,8 +2306,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['led_enabled' => $enable]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/mgmt', 'json=' . $json);
+        $payload  = ['led_enabled' => $enable];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/mgmt', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2352,7 +2316,7 @@ class Client
      * Update access point radio settings
      * ----------------------------------
      * return true on success
-     * required parameter <ap_id>
+     * required parameter <ap_id>               = the "_id" value for the access point you wish to update
      * required parameter <radio>(default=ng)
      * required parameter <channel>
      * required parameter <ht>(default=20)
@@ -2368,7 +2332,7 @@ class Client
             return false;
         }
 
-        $json = json_encode([
+        $payload = [
             'radio_table' => [
                 'radio'         => $radio,
                 'channel'       => $channel,
@@ -2376,8 +2340,9 @@ class Client
                 'tx_power_mode' => $tx_power_mode,
                 'tx_power'      => $tx_power
             ]
-        ]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($ap_id), 'json=' . $json);
+        ];
+
+        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($ap_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2387,8 +2352,8 @@ class Client
      * -----------------------------------------
      * return true on success
      * required parameter <wlantype_id>  = string; WLAN type, can be either 'ng' (for WLANs 2G (11n/b/g)) or 'na' (WLANs 5G (11n/a/ac))
-     * required parameter <device_id>    = string; id of the access point to be modified
-     * required parameter <wlangroup_id> = string; id of the WLAN group to assign device to
+     * required parameter <device_id>    = string; _id value of the access point to be modified
+     * required parameter <wlangroup_id> = string; _id value of the WLAN group to assign device to
      *
      * NOTES:
      * - can for example be used to turn WiFi off
@@ -2403,8 +2368,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['wlan_overrides' => [], 'wlangroup_id_' . $wlantype_id => $wlangroup_id]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($device_id), 'json=' . $json);
+        $payload  = ['wlan_overrides' => [], 'wlangroup_id_' . $wlantype_id => $wlangroup_id];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($device_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2438,7 +2403,8 @@ class Client
         if (!$this->is_loggedin) {
             return false;
         }
-        $json = [
+
+        $payload = [
             'portal_enabled'    => $portal_enabled,
             'portal_customized' => $portal_customized,
             'redirect_enabled'  => $redirect_enabled,
@@ -2448,8 +2414,8 @@ class Client
             'expire_unit'       => $expire_unit,
             'site_id'           => $site_id
         ];
-        $json     = json_encode($json, JSON_UNESCAPED_SLASHES);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/guest_access', 'json=' . $json);
+
+        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/guest_access', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2458,17 +2424,16 @@ class Client
      * Update guestlogin settings, base
      * ------------------------------------------
      * return true on success
-     * required parameter <network_settings> = stdClass object or associative array containing the configuration to apply to the guestlogin, must be a (partial)
-     *                                         object/array structured in the same manner as is returned by list_settings() for the "guest_access" section.
+     * required parameter <payload> = stdClass object or associative array containing the configuration to apply to the guestlogin, must be a (partial)
+     *                                object/array structured in the same manner as is returned by list_settings() for the "guest_access" section.
      */
-    public function set_guestlogin_settings_base($guestlogin_settings)
+    public function set_guestlogin_settings_base($payload)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
-        $json     = json_encode($guestlogin_settings, JSON_UNESCAPED_SLASHES);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/guest_access', 'json=' . $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/guest_access', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2477,17 +2442,16 @@ class Client
      * Update IPS/IDS settings, base
      * ------------------------------------------
      * return true on success
-     * required parameter <ips_settings> = stdClass object or associative array containing the IPS/IDS settings to apply, must be a (partial)
-     *                                     object/array structured in the same manner as is returned by list_settings() for the "ips" section.
+     * required parameter <payload> = stdClass object or associative array containing the IPS/IDS settings to apply, must be a (partial)
+     *                                object/array structured in the same manner as is returned by list_settings() for the "ips" section.
      */
-    public function set_ips_settings_base($ips_settings)
+    public function set_ips_settings_base($payload)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
-        $json     = json_encode($ips_settings, JSON_UNESCAPED_SLASHES);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/ips', 'json=' . $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/ips', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2505,8 +2469,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['name' => $apname]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($ap_id), 'json=' . $json);
+        $payload  = ['name' => $apname];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($ap_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2524,8 +2488,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['site' => $site_id, 'mac' => strtolower($mac), 'cmd' => 'move-device']);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+        $payload  = ['site' => $site_id, 'mac' => strtolower($mac), 'cmd' => 'move-device'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2542,8 +2506,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['mac' => strtolower($mac), 'cmd' => 'delete-device']);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', 'json=' . $json);
+        $payload  = ['mac' => strtolower($mac), 'cmd' => 'delete-device'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2552,7 +2516,7 @@ class Client
      * List network settings (using REST)
      * ----------------------------------
      * returns an array of (non-wireless) networks and their settings
-     * optional parameter <network_id> = string; network id to get specific network data for
+     * optional parameter <network_id> = string; _id value of the network to get settings for
      */
     public function list_networkconf($network_id = '')
     {
@@ -2569,19 +2533,18 @@ class Client
      * Create a network (using REST)
      * -----------------------------
      * return an array with a single object containing details of the new network on success, else return false
-     * required parameter <network_settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
-     *                                         object structured in the same manner as is returned by list_networkconf() for the specific network type.
-     *                                         Do not include the _id property, it will be assigned by the controller and returned upon success.
+     * required parameter <payload> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                object structured in the same manner as is returned by list_networkconf() for the specific network type.
+     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
      */
-    public function create_network($network_settings)
+    public function create_network($payload)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
         $this->request_type = 'POST';
-        $json               = json_encode($network_settings);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/networkconf', 'json=' . $json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/networkconf', $payload);
 
         return $this->process_response($response);
     }
@@ -2590,19 +2553,18 @@ class Client
      * Update network settings, base (using REST)
      * ------------------------------------------
      * return true on success
-     * required parameter <network_id>
-     * required parameter <network_settings> = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
-     *                                         object/array structured in the same manner as is returned by list_networkconf() for the network.
+     * required parameter <network_id> = the "_id" value for the network you wish to update
+     * required parameter <payload>    = stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
+     *                                   object/array structured in the same manner as is returned by list_networkconf() for the network.
      */
-    public function set_networksettings_base($network_id, $network_settings)
+    public function set_networksettings_base($network_id, $payload)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
         $this->request_type = 'PUT';
-        $json               = json_encode($network_settings);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id), 'json=' . $json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2611,7 +2573,7 @@ class Client
      * Delete a network (using REST)
      * -----------------------------
      * return true on success
-     * required parameter <network_id> = 24 char string; _id of the network which can be found with the list_networkconf() function
+     * required parameter <network_id> = 24 char string; _id value of the network which can be found with the list_networkconf() function
      */
     public function delete_network($network_id)
     {
@@ -2630,7 +2592,7 @@ class Client
      * -------------------------------
      * returns an array of wireless networks and their settings, or an array containing a single wireless network when using
      * the <wlan_id> parameter
-     * optional parameter <wlan_id> = 24 char string; _id of the wlan to fetch the settings for
+     * optional parameter <wlan_id> = 24 char string; _id value of the wlan to fetch the settings for
      */
     public function list_wlanconf($wlan_id = null)
     {
@@ -2648,13 +2610,14 @@ class Client
      * -------------
      * return true on success
      * required parameter <name>             = string; SSID
-     * required parameter <x_passphrase>     = string; new pre-shared key, minimal length is 8 characters, maximum length is 63
+     * required parameter <x_passphrase>     = string; new pre-shared key, minimal length is 8 characters, maximum length is 63,
+     *                                         assign a value of null when security = 'open'
      * required parameter <usergroup_id>     = string; user group id that can be found using the list_usergroups() function
      * required parameter <wlangroup_id>     = string; wlan group id that can be found using the list_wlan_groups() function
      * optional parameter <enabled>          = boolean; enable/disable wlan
      * optional parameter <hide_ssid>        = boolean; hide/unhide wlan SSID
      * optional parameter <is_guest>         = boolean; apply guest policies or not
-     * optional parameter <security>         = string; security type
+     * optional parameter <security>         = string; security type (open, wep, wpapsk, wpaeap)
      * optional parameter <wpa_mode>         = string; wpa mode (wpa, wpa2, ..)
      * optional parameter <wpa_enc>          = string; encryption (auto, ccmp)
      * optional parameter <vlan_enabled>     = boolean; enable/disable vlan for this wlan
@@ -2686,9 +2649,8 @@ class Client
             return false;
         }
 
-        $json = [
+        $payload = [
             'name'             => $name,
-            'x_passphrase'     => $x_passphrase,
             'usergroup_id'     => $usergroup_id,
             'wlangroup_id'     => $wlangroup_id,
             'enabled'          => $enabled,
@@ -2702,12 +2664,16 @@ class Client
             'schedule_enabled' => $schedule_enabled,
             'schedule'         => $schedule,
         ];
+
         if (!is_null($vlan) && $vlan_enabled) {
-            $json['vlan'] = $vlan;
+            $payload['vlan'] = $vlan;
         }
 
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/add/wlanconf', 'json=' . $json);
+        if (!empty($x_passphrase) && $security !== 'open') {
+            $payload['x_passphrase'] = $x_passphrase;
+        }
+
+        $response = $this->exec_curl('/api/s/' . $this->site . '/add/wlanconf', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2716,19 +2682,18 @@ class Client
      * Update wlan settings, base (using REST)
      * ---------------------------------------
      * return true on success
-     * required parameter <wlan_id>
-     * required parameter <wlan_settings> = stdClass object or associative array containing the configuration to apply to the wlan, must be a
-     *                                      (partial) object/array structured in the same manner as is returned by list_wlanconf() for the wlan.
+     * required parameter <wlan_id> = the "_id" value for the WLAN you wish to update
+     * required parameter <payload> = stdClass object or associative array containing the configuration to apply to the wlan, must be a
+     *                                (partial) object/array structured in the same manner as is returned by list_wlanconf() for the wlan.
      */
-    public function set_wlansettings_base($wlan_id, $wlan_settings)
+    public function set_wlansettings_base($wlan_id, $payload)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
         $this->request_type = 'PUT';
-        $json               = json_encode($wlan_settings);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id), 'json=' . $json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2797,7 +2762,7 @@ class Client
      * Update MAC filter for a wlan
      * ----------------------------
      * return true on success
-     * required parameter <wlan_id>
+     * required parameter <wlan_id>            = the "_id" value for the WLAN you wish to update
      * required parameter <mac_filter_policy>  = string, "allow" or "deny"; default MAC policy to apply
      * required parameter <mac_filter_enabled> = boolean; true enables the policy, false disables it
      * required parameter <macs>               = array; must contain valid MAC strings to be placed in the MAC filter list,
@@ -2838,15 +2803,15 @@ class Client
             return false;
         }
 
-        $json = [
+        $payload = [
             '_sort'  => '-time',
             'within' => intval($historyhours),
             'type'   => null,
             '_start' => intval($start),
             '_limit' => intval($limit)
         ];
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/event', 'json=' . $json);
+
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/event', $payload);
 
         return $this->process_response($response);
     }
@@ -2899,12 +2864,12 @@ class Client
         }
 
         $this->request_type = 'POST';
-        $json               = json_encode(['cmd' => 'archive-all-alarms']);
+        $payload            = ['cmd' => 'archive-all-alarms'];
         if (!is_null($alarm_id)) {
-            $json = json_encode(['_id' => $alarm_id, 'cmd' => 'archive-alarm']);
+            $payload = ['_id' => $alarm_id, 'cmd' => 'archive-alarm'];
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/evtmgr', 'json=' . $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/evtmgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2924,9 +2889,8 @@ class Client
             return false;
         }
 
-        $json     = ['mac' => strtolower($device_mac)];
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr/upgrade', 'json=' . $json);
+        $payload  = ['mac' => strtolower($device_mac)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr/upgrade', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2948,9 +2912,8 @@ class Client
             return false;
         }
 
-        $json     = ['url' => filter_var($firmware_url, FILTER_SANITIZE_URL), 'mac' => strtolower($device_mac)];
-        $json     = json_encode($json, JSON_UNESCAPED_SLASHES);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr/upgrade-external', 'json=' . $json);
+        $payload  = ['url' => filter_var($firmware_url, FILTER_SANITIZE_URL), 'mac' => strtolower($device_mac)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr/upgrade-external', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2970,9 +2933,8 @@ class Client
             return false;
         }
 
-        $json     = ['cmd' => 'set-rollupgrade'];
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', 'json=' . $json);
+        $payload  = ['cmd' => 'set-rollupgrade'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -2988,9 +2950,8 @@ class Client
             return false;
         }
 
-        $json     = ['cmd' => 'unset-rollupgrade'];
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', 'json=' . $json);
+        $payload  = ['cmd' => 'unset-rollupgrade'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -3011,9 +2972,8 @@ class Client
         if (!$this->is_loggedin) {
             return false;
         }
-        $json     = ['mac' => strtolower($switch_mac), 'port_idx' => intval($port_idx), 'cmd' => 'power-cycle'];
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', 'json=' . $json);
+        $payload  = ['mac' => strtolower($switch_mac), 'port_idx' => intval($port_idx), 'cmd' => 'power-cycle'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -3030,9 +2990,8 @@ class Client
             return false;
         }
 
-        $json     = ['cmd' => 'spectrum-scan', 'mac' => strtolower($ap_mac)];
-        $json     = json_encode($json);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', 'json=' . $json);
+        $payload  = ['cmd' => 'spectrum-scan', 'mac' => strtolower($ap_mac)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -3058,20 +3017,18 @@ class Client
      * Update device settings, base (using REST)
      * -----------------------------------------
      * return true on success
-     * required parameter <device_id>       = 24 char string; _id of the device which can be found with the list_devices() function
-     * required parameter <device_settings> = stdClass object or associative array containing the configuration to apply to the device, must be a
-     *                                        (partial) object/array structured in the same manner as is returned by list_devices() for the device.
+     * required parameter <device_id> = 24 char string; _id of the device which can be found with the list_devices() function
+     * required parameter <payload>   = stdClass object or associative array containing the configuration to apply to the device, must be a
+     *                                  (partial) object/array structured in the same manner as is returned by list_devices() for the device.
      */
-    public function set_device_settings_base($device_id, $device_settings)
+    public function set_device_settings_base($device_id, $payload)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
         $this->request_type = 'PUT';
-        $json               = json_encode($device_settings);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/device/' . trim($device_id),
-            'json=' . $json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/device/' . trim($device_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -3168,18 +3125,18 @@ class Client
         }
 
         $this->request_type = 'POST';
-        $account_details    = [
+        $payload = [
             'name'               => $name,
             'x_password'         => $x_password,
             'tunnel_type'        => (int) $tunnel_type,
             'tunnel_medium_type' => (int) $tunnel_medium_type
         ];
+
         if (isset($vlan)) {
-            $account_details['vlan'] = (int) $vlan;
+            $payload['vlan'] = (int) $vlan;
         }
 
-        $json     = json_encode($account_details);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/account', 'json=' . $json);
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/account', $payload);
 
         return $this->process_response($response);
     }
@@ -3188,23 +3145,21 @@ class Client
      * Update Radius account, base (using REST)
      * ----------------------------------------
      * return true on success
-     * required parameter <account_id>      = 24 char string; _id of the account which can be found with the list_radius_accounts() function
-     * required parameter <account_details> = stdClass object or associative array containing the new profile to apply to the account, must be a (partial)
-     *
-     *                                        object/array structured in the same manner as is returned by list_radius_accounts() for the account.
+     * required parameter <account_id> = 24 char string; _id of the account which can be found with the list_radius_accounts() function
+     * required parameter <payload>    = stdClass object or associative array containing the new profile to apply to the account, must be a (partial)
+     *                                   object/array structured in the same manner as is returned by list_radius_accounts() for the account.
      *
      * NOTES:
      * - this function/method is only supported on controller versions 5.5.19 and later
      */
-    public function set_radius_account_base($account_id, $account_details)
+    public function set_radius_account_base($account_id, $payload)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
         $this->request_type = 'PUT';
-        $json               = json_encode($account_details);
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/account/' . trim($account_id), 'json=' . $json);
+        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/account/' . trim($account_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -3246,8 +3201,8 @@ class Client
             return false;
         }
 
-        $json     = json_encode(['cmd' => trim($command)]);
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stat', 'json=' . $json);
+        $payload  = ['cmd' => trim($command)];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stat', $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -3336,6 +3291,35 @@ class Client
         );
 
         return $this->site_leds(false);
+    }
+
+    /**
+     * Custom API request
+     * ------------------
+     * return results as requested
+     * required parameter <url>          = string; suffix of the URL (following the port number) to pass request to, *must* start with a "/" character
+     * optional parameter <request_type> = string; HTTP request type, can be GET (default), POST, PUT, or DELETE
+     * optional parameter <payload>      = stdClass object or associative array containing the payload to pass
+     * optional parameter <return>       = string; determines how to return results, value must be "boolean" when the method must return a
+     *                                     boolean result (true/false) or "array" when the method must return data as an array
+     *
+     * NOTE:
+     * Only use this method when you fully understand the behavior of the UniFi controller API. No input validation is performed, to be used with care!
+     */
+    public function custom_api_request($url, $request_type = 'GET', $payload = null, $return = 'array')
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $this->request_type = $request_type;
+        $response           = $this->exec_curl($url, $payload);
+
+        if ($return === 'array') {
+            return $this->process_response($response);
+        } elseif ($return === 'boolean') {
+            return $this->process_response_boolean($response);
+        }
     }
 
     /****************************************************************
@@ -3512,19 +3496,22 @@ class Client
     /**
      * Execute the cURL request
      */
-    protected function exec_curl($path, $data = '')
+    protected function exec_curl($path, $payload = '')
     {
-        $url = $this->baseurl . $path;
-
-        $ch = $this->get_curl_obj();
+        $json_payload = '';
+        $url          = $this->baseurl . $path;
+        $ch           = $this->get_curl_obj();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLINFO_HEADER_OUT, true);
 
-        if (trim($data) != '') {
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        if (!empty($payload)) {
+            $json_payload = json_encode($payload, JSON_UNESCAPED_SLASHES);
+
+            curl_setopt($ch, CURLOPT_POSTFIELDS, $json_payload);
+
             if ($this->request_type === 'PUT') {
                 curl_setopt($ch, CURLOPT_HTTPHEADER,
-                    ['Content-Type: application/json', 'Content-Length: ' . strlen($data)]);
+                    ['Content-Type: application/json', 'Content-Length: ' . strlen($json_payload)]);
                 curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
             } else {
                 curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
@@ -3547,53 +3534,63 @@ class Client
         /**
          * has the session timed out?
          */
-        $http_code            = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $json_decoded_content = json_decode($content, true);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        if ($http_code == 401 && isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
-            if ($this->debug) {
-                error_log('cURL debug: Needed to reconnect to UniFi Controller');
-            }
+        if ($http_code == 401) {
+            $json_decoded_content = json_decode($content, true);
 
-            /**
-             * explicitly unset the old cookie now
-             */
-            if (isset($_SESSION['unificookie'])) {
-                unset($_SESSION['unificookie']);
-                $no_cookie_in_use = 1;
-            }
-
-            $this->login();
-
-            /**
-             * when login was okay, exec the same command again
-             */
-            if ($this->is_loggedin) {
-                curl_close($ch);
-
-                /**
-                 * setup the cookie for the user within $_SESSION
-                 */
-                if (isset($no_cookie_in_use) && session_status() != PHP_SESSION_DISABLED) {
-                    $_SESSION['unificookie'] = $this->cookies;
-                    unset($no_cookie_in_use);
+            if (isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
+                if ($this->debug) {
+                    error_log('cURL debug: Needed to reconnect to UniFi Controller');
                 }
 
-                return $this->exec_curl($path, $data);
+                /**
+                 * explicitly unset the old cookie now
+                 */
+                if (isset($_SESSION['unificookie'])) {
+                    unset($_SESSION['unificookie']);
+                    $no_cookie_in_use = 1;
+                }
+
+                $this->login();
+
+                /**
+                 * when login was okay, exec the same command again
+                 */
+                if ($this->is_loggedin) {
+                    curl_close($ch);
+
+                    /**
+                     * setup the cookie for the user within $_SESSION
+                     */
+                    if (isset($no_cookie_in_use) && session_status() != PHP_SESSION_DISABLED) {
+                        $_SESSION['unificookie'] = $this->cookies;
+                        unset($no_cookie_in_use);
+                    }
+
+                    return $this->exec_curl($path, $payload);
+                }
             }
+
+            unset($json_decoded_content);
         }
 
         if ($this->debug) {
-            print '<pre>';
+            print PHP_EOL . '<pre>';
             print PHP_EOL . '---------cURL INFO-----------' . PHP_EOL;
             print_r(curl_getinfo($ch));
             print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
             print $url . PHP_EOL;
-            print $data;
+            if (empty($json_payload)) {
+                print 'empty payload';
+            } else {
+                print $json_payload;
+            }
+
             print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
             print $content;
             print PHP_EOL . '-----------------------------' . PHP_EOL;
-            print '</pre>';
+            print '</pre>' . PHP_EOL;
         }
 
         curl_close($ch);
@@ -3629,7 +3626,6 @@ class Client
 
         return $ch;
     }
-
 
     /****************************************************************
      * setter/getter functions from here:
@@ -3799,6 +3795,9 @@ class Client
         $this->curl_ssl_verify_peer = $ssl_verify_peer;
     }
 
+    /**
+     * set the value for cURL option CURLOPT_SSL_VERIFYHOST, should be 0/false or 2
+     */
     public function set_ssl_verify_host($ssl_verify_host)
     {
         $this->curl_ssl_verify_host = $ssl_verify_host;
