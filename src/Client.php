@@ -2375,6 +2375,78 @@ class Client
     }
 
     /**
+     * Assign access point to another WLAN group
+     * -----------------------------------------
+     * return true on success
+     * required parameter <device_name>    = string; _idname value of the access point to be modified
+     * required parameter <wlangroup_name> = string; name value of the WLAN group to assign device to
+     *
+     * NOTES:
+     * - can for example be used to turn WiFi off
+     * - this is only supported on newer version of Unifi controller
+     */
+    public function set_ap_wlangroups_by_device_name($device_name, $wlangroup_name)
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+
+        $devices = $this->list_devices();
+        $device_id = null;
+        foreach($devices as $device)
+        {
+            if($device->name == $device_name)
+            {
+                $device_id = $device->_id; 
+            }
+        }
+
+        if(!$device_id)
+        {
+            return false;
+        }
+
+        $wlan_groups = $this->list_wlan_groups();
+        $wlangroup_id = null; 
+        foreach($wlan_groups as $group)
+        {
+            if($group->name == $wlangroup_name)
+            {
+                $wlangroup_id = $group->_id; 
+            }
+        }
+
+        if(!$wlangroup_id)
+        {
+            return false;
+        }
+
+        $this->set_request_type('PUT');
+
+        $payload  = 
+            [
+                'radio_table' => [
+                    array(    
+                        'name' => 'wifi0',
+                        'radio' => 'ng',
+                        'wlangroup_id' => $wlangroup_id
+                    ),
+                    array(
+                        'name' => 'wifi1',
+                        'radio' => 'na',
+                        'wlangroup_id' => $wlangroup_id
+                    )
+                ],
+                'wlan_overrides' => []
+            ];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/device/' . trim($device_id), $payload);
+
+        return $this->process_response_boolean($response);
+    }
+
+
+    /**
      * Update guest login settings
      * ---------------------------
      * return true on success
