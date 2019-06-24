@@ -2368,8 +2368,40 @@ class Client
             return false;
         }
 
-        $payload  = ['wlan_overrides' => [], 'wlangroup_id_' . $wlantype_id => $wlangroup_id];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($device_id), $payload);
+        $devices_list = $this->list_devices();
+        if (!$devices_list) {
+            return false;
+        }
+
+        $radio_name = null;
+        foreach ($devices_list as $device) {
+            if ($device->_id == $device_id) {
+                foreach ($device->radio_table as $radio) {
+                    if ($radio->radio == $wlantype_id) {
+                        $radio_name = $radio->name;
+                    }
+                }
+            }
+        }
+        if (!$radio_name) {
+            return false;
+        }
+
+        $this->set_request_type('PUT');
+
+        $payload  =
+            [
+                'radio_table' => [
+                    array(
+                        'name' => $radio_name,
+                        'radio' => $wlantype_id,
+                        'wlangroup_id' => $wlangroup_id
+                    )
+                ],
+                'wlan_overrides' => []
+            ];
+
+        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/device/' . trim($device_id), $payload);
 
         return $this->process_response_boolean($response);
     }
