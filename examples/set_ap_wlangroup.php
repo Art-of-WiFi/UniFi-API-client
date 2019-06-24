@@ -2,8 +2,8 @@
 /**
  * PHP API usage example
  *
- * contributed by: Art of WiFi
- * description: example to change the wlan group of APs by the name of the AP and the name of the group
+ * contributed by: gahujipo
+ * description: example to change the wlan group of an AP
  */
 
 /**
@@ -28,7 +28,7 @@ $site_id = '<enter your site id here>';
 $unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
 $set_debug_mode   = $unifi_connection->set_debug($debug);
 $loginresults     = $unifi_connection->login();
-$result           = $unifi_connection->set_ap_wlangroups_by_device_name('<device_name>','<wlan group name e.g. Default>');
+$result           = $unifi_connection->set_ap_wlangroup('<wlantype_id>', '<device_id>', '<wlangroup_id>');
 
 /**
  * output the results in JSON format
