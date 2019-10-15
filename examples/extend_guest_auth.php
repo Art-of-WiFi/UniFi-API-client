@@ -62,7 +62,7 @@ if ($loginresults === 400) {
             }
 
             if (!$unifi_connection->extend_guest_validity($guest->_id)) {
-                {print "Extend failed for guest with id " . $guest->_id . "\n";
+                print "Extend failed for guest with id " . $guest->_id . "\n";
             }
         }
     }
