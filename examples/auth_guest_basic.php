@@ -3,7 +3,7 @@
  * PHP API usage example
  *
  * contributed by: Art of WiFi
- * description: example basic PHP script to perform a basic auth of a guest device
+ * description: example PHP script to perform a basic auth of a guest device
  */
 
 /**
@@ -21,6 +21,16 @@ require_once('config.php');
  * the MAC address of the device to authorize
  */
 $mac = '<enter MAC address of guest device to auth>';
+
+/**
+ * the MAC address of the Access Point the guest is currently connected to, enter null (without quotes)
+ * if not known or unavailable
+ *
+ * NOTE:
+ * although the AP MAC address is not a required parameter for the authorize_guest() function,
+ * adding this parameter will speed up the initial authorization process
+ */
+$ap_mac = '<enter MAC address of Access Point>';
 
 /**
  * the duration to authorize the device for in minutes
@@ -42,7 +52,7 @@ $loginresults     = $unifi_connection->login();
 /**
  * then we authorize the device for the requested duration
  */
-$auth_result = $unifi_connection->authorize_guest($mac, $duration);
+$auth_result = $unifi_connection->authorize_guest($mac, $duration, null, null, null, $ap_mac);
 
 /**
  * provide feedback in json format

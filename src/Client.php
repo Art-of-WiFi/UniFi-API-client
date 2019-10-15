@@ -114,56 +114,58 @@ class Client
             return $this->is_loggedin = true;
         }
 
-        $ch = $this->get_curl_obj();
+        if (!is_resource($ch = $this->get_curl_resource())) {
+            trigger_error('$ch as returned by get_curl_resource() is not a resource');
+        } else {
+            curl_setopt($ch, CURLOPT_HEADER, 1);
+            curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
+            curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/login');
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
 
-        curl_setopt($ch, CURLOPT_HEADER, 1);
-        curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
-        curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/login');
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
+            /**
+             * execute the cURL request
+             */
+            $content = curl_exec($ch);
 
-        /**
-         * execute the cURL request
-         */
-        $content = curl_exec($ch);
+            if (curl_errno($ch)) {
+                trigger_error('cURL error: ' . curl_error($ch));
+            }
 
-        if (curl_errno($ch)) {
-            trigger_error('cURL error: ' . curl_error($ch));
-        }
+            if ($this->debug) {
+                curl_setopt($ch, CURLOPT_VERBOSE, true);
 
-        if ($this->debug) {
-            curl_setopt($ch, CURLOPT_VERBOSE, true);
+                print '<pre>';
+                print PHP_EOL . '-----------LOGIN-------------' . PHP_EOL;
+                print_r(curl_getinfo($ch));
+                print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
+                print $content;
+                print PHP_EOL . '-----------------------------' . PHP_EOL;
+                print '</pre>';
+            }
 
-            print '<pre>';
-            print PHP_EOL . '-----------LOGIN-------------' . PHP_EOL;
-            print_r(curl_getinfo($ch));
-            print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
-            print $content;
-            print PHP_EOL . '-----------------------------' . PHP_EOL;
-            print '</pre>';
-        }
+            $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+            $headers     = substr($content, 0, $header_size);
+            $body        = trim(substr($content, $header_size));
+            $http_code   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-        $headers     = substr($content, 0, $header_size);
-        $body        = trim(substr($content, $header_size));
-        $http_code   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            curl_close($ch);
 
-        curl_close($ch);
+            preg_match_all('|Set-Cookie: (.*);|Ui', $headers, $results);
 
-        preg_match_all('|Set-Cookie: (.*);|Ui', $headers, $results);
-
-        if (isset($results[1])) {
-            $this->cookies = implode(';', $results[1]);
-            if (!empty($body)) {
-                if (($http_code >= 200) && ($http_code < 400)) {
-                    if (strpos($this->cookies, 'unifises') !== false) {
-                        return $this->is_loggedin = true;
+            if (isset($results[1])) {
+                $this->cookies = implode(';', $results[1]);
+                if (!empty($body)) {
+                    if (($http_code >= 200) && ($http_code < 400)) {
+                        if (strpos($this->cookies, 'unifises') !== false) {
+                            return $this->is_loggedin = true;
+                        }
                     }
-                }
 
-                if ($http_code === 400) {
-                    trigger_error('We have received an HTTP response status: 400. Probably a controller login failure');
+                    if ($http_code === 400) {
+                        trigger_error('We have received an HTTP response status: 400. Probably a controller login failure');
 
-                    return $http_code;
+                        return $http_code;
+                    }
                 }
             }
         }
@@ -1769,14 +1771,14 @@ class Client
     }
 
     /**
-     * Revoke an admin
-     * ---------------
+     * Revoke an admin from the current site
+     * -------------------------------------
      * returns true on success
      * required parameter <admin_id> = _id value of the admin to revoke, can be obtained using the
      *                                 list_all_admins() method/function
      *
      * NOTES:
-     * only non-superadmins account can be revoked
+     * only non-superadmin accounts can be revoked
      */
     public function revoke_admin($admin_id)
     {
@@ -2421,10 +2423,10 @@ class Client
     }
 
     /**
-     * Update guestlogin settings, base
+     * Update guest login settings, base
      * ------------------------------------------
      * return true on success
-     * required parameter <payload> = stdClass object or associative array containing the configuration to apply to the guestlogin, must be a (partial)
+     * required parameter <payload> = stdClass object or associative array containing the configuration to apply to the guest login, must be a (partial)
      *                                object/array structured in the same manner as is returned by list_settings() for the "guest_access" section.
      */
     public function set_guestlogin_settings_base($payload)
@@ -2452,6 +2454,66 @@ class Client
         }
 
         $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/ips', $payload);
+
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Update "Super Management" settings, base
+     * ------------------------------------------
+     * return true on success
+     * required parameter <settings_id> = 24 char string; value of _id for the site settings section where key = "super_mgmt", settings can be obtained
+     *                                    using the list_settings() function
+     * required parameter <payload>     = stdClass object or associative array containing the "Super Management" settings to apply, must be a (partial)
+     *                                    object/array structured in the same manner as is returned by list_settings() for the "super_mgmt" section.
+     */
+    public function set_super_mgmt_settings_base($settings_id, $payload)
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/super_mgmt/' . trim($settings_id), $payload);
+
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Update "Super SMTP" settings, base
+     * ------------------------------------------
+     * return true on success
+     * required parameter <settings_id> = 24 char string; value of _id for the site settings section where key = "super_smtp", settings can be obtained
+     *                                    using the list_settings() function
+     * required parameter <payload>     = stdClass object or associative array containing the "Super SMTP" settings to apply, must be a (partial)
+     *                                    object/array structured in the same manner as is returned by list_settings() for the "super_smtp" section.
+     */
+    public function set_super_smtp_settings_base($settings_id, $payload)
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/super_smtp/' . trim($settings_id), $payload);
+
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Update "Super Controller Identity" settings, base
+     * ------------------------------------------
+     * return true on success
+     * required parameter <settings_id> = 24 char string; value of _id for the site settings section where key = "super_identity", settings can be obtained
+     *                                    using the list_settings() function
+     * required parameter <payload>     = stdClass object or associative array containing the "Super Controller Identity" settings to apply, must be a (partial)
+     *                                    object/array structured in the same manner as is returned by list_settings() for the "super_identity" section.
+     */
+    public function set_super_identity_settings_base($settings_id, $payload)
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/super_identity/' . trim($settings_id), $payload);
 
         return $this->process_response_boolean($response);
     }
@@ -3296,8 +3358,8 @@ class Client
     /**
      * Custom API request
      * ------------------
-     * return results as requested
-     * required parameter <url>          = string; suffix of the URL (following the port number) to pass request to, *must* start with a "/" character
+     * returns results as requested, returns false on incorrect parameters
+     * required parameter <path>         = string; suffix of the URL (following the port number) to pass request to, *must* start with a "/" character
      * optional parameter <request_type> = string; HTTP request type, can be GET (default), POST, PUT, or DELETE
      * optional parameter <payload>      = stdClass object or associative array containing the payload to pass
      * optional parameter <return>       = string; determines how to return results, value must be "boolean" when the method must return a
@@ -3306,24 +3368,202 @@ class Client
      * NOTE:
      * Only use this method when you fully understand the behavior of the UniFi controller API. No input validation is performed, to be used with care!
      */
-    public function custom_api_request($url, $request_type = 'GET', $payload = null, $return = 'array')
+    public function custom_api_request($path, $request_type = 'GET', $payload = null, $return = 'array')
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
         $this->request_type = $request_type;
-        $response           = $this->exec_curl($url, $payload);
+        $response           = $this->exec_curl($path, $payload);
 
         if ($return === 'array') {
             return $this->process_response($response);
         } elseif ($return === 'boolean') {
             return $this->process_response_boolean($response);
         }
+
+        return false;
     }
 
     /****************************************************************
-     * Internal (private) functions from here:
+     * setter/getter functions from here:
+     ****************************************************************/
+
+    /**
+     * Set site
+     * --------
+     * modify the private property site, returns the new (short) site name
+     * required parameter <site> = string; must be the short site name of a site to which the
+     *                             provided credentials have access
+     *
+     * NOTE:
+     * this method can be useful when switching between sites
+     */
+    public function set_site($site)
+    {
+        $this->check_site($site);
+        $this->site = trim($site);
+
+        return $this->site;
+    }
+
+    /**
+     * Get site
+     * --------
+     * get the value of private property site, returns the current (short) site name
+     */
+    public function get_site()
+    {
+        return $this->site;
+    }
+
+    /**
+     * Set debug mode
+     * --------------
+     * sets debug mode to true or false, returns false if a non-boolean parameter was passed
+     * required parameter <enable> = boolean; true will enable debug mode, false will disable it
+     */
+    public function set_debug($enable)
+    {
+        if ($enable === true || $enable === false) {
+            $this->debug = $enable;
+
+            return true;
+        }
+
+        trigger_error('Error: the parameter for set_debug() must be boolean');
+
+        return false;
+    }
+
+    /**
+     * Get debug mode
+     * --------------
+     * get the value of private property debug, returns the current boolean value for debug
+     */
+    public function get_debug()
+    {
+        return $this->debug;
+    }
+
+    /**
+     * Get last raw results
+     * --------------------
+     * returns the raw results of the last method called, returns false if unavailable
+     * optional parameter <return_json> = boolean; true will return the results in "pretty printed" json format,
+     *                                    PHP stdClass Object format is returned by default
+     */
+    public function get_last_results_raw($return_json = false)
+    {
+        if ($this->last_results_raw !== null) {
+            if ($return_json) {
+                return json_encode($this->last_results_raw, JSON_PRETTY_PRINT);
+            }
+
+            return $this->last_results_raw;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get last error message
+     * ----------------------
+     * returns the error message of the last method called in PHP stdClass Object format, returns false if unavailable
+     */
+    public function get_last_error_message()
+    {
+        if ($this->last_error_message !== null) {
+            return $this->last_error_message;
+        }
+
+        return false;
+    }
+
+    /**
+     * Get Cookie from UniFi Controller
+     * --------------------------------
+     * returns the UniFi controller cookie
+     *
+     * NOTES:
+     * - when the results from this method are stored in $_SESSION['unificookie'], the class will initially not
+     *   log in to the controller when a subsequent request is made using a new instance. This speeds up the
+     *   overall request considerably. If that subsequent request fails (e.g. cookies have expired), a new login
+     *   is executed automatically and the value of $_SESSION['unificookie'] is updated.
+     */
+    public function get_cookie()
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        return $this->cookies;
+    }
+
+    /******************************************************************
+     * other getter/setter functions/methods from here, use with care!
+     ******************************************************************/
+    public function get_cookies()
+    {
+        return $this->cookies;
+    }
+
+    public function get_request_type()
+    {
+        return $this->request_type;
+    }
+
+    public function get_ssl_verify_peer()
+    {
+        return $this->curl_ssl_verify_peer;
+    }
+
+    public function get_ssl_verify_host()
+    {
+        return $this->curl_ssl_verify_host;
+    }
+
+    public function set_cookies($cookies_value)
+    {
+        $this->cookies = $cookies_value;
+    }
+
+    public function set_request_type($request_type)
+    {
+        $this->request_type = $request_type;
+    }
+
+    public function set_connection_timeout($timeout)
+    {
+        $this->connect_timeout = $timeout;
+    }
+
+    public function set_last_results_raw($last_results)
+    {
+        $this->last_results_raw = $last_results;
+    }
+
+    public function set_last_error_message($last_error_message)
+    {
+        $this->last_error_message = $last_error_message;
+    }
+
+    public function set_ssl_verify_peer($ssl_verify_peer)
+    {
+        $this->curl_ssl_verify_peer = $ssl_verify_peer;
+    }
+
+    /**
+     * set the value for cURL option CURLOPT_SSL_VERIFYHOST, should be 0/false or 2
+     */
+    public function set_ssl_verify_host($ssl_verify_host)
+    {
+        $this->curl_ssl_verify_host = $ssl_verify_host;
+    }
+
+    /****************************************************************
+     * internal (private and protected) functions from here:
      ****************************************************************/
 
     /**
@@ -3498,115 +3738,121 @@ class Client
      */
     protected function exec_curl($path, $payload = '')
     {
-        $json_payload = '';
-        $url          = $this->baseurl . $path;
-        $ch           = $this->get_curl_obj();
-        curl_setopt($ch, CURLOPT_URL, $url);
-        curl_setopt($ch, CURLINFO_HEADER_OUT, true);
-
-        if (!empty($payload)) {
-            $json_payload = json_encode($payload, JSON_UNESCAPED_SLASHES);
-
-            curl_setopt($ch, CURLOPT_POSTFIELDS, $json_payload);
-
-            if ($this->request_type === 'PUT') {
-                curl_setopt($ch, CURLOPT_HTTPHEADER,
-                    ['Content-Type: application/json', 'Content-Length: ' . strlen($json_payload)]);
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-            } else {
-                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-            }
+        if (!is_resource($ch = $this->get_curl_resource())) {
+            trigger_error('$ch as returned by get_curl_resource() is not a resource');
         } else {
-            curl_setopt($ch, CURLOPT_POST, false);
-            if ($this->request_type === 'DELETE') {
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+            $json_payload = '';
+            $url          = $this->baseurl . $path;
+            curl_setopt($ch, CURLOPT_URL, $url);
+
+            if (!empty($payload)) {
+                $json_payload = json_encode($payload, JSON_UNESCAPED_SLASHES);
+
+                curl_setopt($ch, CURLOPT_POSTFIELDS, $json_payload);
+
+                if ($this->request_type === 'PUT') {
+                    curl_setopt($ch, CURLOPT_HTTPHEADER,
+                        ['Content-Type: application/json', 'Content-Length: ' . strlen($json_payload)]);
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+                } else {
+                    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+                }
+            } else {
+                curl_setopt($ch, CURLOPT_POST, false);
+                if ($this->request_type === 'DELETE') {
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+                }
             }
-        }
 
-        /**
-         * execute the cURL request
-         */
-        $content = curl_exec($ch);
-        if (curl_errno($ch)) {
-            trigger_error('cURL error: ' . curl_error($ch));
-        }
+            /**
+             * execute the cURL request
+             */
+            $content = curl_exec($ch);
+            if (curl_errno($ch)) {
+                trigger_error('cURL error: ' . curl_error($ch));
+            }
 
-        /**
-         * has the session timed out?
-         */
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            /**
+             * has the session timed out? If so, we need to login again.
+             */
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-        if ($http_code == 401) {
-            $json_decoded_content = json_decode($content, true);
+            if ($http_code == 401) {
+                $json_decoded_content = json_decode($content, true);
 
-            if (isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
-                if ($this->debug) {
-                    error_log('cURL debug: Needed to reconnect to UniFi Controller');
-                }
-
-                /**
-                 * explicitly unset the old cookie now
-                 */
-                if (isset($_SESSION['unificookie'])) {
-                    unset($_SESSION['unificookie']);
-                    $no_cookie_in_use = 1;
-                }
-
-                $this->login();
-
-                /**
-                 * when login was okay, exec the same command again
-                 */
-                if ($this->is_loggedin) {
-                    curl_close($ch);
-
-                    /**
-                     * setup the cookie for the user within $_SESSION
-                     */
-                    if (isset($no_cookie_in_use) && session_status() != PHP_SESSION_DISABLED) {
-                        $_SESSION['unificookie'] = $this->cookies;
-                        unset($no_cookie_in_use);
+                if (isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
+                    if ($this->debug) {
+                        error_log('cURL debug: Needed to reconnect to UniFi Controller');
                     }
 
-                    return $this->exec_curl($path, $payload);
+                    /**
+                     * explicitly unset the old cookie now
+                     */
+                    if (isset($_SESSION['unificookie'])) {
+                        unset($_SESSION['unificookie']);
+                    }
+
+                    /**
+                     * then login again
+                     */
+                    $this->login();
+
+                    /**
+                     * when login was successful, execute the same command again
+                     */
+                    if ($this->is_loggedin) {
+                        curl_close($ch);
+
+                        /**
+                         * setup the cookie for the user within $_SESSION, if $_SESSION['unificookie'] does not exist
+                         */
+                        if (!isset($_SESSION['unificookie']) && session_status() != PHP_SESSION_DISABLED) {
+                            $_SESSION['unificookie'] = $this->cookies;
+                        }
+
+                        return $this->exec_curl($path, $payload);
+                    }
                 }
+
+                unset($json_decoded_content);
             }
 
-            unset($json_decoded_content);
-        }
+            if ($this->debug) {
+                print PHP_EOL . '<pre>';
+                print PHP_EOL . '---------cURL INFO-----------' . PHP_EOL;
+                print_r(curl_getinfo($ch));
+                print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
+                print $url . PHP_EOL;
+                if (empty($json_payload)) {
+                    print 'empty payload';
+                } else {
+                    print $json_payload;
+                }
 
-        if ($this->debug) {
-            print PHP_EOL . '<pre>';
-            print PHP_EOL . '---------cURL INFO-----------' . PHP_EOL;
-            print_r(curl_getinfo($ch));
-            print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
-            print $url . PHP_EOL;
-            if (empty($json_payload)) {
-                print 'empty payload';
-            } else {
-                print $json_payload;
+                print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
+                print $content;
+                print PHP_EOL . '-----------------------------' . PHP_EOL;
+                print '</pre>' . PHP_EOL;
             }
 
-            print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
-            print $content;
-            print PHP_EOL . '-----------------------------' . PHP_EOL;
-            print '</pre>' . PHP_EOL;
+            curl_close($ch);
+
+            /**
+             * set request_type value back to default, just in case
+             */
+            $this->request_type = 'POST';
+
+            return $content;
         }
 
-        curl_close($ch);
-
-        /**
-         * set request_type value back to default, just in case
-         */
-        $this->request_type = 'POST';
-
-        return $content;
+        return false;
     }
 
     /**
-     * Get the cURL object
+     * Create a new cURL resource and return a cURL handle,
+     * returns false on errors
      */
-    protected function get_curl_obj()
+    protected function get_curl_resource()
     {
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_POST, true);
@@ -3614,6 +3860,7 @@ class Client
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->curl_ssl_verify_host);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
+        curl_setopt($ch, CURLINFO_HEADER_OUT, true);
 
         if ($this->debug) {
             curl_setopt($ch, CURLOPT_VERBOSE, true);
@@ -3625,181 +3872,5 @@ class Client
         }
 
         return $ch;
-    }
-
-    /****************************************************************
-     * setter/getter functions from here:
-     ****************************************************************/
-
-    /**
-     * Set site
-     * --------
-     * modify the private property site, returns the new (short) site name
-     * required parameter <site> = string; must be the short site name of a site to which the
-     *                             provided credentials have access
-     *
-     * NOTE:
-     * this method can be useful when switching between sites
-     */
-    public function set_site($site)
-    {
-        $this->check_site($site);
-        $this->site = trim($site);
-
-        return $this->site;
-    }
-
-    /**
-     * Get site
-     * --------
-     * get the value of private property site, returns the current (short) site name
-     */
-    public function get_site()
-    {
-        return $this->site;
-    }
-
-    /**
-     * Set debug mode
-     * --------------
-     * sets debug mode to true or false, returns false if a non-boolean parameter was passed
-     * required parameter <enable> = boolean; true will enable debug mode, false will disable it
-     */
-    public function set_debug($enable)
-    {
-        if ($enable === true || $enable === false) {
-            $this->debug = $enable;
-
-            return true;
-        }
-
-        trigger_error('Error: the parameter for set_debug() must be boolean');
-
-        return false;
-    }
-
-    /**
-     * Get debug mode
-     * --------------
-     * get the value of private property debug, returns the current boolean value for debug
-     */
-    public function get_debug()
-    {
-        return $this->debug;
-    }
-
-    /**
-     * Get last raw results
-     * --------------------
-     * returns the raw results of the last method called, returns false if unavailable
-     * optional parameter <return_json> = boolean; true will return the results in "pretty printed" json format,
-     *                                    PHP stdClass Object format is returned by default
-     */
-    public function get_last_results_raw($return_json = false)
-    {
-        if ($this->last_results_raw !== null) {
-            if ($return_json) {
-                return json_encode($this->last_results_raw, JSON_PRETTY_PRINT);
-            }
-
-            return $this->last_results_raw;
-        }
-
-        return false;
-    }
-
-    /**
-     * Get last error message
-     * ----------------------
-     * returns the error message of the last method called in PHP stdClass Object format, returns false if unavailable
-     */
-    public function get_last_error_message()
-    {
-        if ($this->last_error_message !== null) {
-            return $this->last_error_message;
-        }
-
-        return false;
-    }
-
-    /**
-     * Get Cookie from UniFi Controller
-     * --------------------------------
-     * returns the UniFi controller cookie
-     *
-     * NOTES:
-     * - when the results from this method are stored in $_SESSION['unificookie'], the class will initially not
-     *   log in to the controller when a subsequent request is made using a new instance. This speeds up the
-     *   overall request considerably. If that subsequent request fails (e.g. cookies have expired), a new login
-     *   is executed automatically and the value of $_SESSION['unificookie'] is updated.
-     */
-    public function get_cookie()
-    {
-        if (!$this->is_loggedin) {
-            return false;
-        }
-
-        return $this->cookies;
-    }
-
-    /****************************************************************
-     * other getter/setter functions/methods from here, use with care!
-     ****************************************************************/
-    public function get_cookies()
-    {
-        return $this->cookies;
-    }
-
-    public function get_request_type()
-    {
-        return $this->request_type;
-    }
-
-    public function get_ssl_verify_peer()
-    {
-        return $this->curl_ssl_verify_peer;
-    }
-
-    public function get_ssl_verify_host()
-    {
-        return $this->curl_ssl_verify_host;
-    }
-
-    public function set_cookies($cookies_value)
-    {
-        $this->cookies = $cookies_value;
-    }
-
-    public function set_request_type($request_type)
-    {
-        $this->request_type = $request_type;
-    }
-
-    public function set_connection_timeout($timeout)
-    {
-        $this->connect_timeout = $timeout;
-    }
-
-    public function set_last_results_raw($last_results)
-    {
-        $this->last_results_raw = $last_results;
-    }
-
-    public function set_last_error_message($last_error_message)
-    {
-        $this->last_error_message = $last_error_message;
-    }
-
-    public function set_ssl_verify_peer($ssl_verify_peer)
-    {
-        $this->curl_ssl_verify_peer = $ssl_verify_peer;
-    }
-
-    /**
-     * set the value for cURL option CURLOPT_SSL_VERIFYHOST, should be 0/false or 2
-     */
-    public function set_ssl_verify_host($ssl_verify_host)
-    {
-        $this->curl_ssl_verify_host = $ssl_verify_host;
     }
 }
