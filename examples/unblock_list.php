@@ -24,8 +24,8 @@ require_once('vendor/autoload.php');
  * see the config.template.php file for an example
  */
 require_once('config.php');
+$debug = false;
 
-$debug=false;
 /**
  * the MAC addresses of the device(s) to unblock
  */

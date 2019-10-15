@@ -24,12 +24,12 @@ require_once('vendor/autoload.php');
  * see the config.template.php file for an example
  */
 require_once('config.php');
-
 $debug = false;
+
 /**
  * the MAC address(es) of the device(s) to block
  */
-$macs_to_block = explode(',',$argv[1]);
+$macs_to_block = explode(',', $argv[1]);
 
 /**
  * The site to authorize the device with
@@ -49,7 +49,7 @@ $loginresults     = $unifi_connection->login(); // always true regardless of sit
 
 foreach ($macs_to_block as &$mac) {
     // block_result is always true even if mac address does not exist :(
-    $block_result   = $unifi_connection->block_sta($mac);
+    $block_result = $unifi_connection->block_sta($mac);
 
     /**
      * NOTE:
@@ -61,7 +61,7 @@ foreach ($macs_to_block as &$mac) {
      */
     sleep(1);
 
-    $getid_result   = $unifi_connection->stat_client($mac);
+    $getid_result = $unifi_connection->stat_client($mac);
 
     if (property_exists($getid_result[0], "oui")) {
         // this field(manufacturer) seems to exist on valid mac addresses

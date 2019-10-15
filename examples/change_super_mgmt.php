@@ -33,10 +33,10 @@ $site_settings    = $unifi_connection->list_settings();
 $super_mgmt_settings = [];
 $super_mgmt_settings_id = '';
 
-if(!empty($site_settings)) {
+if (!empty($site_settings)) {
     foreach($site_settings as $section) {
         echo 'section key: ' . $section->key . PHP_EOL;
-        if($section->key === 'super_mgmt') {
+        if ($section->key === 'super_mgmt') {
             $super_mgmt_settings = $section;
             $super_mgmt_settings_id = $section->_id;
         }

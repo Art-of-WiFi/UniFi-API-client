@@ -17,7 +17,9 @@ require_once('vendor/autoload.php');
  */
 require_once('config.php');
 
-// must be adapted to your site!
+/**
+ * must be adapted to your site!
+ */
 $site_id   = "default";
 $site_name = "*enter your site name*";
 
@@ -29,18 +31,39 @@ if ($loginresults === 400) {
     print "UniFi controller login failure, please check your credentials in config.php.\n";
 } else {
     $guestlist = $unifi_connection->list_guests();
-    // loop thru all known guests
+
+    /**
+     * loop thru all known guests
+     */
     foreach ($guestlist as $guest) {
         print "<pre>" . $guest->_id . " (" . $guest->mac . "), valid until " . date(DATE_ATOM, $guest->end) . " (" . $guest->end . ")</pre>";
 
-        // just a sample: only extend validity of guests which have end date after 2017-04-02
+        /**
+         * just a sample: only extend validity of guests which have end date after 2017-04-02
+         */
         if ($guest->end > 1491166482) {
-            // extend clients five times = five days
-            if (!$unifi_connection->extend_guest_validity($guest->_id)) print "Extend failed for guest with id " . $guest->_id . "\n";
-            if (!$unifi_connection->extend_guest_validity($guest->_id)) print "Extend failed for guest with id " . $guest->_id . "\n";
-            if (!$unifi_connection->extend_guest_validity($guest->_id)) print "Extend failed for guest with id " . $guest->_id . "\n";
-            if (!$unifi_connection->extend_guest_validity($guest->_id)) print "Extend failed for guest with id " . $guest->_id . "\n";
-            if (!$unifi_connection->extend_guest_validity($guest->_id)) print "Extend failed for guest with id " . $guest->_id . "\n";
+            /**
+             * extend clients five times = five days
+             */
+            if (!$unifi_connection->extend_guest_validity($guest->_id)) {
+                print "Extend failed for guest with id " . $guest->_id . "\n";
+            }
+
+            if (!$unifi_connection->extend_guest_validity($guest->_id)) {
+                print "Extend failed for guest with id " . $guest->_id . "\n";
+            }
+
+            if (!$unifi_connection->extend_guest_validity($guest->_id)) {
+                print "Extend failed for guest with id " . $guest->_id . "\n";
+            }
+
+            if (!$unifi_connection->extend_guest_validity($guest->_id)) {
+                print "Extend failed for guest with id " . $guest->_id . "\n";
+            }
+
+            if (!$unifi_connection->extend_guest_validity($guest->_id)) {
+                {print "Extend failed for guest with id " . $guest->_id . "\n";
+            }
         }
     }
 
