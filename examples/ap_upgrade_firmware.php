@@ -3,7 +3,7 @@
  * PHP API usage example
  *
  * contributed by: @4oo4
- * description: example script to check and upgrade device firmware (can be scheduled with systemd/cron)
+ * description: example script to upgrade device firmware (can be scheduled with systemd/cron)
  *              to the most current version
  */
 require_once('vendor/autoload.php');

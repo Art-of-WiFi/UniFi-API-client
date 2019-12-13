@@ -537,9 +537,10 @@ class Client
             return false;
         }
 
-        $end     = is_null($end) ? (time() * 1000) : intval($end);
-        $start   = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
-        $payload = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        $end        = is_null($end) ? (time() * 1000) : intval($end);
+        $start      = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
+        $attributes = ['bytes', 'num_sta', 'time'];
+        $payload = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
             $payload['mac'] = strtolower($mac);
         }
@@ -567,9 +568,10 @@ class Client
             return false;
         }
 
-        $end     = is_null($end) ? (time() * 1000) : intval($end);
-        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $payload = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        $end        = is_null($end) ? (time() * 1000) : intval($end);
+        $start      = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $attributes = ['bytes', 'num_sta', 'time'];
+        $payload = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
             $payload['mac'] = strtolower($mac);
         }
@@ -597,9 +599,10 @@ class Client
             return false;
         }
 
-        $end     = is_null($end) ? (time() * 1000) : intval($end);
-        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $payload = ['attrs' => ['bytes', 'num_sta', 'time'], 'start' => $start, 'end' => $end];
+        $end        = is_null($end) ? (time() * 1000) : intval($end);
+        $start      = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $attributes = ['bytes', 'num_sta', 'time'];
+        $payload = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
             $payload['mac'] = strtolower($mac);
         }
@@ -2190,18 +2193,27 @@ class Client
     }
 
     /**
-     * Reboot an access point
+     * Reboot a device
      * ----------------------
      * return true on success
-     * required parameter <mac> = device MAC address
+     * required parameter <mac>  = device MAC address
+     * optional parameter <type> = string; two options: 'soft' or 'hard', defaults to soft
+     *                             soft can be used for all devices, requests a plain restart of that device
+     *                             hard is special for PoE switches and besides the restart also requests a
+     *                             power cycle on all PoE capable ports. Keep in mind that a 'hard' reboot
+     *                             does *NOT* trigger a factory-reset, as it somehow could suggest.
      */
-    public function restart_ap($mac)
+    public function restart_device($mac, $type = 'soft')
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
-        $payload  = ['cmd' => 'restart', 'mac' => strtolower($mac)];
+        $payload = ['cmd' => 'restart', 'mac' => strtolower($mac)];
+        if (!is_null($type) && in_array($type, ['soft', 'hard'])) {
+            $payload['type'] = strtolower($type);
+        }
+
         $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
 
         return $this->process_response_boolean($response);
@@ -2356,9 +2368,6 @@ class Client
      * required parameter <wlantype_id>  = string; WLAN type, can be either 'ng' (for WLANs 2G (11n/b/g)) or 'na' (WLANs 5G (11n/a/ac))
      * required parameter <device_id>    = string; _id value of the access point to be modified
      * required parameter <wlangroup_id> = string; _id value of the WLAN group to assign device to
-     *
-     * NOTES:
-     * - can for example be used to turn WiFi off
      */
     public function set_ap_wlangroup($wlantype_id, $device_id, $wlangroup_id)
     {
@@ -2370,7 +2379,11 @@ class Client
             return false;
         }
 
-        $payload  = ['wlan_overrides' => [], 'wlangroup_id_' . $wlantype_id => $wlangroup_id];
+        $payload  = [
+            'wlan_overrides'               => [],
+            'wlangroup_id_' . $wlantype_id => $wlangroup_id
+        ];
+
         $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($device_id), $payload);
 
         return $this->process_response_boolean($response);
@@ -2380,14 +2393,15 @@ class Client
      * Update guest login settings
      * ---------------------------
      * return true on success
-     * required parameter <portal_enabled>
-     * required parameter <portal_customized>
-     * required parameter <redirect_enabled>
-     * required parameter <redirect_url>
-     * required parameter <x_password>
-     * required parameter <expire_number>
-     * required parameter <expire_unit>
-     * required parameter <site_id>
+     * required parameter <portal_enabled>    = boolean; enable/disable the captive portal
+     * required parameter <portal_customized> = boolean; enable/disable captive portal customizations
+     * required parameter <redirect_enabled>  = boolean; enable/disable captive portal redirect
+     * required parameter <redirect_url>      = string; url to redirect to, must include the http/https prefix, no trailing slashes
+     * required parameter <x_password>        = string; the captive portal (simple) password
+     * required parameter <expire_number>     = numeric; number of units for the authorization expiry
+     * required parameter <expire_unit>       = numeric; number of minutes within a unit (a value 60 is required for hours)
+     * required parameter <section_id>        = 24 char string; value of _id for the site settings section where key = "guest_access", settings can be obtained
+     *                                          using the list_settings() function
      *
      * NOTES:
      * - both portal parameters are set to the same value!
@@ -2400,7 +2414,7 @@ class Client
         $x_password,
         $expire_number,
         $expire_unit,
-        $site_id
+        $section_id
     ) {
         if (!$this->is_loggedin) {
             return false;
@@ -2414,7 +2428,7 @@ class Client
             'x_password'        => $x_password,
             'expire_number'     => $expire_number,
             'expire_unit'       => $expire_unit,
-            'site_id'           => $site_id
+            '_id'               => $section_id
         ];
 
         $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/guest_access', $payload);
@@ -3354,6 +3368,23 @@ class Client
 
         return $this->site_leds(false);
     }
+
+    /**
+     * Reboot an access point
+     * ----------------------
+     * return true on success
+     * required parameter <mac> = device MAC address
+     */
+    public function restart_ap($mac)
+    {
+        trigger_error(
+            'Function restart_ap() has been deprecated, use restart_device() instead.',
+            E_USER_DEPRECATED
+        );
+
+        return $this->restart_device($mac);
+    }
+
 
     /**
      * Custom API request
