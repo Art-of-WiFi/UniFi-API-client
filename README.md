@@ -1,12 +1,12 @@
 ## UniFi Controller API client class
 
-A PHP class which provides access to Ubiquiti's [**UniFi SDN Controller API**](https://unifi-sdn.ui.com/), versions 4.X.X and 5.X.X of the UniFi SDN Controller software are supported (version 5.11.39 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+A PHP class which provides access to Ubiquiti's [**UniFi SDN Controller**](https://unifi-sdn.ui.com/) API, versions 4.X.X and 5.X.X of the UniFi SDN Controller software are supported (version 5.12.35 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 This class can be installed manually or using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
 ## Requirements
 
-- a web server with PHP and cURL modules installed (tested on Apache 2.4 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.2.10 and cURL 7.58.0)
+- a web server with PHP and cURL modules installed (tested on Apache 2.4 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.2.24 and cURL 7.58.0)
 - network connectivity between this web server and the server and port (normally TCP port 8443) where the UniFi Controller is running
 
 ## Installation ##
@@ -169,7 +169,9 @@ The class currently supports the following functions/methods to GET/POST/PUT/DEL
 - power_cycle_switch_port()
 - reconnect_sta()
 - rename_ap()
-- restart_ap()
+- restart_ap() (deprecated but still available as alias)
+- restart_device()
+- reboot_cloudkey()
 - revoke_voucher()
 - set_ap_radiosettings()
 - set_device_settings_base()
@@ -261,7 +263,7 @@ This class is based on the initial work by the following developers:
 
 and the API as published by Ubiquiti:
 
-- https://dl.ubnt.com/unifi/5.10.19/unifi_sh_api
+- https://dl.ui.com/unifi/5.12.35/unifi_sh_api
 
 ## Important Disclaimer
 

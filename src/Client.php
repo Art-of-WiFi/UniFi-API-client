@@ -2220,6 +2220,25 @@ class Client
     }
 
     /**
+     * Reboot a UniFi CloudKey
+     * -----------------------
+     * return true on success
+     *
+     * This API call does nothing on UniFi controllers *not* running on a UniFi CloudKey device
+     */
+    public function reboot_cloudkey()
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $payload  = ['cmd' => 'reboot'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/system', $payload);
+
+        return $this->process_response_boolean($response);
+    }
+
+    /**
      * Disable/enable an access point (using REST)
      * -------------------------------------------
      * return true on success
@@ -2379,7 +2398,7 @@ class Client
             return false;
         }
 
-        $payload  = [
+        $payload = [
             'wlan_overrides'               => [],
             'wlangroup_id_' . $wlantype_id => $wlangroup_id
         ];
