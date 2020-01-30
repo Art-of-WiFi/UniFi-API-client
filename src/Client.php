@@ -73,7 +73,7 @@ class Client
             $this->version = trim($version);
         }
 
-        if ($ssl_verify === true) {
+        if ((boolean)$ssl_verify === true) {
             $this->curl_ssl_verify_peer = true;
             $this->curl_ssl_verify_host = 2;
         }
@@ -1382,6 +1382,27 @@ class Client
     }
 
     /**
+     * Generate backup
+     * ---------------------------
+     * returns a URL from where the backup file can be downloaded once generated
+     *
+     * NOTES:
+     * this is an experimental function, please do not use unless you know exactly
+     * what you're doing
+     */
+    public function generate_backup()
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $payload  = ['cmd' => 'backup'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/backup', $payload);
+
+        return $this->process_response($response);
+    }
+
+    /**
      * List auto backups
      * ---------------------------
      * return an array containing objects with backup details on success
@@ -2215,6 +2236,25 @@ class Client
         }
 
         $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+
+        return $this->process_response_boolean($response);
+    }
+
+    /**
+     * Force provision of a device
+     * ---------------------------
+     * return true on success
+     * required parameter <mac> = device MAC address
+     */
+    public function force_provision($mac)
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        $payload  = ['mac' => strtolower($mac), 'cmd' => 'force-provision'];
+        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+
 
         return $this->process_response_boolean($response);
     }
@@ -3281,18 +3321,19 @@ class Client
     }
 
     /**
-     * Execute specific command
-     * ------------------------
+     * Execute specific stats command
+     * ------------------------------
      * return true on success
      * required parameter <command>  = string; command to execute, known valid values
      *                                 'reset-dpi': reset all DPI counters for the current site
-     *
-     * NOTE:
-     * the provided <command> parameter isn't validated so make sure you're using a correct value
      */
     public function cmd_stat($command)
     {
         if (!$this->is_loggedin) {
+            return false;
+        }
+
+        if (!in_array($command, ['reset-dpi'])) {
             return false;
         }
 
@@ -3768,8 +3809,8 @@ class Client
      */
     private function check_site($site)
     {
-        if ($this->debug && strlen($site) !== 8 && $site !== 'default') {
-            error_log('The provided (short) site name is probably incorrect');
+        if ($this->debug && preg_match("/\s/", $site)) {
+            error_log('The provided (short) site name may not contain spaces');
         }
     }
 
@@ -3793,6 +3834,7 @@ class Client
         } else {
             $json_payload = '';
             $url          = $this->baseurl . $path;
+
             curl_setopt($ch, CURLOPT_URL, $url);
 
             if (!empty($payload)) {
@@ -3868,7 +3910,7 @@ class Client
             }
 
             if ($this->debug) {
-                print PHP_EOL . '<pre>';
+                print '<pre>';
                 print PHP_EOL . '---------cURL INFO-----------' . PHP_EOL;
                 print_r(curl_getinfo($ch));
                 print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
@@ -3882,7 +3924,7 @@ class Client
                 print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
                 print $content;
                 print PHP_EOL . '-----------------------------' . PHP_EOL;
-                print '</pre>' . PHP_EOL;
+                print '</pre>';
             }
 
             curl_close($ch);
