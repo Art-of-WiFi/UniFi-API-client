@@ -134,13 +134,13 @@ class Client
             if ($this->debug) {
                 curl_setopt($ch, CURLOPT_VERBOSE, true);
 
-                print '<pre>';
+                print PHP_EOL . '<pre>';
                 print PHP_EOL . '-----------LOGIN-------------' . PHP_EOL;
                 print_r(curl_getinfo($ch));
                 print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
                 print $content;
                 print PHP_EOL . '-----------------------------' . PHP_EOL;
-                print '</pre>';
+                print '</pre>' . PHP_EOL;
             }
 
             $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
@@ -3910,7 +3910,7 @@ class Client
             }
 
             if ($this->debug) {
-                print '<pre>';
+                print PHP_EOL . '<pre>';
                 print PHP_EOL . '---------cURL INFO-----------' . PHP_EOL;
                 print_r(curl_getinfo($ch));
                 print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
@@ -3924,7 +3924,7 @@ class Client
                 print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
                 print $content;
                 print PHP_EOL . '-----------------------------' . PHP_EOL;
-                print '</pre>';
+                print '</pre>' . PHP_EOL;
             }
 
             curl_close($ch);
