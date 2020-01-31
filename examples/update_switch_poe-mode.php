@@ -43,7 +43,8 @@ function update_ports($running_config, $ports, $poe_mode){
     /**
      * Update already non-default ports
      */
-    for($i = 0; $i < count($running_config); $i++){
+    $running_config_count = count($running_config);
+    for($i = 0; $i < $running_config_count; $i++){
         if(in_array($running_config[$i]->port_idx, $ports)){
             $running_config[$i]->poe_mode = $poe_mode;
             unset($ports[array_search($running_config[$i]->port_idx, $ports)]);
@@ -71,7 +72,7 @@ $current_conf     = $data[0]->port_overrides;
 /**
  * This reads in the values provided via URL or in the command line, if nothing is set than it will poe_mode will be set to "auto"
  */
-if (isset($_GET[poe_mode])) {
+if (isset($_GET[$poe_mode])) {
     $poe_mode = $_GET[poe_mode];
 } elseif (isset($argv[1])) {
     $poe_mode = $argv[1];

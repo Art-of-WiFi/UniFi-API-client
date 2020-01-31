@@ -9,7 +9,11 @@ This class can be installed manually or using composer/[packagist](https://packa
 - a web server with PHP and cURL modules installed (tested on Apache 2.4 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.2.24 and cURL 7.58.0)
 - network connectivity between this web server and the server and port (normally TCP port 8443) where the UniFi Controller is running
 
-## Installation ##
+## UniFi OS Support
+
+Currently, UniFi OS-based controllers (UniFi Dream Machine Pro) are **not supported** due to several breaking changes to the API.
+
+## Installation
 
 You can use [Composer](#composer), [Git](#git) or simply [Download the Release](#download-the-release) to install the API client class.
 
