@@ -32,12 +32,13 @@ class Client
     protected $debug              = false;
     protected $is_loggedin        = false;
     private $cookies              = '';
-    private $request_type         = 'POST';
+    private $request_type         = 'GET';
     private $connect_timeout      = 10;
     private $last_results_raw     = null;
     private $last_error_message   = null;
     private $curl_ssl_verify_peer = false;
     private $curl_ssl_verify_host = false;
+    private $is_unifi_os          = false;
 
     /**
      * Construct an instance of the UniFi API client class
@@ -81,6 +82,14 @@ class Client
         $this->check_base_url();
         $this->check_site($this->site);
         $this->update_unificookie();
+
+        /**
+         * if we have a JWT as our cookie we know we have a UniFi OS controller,
+         * saves us from requiring a login
+         */
+        if ($this->cookies !== '' && strpos($this->cookies, 'TOKEN') !== false) {
+            $this->is_unifi_os = true;
+        }
     }
 
     public function __destruct()
@@ -114,12 +123,43 @@ class Client
             return $this->is_loggedin = true;
         }
 
+        /**
+         * check we have a "regular" controller or one based on UniFi OS
+         */
         if (!is_resource($ch = $this->get_curl_resource())) {
             trigger_error('$ch as returned by get_curl_resource() is not a resource');
         } else {
             curl_setopt($ch, CURLOPT_HEADER, 1);
-            curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
-            curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/login');
+            curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/');
+
+            /**
+             * execute the cURL request and get the HTTP response code
+             */
+            $content   = curl_exec($ch);
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            if (curl_errno($ch)) {
+                trigger_error('cURL error: ' . curl_error($ch));
+            }
+
+            if ($http_code === 200) {
+                $this->is_unifi_os = true;
+            }
+        }
+
+        if (!is_resource($ch = $this->get_curl_resource())) {
+            trigger_error('$ch as returned by get_curl_resource() is not a resource');
+        } else {
+            curl_setopt($ch, CURLOPT_HEADER, 1);
+
+            if ($this->is_unifi_os) {
+                curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
+                curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/auth/login');
+            } else {
+                curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
+                curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/login');
+            }
+
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
             curl_setopt($ch, CURLOPT_HTTPHEADER, ['content-type: application/json; charset=utf-8']);
 
@@ -134,8 +174,6 @@ class Client
             }
 
             if ($this->debug) {
-                curl_setopt($ch, CURLOPT_VERBOSE, true);
-
                 print PHP_EOL . '<pre>';
                 print PHP_EOL . '-----------LOGIN-------------' . PHP_EOL;
                 print_r(curl_getinfo($ch));
@@ -165,7 +203,11 @@ class Client
                 preg_match_all('|Set-Cookie: (.*);|Ui', $headers, $results);
                 if (isset($results[1])) {
                     $this->cookies = implode(';', $results[1]);
-                    if (strpos($this->cookies, 'unifises') !== false) {
+
+                    /**
+                     * accept cookies from UniFi OS or from regular UNiFI controllers
+                     */
+                    if (strpos($this->cookies, 'unifises') !== false || strpos($this->cookies, 'TOKEN') !== false) {
                         return $this->is_loggedin = true;
                     }
                 }
@@ -186,11 +228,47 @@ class Client
             return false;
         }
 
-        $this->exec_curl('/logout');
-        $this->is_loggedin = false;
-        $this->cookies     = '';
+        if (!is_resource($ch = $this->get_curl_resource())) {
+            trigger_error('$ch as returned by get_curl_resource() is not a resource');
+        } else {
+            curl_setopt($ch, CURLOPT_HEADER, 1);
 
-        return true;
+            if ($this->is_unifi_os) {
+                curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/auth/logout');
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+                curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode([]));
+                curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            } else {
+                curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/logout');
+            }
+
+            /**
+             * execute the cURL request and get the HTTP response code
+             */
+            $content   = curl_exec($ch);
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            if (curl_errno($ch)) {
+                trigger_error('cURL error: ' . curl_error($ch));
+            }
+
+            if ($this->debug) {
+                print PHP_EOL . '<pre>';
+                print PHP_EOL . '-----------LOGOUT-------------' . PHP_EOL;
+                print_r(curl_getinfo($ch));
+                print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
+                print $content;
+                print PHP_EOL . '-----------------------------' . PHP_EOL;
+                print '</pre>' . PHP_EOL;
+            }
+
+            $this->is_loggedin = false;
+            $this->cookies     = '';
+
+            return true;
+        }
+
+        return false;
     }
 
     /****************************************************************
@@ -3625,10 +3703,6 @@ class Client
      ******************************************************************/
     public function get_cookies()
     {
-        if (!$this->is_loggedin) {
-            return false;
-        }
-
         return $this->cookies;
     }
 
@@ -3815,20 +3889,13 @@ class Client
     }
 
     /**
-     * Check the submitted base URL
+     * validate the submitted base URL
      */
     private function check_base_url()
     {
         $url_valid = filter_var($this->baseurl, FILTER_VALIDATE_URL);
         if (!$url_valid) {
             trigger_error('The URL provided is incomplete or invalid!');
-
-            return false;
-        }
-
-        $base_url_components = parse_url($this->baseurl);
-        if (empty($base_url_components['port'])) {
-            trigger_error('The URL provided does not have a port suffix, normally this is :8443');
 
             return false;
         }
@@ -3865,7 +3932,12 @@ class Client
             trigger_error('$ch as returned by get_curl_resource() is not a resource');
         } else {
             $json_payload = '';
-            $url          = $this->baseurl . $path;
+
+            if ($this->is_unifi_os) {
+                $url = $this->baseurl . '/proxy/network' . $path;
+            } else {
+                $url = $this->baseurl . $path;
+            }
 
             curl_setopt($ch, CURLOPT_URL, $url);
 
@@ -3879,6 +3951,7 @@ class Client
                         ['Content-Type: application/json', 'Content-Length: ' . strlen($json_payload)]);
                     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
                 } else {
+                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $this->request_type);
                     curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
                 }
             } else {
@@ -3964,7 +4037,7 @@ class Client
             /**
              * set request_type value back to default, just in case
              */
-            $this->request_type = 'POST';
+            $this->request_type = 'GET';
 
             return $content;
         }
@@ -3984,7 +4057,6 @@ class Client
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->curl_ssl_verify_host);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
-        curl_setopt($ch, CURLINFO_HEADER_OUT, true);
 
         if ($this->debug) {
             curl_setopt($ch, CURLOPT_VERBOSE, true);
