@@ -72,8 +72,8 @@ $current_conf     = $data[0]->port_overrides;
 /**
  * This reads in the values provided via URL or in the command line, if nothing is set than it will poe_mode will be set to "auto"
  */
-if (isset($_GET[$poe_mode])) {
-    $poe_mode = $_GET[poe_mode];
+if (isset($_GET['poe_mode'])) {
+    $poe_mode = $_GET['poe_mode'];
 } elseif (isset($argv[1])) {
     $poe_mode = $argv[1];
 } else {

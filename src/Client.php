@@ -121,11 +121,13 @@ class Client
             curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
             curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/login');
             curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, ['content-type: application/json; charset=utf-8']);
 
             /**
-             * execute the cURL request
+             * execute the cURL request and get the HTTP response code
              */
-            $content = curl_exec($ch);
+            $content   = curl_exec($ch);
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
             if (curl_errno($ch)) {
                 trigger_error('cURL error: ' . curl_error($ch));
@@ -143,28 +145,28 @@ class Client
                 print '</pre>' . PHP_EOL;
             }
 
+            /**
+             * based on the HTTP response code we either trigger an error or
+             * extract the cookie from the headers
+             */
+            if ($http_code === 400) {
+                trigger_error('We have received an HTTP response status: 400. Probably a controller login failure');
+
+                return $http_code;
+            }
+
             $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
             $headers     = substr($content, 0, $header_size);
             $body        = trim(substr($content, $header_size));
-            $http_code   = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
             curl_close($ch);
 
-            preg_match_all('|Set-Cookie: (.*);|Ui', $headers, $results);
-
-            if (isset($results[1])) {
-                $this->cookies = implode(';', $results[1]);
-                if (!empty($body)) {
-                    if (($http_code >= 200) && ($http_code < 400)) {
-                        if (strpos($this->cookies, 'unifises') !== false) {
-                            return $this->is_loggedin = true;
-                        }
-                    }
-
-                    if ($http_code === 400) {
-                        trigger_error('We have received an HTTP response status: 400. Probably a controller login failure');
-
-                        return $http_code;
+            if ($http_code >= 200 && $http_code < 400 && !empty($body)) {
+                preg_match_all('|Set-Cookie: (.*);|Ui', $headers, $results);
+                if (isset($results[1])) {
+                    $this->cookies = implode(';', $results[1]);
+                    if (strpos($this->cookies, 'unifises') !== false) {
+                        return $this->is_loggedin = true;
                     }
                 }
             }
@@ -2080,6 +2082,32 @@ class Client
     }
 
     /**
+     * List filtered DPI stats
+     * -----------------------
+     * returns an array of fileterd DPI stats
+     * optional parameter <type>       = whether to returns stats by app or by category, valid values:
+     *                                   'by_cat' or 'by_app'
+     * optional parameter <cat_filter> = an array containing numeric category ids to filter by,
+     *                                   only to be combined with a "by_app" value for $type
+     */
+    public function list_dpi_stats_filtered($type = 'by_cat', $cat_filter = null)
+    {
+        if (!$this->is_loggedin || !in_array($type, ['by_cat', 'by_app'])) {
+            return false;
+        }
+
+        $payload = ['type' => $type];
+
+        if ($cat_filter !== null && $type == 'by_app' && is_array($cat_filter)) {
+            $payload['cats'] = $cat_filter;
+        }
+
+        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/sitedpi', $payload);
+
+        return $this->process_response($response);
+    }
+
+    /**
      * List current channels
      * ---------------------
      * returns an array of currently allowed channels
@@ -3597,6 +3625,10 @@ class Client
      ******************************************************************/
     public function get_cookies()
     {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
         return $this->cookies;
     }
 
