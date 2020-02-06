@@ -1,8 +1,8 @@
 ## UniFi Controller API client class
 
-A PHP class which provides access to Ubiquiti's [**UniFi SDN Controller**](https://unifi-sdn.ui.com/) API, versions 4.X.X and 5.X.X of the UniFi SDN Controller software are supported (version 5.12.35 has been confirmed to work). It's a standalone version of the class which is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+A PHP class that provides access to Ubiquiti's [**UniFi SDN Controller**](https://unifi-sdn.ui.com/) API, versions 4.X.X and 5.X.X of the UniFi SDN Controller software are supported (version 5.12.35 has been confirmed to work) as well as UniFi OS-based controllers (version 5.12.59 has been confirmed to work). This class is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
-This class can be installed manually or using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
+The package can be installed manually or using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
 ## Requirements
 
@@ -11,7 +11,9 @@ This class can be installed manually or using composer/[packagist](https://packa
 
 ## UniFi OS Support
 
-Currently, UniFi OS-based controllers (UniFi Dream Machine Pro) are **not supported** due to several breaking changes to the API.
+Support for UniFi OS-based controllers (UniFi Dream Machine Pro) has been added as of version 1.1.47. The class automatically detects UniFi OS devices and adjusts URLs and several functions/methods accordingly. If your own code applies strict validation of the URL that is passed to the constructor, please adapt your logic to allow URLs without a port suffix when dealing with a UniFi OS-based controller.
+
+Please test all methods you plan on using thoroughly before using the API Client with UniFi OS devices in a production environment.
 
 ## Installation
 
