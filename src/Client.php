@@ -127,9 +127,9 @@ class Client
         }
 
         /**
-         * check we have a "regular" controller or one based on UniFi OS
+         * check whether we have a "regular" controller or one based on UniFi OS
          */
-        if (!is_resource($ch = $this->get_curl_resource())) {
+        if (!($ch = $this->get_curl_resource())) {
             trigger_error('$ch as returned by get_curl_resource() is not a resource');
         } else {
             curl_setopt($ch, CURLOPT_HEADER, true);
@@ -140,7 +140,7 @@ class Client
             /**
              * execute the cURL request and get the HTTP response code
              */
-            $content   = curl_exec($ch);
+            curl_exec($ch);
             $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
             if (curl_errno($ch)) {
@@ -393,14 +393,16 @@ class Client
      *                                      can be obtained from the output of list_usergroups()
      * optional parameter <name>          = name to be given to the new user/client-device
      * optional parameter <note>          = note to be applied to the new user/client-device
+     * optional parameter <is_guest>      = boolean; defines whether the new user/client-device is a guest or not
+     * optional parameter <is_wired>      = boolean; defines whether the new user/client-device is wired or not
      */
-    public function create_user($mac, $user_group_id, $name = null, $note = null)
+    public function create_user($mac, $user_group_id, $name = null, $note = null, $is_guest = null, $is_wired = null)
     {
         if (!$this->is_loggedin) {
             return false;
         }
 
-        $new_user           = ['mac' => strtolower($mac), 'usergroup_id' => $user_group_id];
+        $new_user = ['mac' => strtolower($mac), 'usergroup_id' => $user_group_id];
         if (!is_null($name)) {
             $new_user['name'] = $name;
         }
@@ -408,6 +410,14 @@ class Client
         if (!is_null($note)) {
             $new_user['note']  = $note;
             $new_user['noted'] = true;
+        }
+
+        if (!is_null($is_guest) && is_bool($is_guest)) {
+            $new_user['is_guest'] = $is_guest;
+        }
+
+        if (!is_null($is_wired) && is_bool($is_wired)) {
+            $new_user['is_wired'] = $is_wired;
         }
 
         $payload  = ['objects' => [['data' => $new_user]]];
@@ -3967,10 +3977,10 @@ class Client
             trigger_error('an invalid HTTP request type was used: ' . $this->request_type);
         }
 
-        if (!is_resource($ch = $this->get_curl_resource())) {
+        if (!($ch = $this->get_curl_resource())) {
             trigger_error('$ch as returned by get_curl_resource() is not a resource');
         } else {
-            $json_payload = [];
+            $json_payload = '';
 
             if ($this->is_unifi_os) {
                 $url = $this->baseurl . '/proxy/network' . $path;
@@ -3986,9 +3996,8 @@ class Client
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $json_payload);
 
                 $headers = [
-                    'Content-Type: application/json',
-                    'Content-Length: ' . strlen($json_payload),
-                    'Accept: application/json'
+                    'Content-Type: application/json;charset=UTF-8',
+                    'Content-Length: ' . strlen($json_payload)
                 ];
 
                 if ($this->is_unifi_os) {
@@ -4112,20 +4121,24 @@ class Client
     protected function get_curl_resource()
     {
         $ch = curl_init();
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->curl_ssl_verify_peer);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->curl_ssl_verify_host);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
+        if (is_resource($ch)) {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->curl_ssl_verify_peer);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->curl_ssl_verify_host);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
 
-        if ($this->debug) {
-            curl_setopt($ch, CURLOPT_VERBOSE, true);
+            if ($this->debug) {
+                curl_setopt($ch, CURLOPT_VERBOSE, true);
+            }
+
+            if ($this->cookies != '') {
+                curl_setopt($ch, CURLOPT_COOKIESESSION, true);
+                curl_setopt($ch, CURLOPT_COOKIE, $this->cookies);
+            }
+
+            return $ch;
         }
 
-        if ($this->cookies != '') {
-            curl_setopt($ch, CURLOPT_COOKIESESSION, true);
-            curl_setopt($ch, CURLOPT_COOKIE, $this->cookies);
-        }
-
-        return $ch;
+        return false;
     }
 }
