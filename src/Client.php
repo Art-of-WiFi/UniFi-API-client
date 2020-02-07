@@ -84,7 +84,6 @@ class Client
 
         $this->check_base_url();
         $this->check_site($this->site);
-        $this->update_unificookie();
     }
 
     /**
@@ -123,6 +122,12 @@ class Client
          * if already logged in we skip the login process
          */
         if ($this->is_loggedin === true) {
+            return true;
+        }
+
+        if ($this->update_unificookie()) {
+            $this->is_loggedin = true;
+
             return true;
         }
 
@@ -205,9 +210,16 @@ class Client
                     $this->cookies = implode(';', $results[1]);
 
                     /**
-                     * accept cookies from UniFi OS or from regular UNiFI controllers
+                     * accept cookies from regular UniFI controllers or from UniFi OS
                      */
                     if (strpos($this->cookies, 'unifises') !== false || strpos($this->cookies, 'TOKEN') !== false) {
+                        /**
+                         * update the cookie value in $_SESSION['unificookie'], if it exists
+                         */
+                        if (isset($_SESSION['unificookie'])) {
+                            $_SESSION['unificookie'] = $this->cookies;
+                        }
+
                         return $this->is_loggedin = true;
                     }
                 }
@@ -3921,13 +3933,12 @@ class Client
     }
 
     /**
-     * Update the unificookie
+     * Update the unificookie if sessions are enabled
      */
     private function update_unificookie()
     {
-        if (isset($_SESSION['unificookie']) && !empty($_SESSION['unificookie'])) {
+        if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['unificookie']) && !empty($_SESSION['unificookie'])) {
             $this->cookies = $_SESSION['unificookie'];
-            $this->is_loggedin = true;
 
             /**
              * if we have a JWT in our cookie we know we're dealing with a UniFi OS controller
@@ -4039,76 +4050,63 @@ class Client
             }
 
             /**
-             * has the Cookie/Token expired? If so, we need to login again.
+             * an HTTP response code 401 (Unauthorized) indicates the Cookie/Token has expired in which case
+             * we need to login again.
              */
             $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
             if ($http_code == 401) {
-                $json_decoded_content = json_decode($content, true);
-
-                if (isset($json_decoded_content['meta']['msg']) && $json_decoded_content['meta']['msg'] === 'api.err.LoginRequired') {
-                    if ($this->debug) {
-                        error_log('cURL debug: needed to reconnect to UniFi controller');
-                    }
-
-                    /**
-                     * explicitly clear the expired Cookie/Token now
-                     */
-                    if (isset($_SESSION['unificookie'])) {
-                        $_SESSION['unificookie'] = '';
-                    }
-
-                    /**
-                     * then login again
-                     */
-                    $this->login();
-
-                    /**
-                     * when login was successful, execute the same command again
-                     */
-                    if ($this->is_loggedin) {
-                        curl_close($ch);
-
-                        /**
-                         * setup the cookie for the user within $_SESSION, if $_SESSION['unificookie'] does not exist
-                         */
-                        if (!isset($_SESSION['unificookie']) && session_status() != PHP_SESSION_DISABLED) {
-                            $_SESSION['unificookie'] = $this->cookies;
-                        }
-
-                        return $this->exec_curl($path, $payload);
-                    }
+                curl_close($ch);
+                if ($this->debug) {
+                    error_log('cURL debug: needed to reconnect to UniFi controller');
                 }
 
-                unset($json_decoded_content);
-            }
-
-            if ($this->debug) {
-                print PHP_EOL . '<pre>';
-                print PHP_EOL . '---------cURL INFO-----------' . PHP_EOL;
-                print_r(curl_getinfo($ch));
-                print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
-                print $url . PHP_EOL;
-                if (empty($json_payload)) {
-                    print 'empty payload';
-                } else {
-                    print $json_payload;
+                /**
+                 * explicitly clear the expired Cookie/Token before logging in again
+                 */
+                if (isset($_SESSION['unificookie'])) {
+                    $_SESSION['unificookie'] = '';
+                    $this->is_loggedin = false;
                 }
 
-                print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
-                print $content;
-                print PHP_EOL . '-----------------------------' . PHP_EOL;
-                print '</pre>' . PHP_EOL;
+                /**
+                 * then login again
+                 */
+                $this->login();
+
+                /**
+                 * when login was successful, execute the same command again
+                 */
+                if ($this->is_loggedin) {
+                    return $this->exec_curl($path, $payload);
+                }
+            } else {
+                if ($this->debug) {
+                    print PHP_EOL . '<pre>';
+                    print PHP_EOL . '---------cURL INFO-----------' . PHP_EOL;
+                    print_r(curl_getinfo($ch));
+                    print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
+                    print $url . PHP_EOL;
+                    if (empty($json_payload)) {
+                        print 'empty payload';
+                    } else {
+                        print $json_payload;
+                    }
+
+                    print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
+                    print $content;
+                    print PHP_EOL . '-----------------------------' . PHP_EOL;
+                    print '</pre>' . PHP_EOL;
+                }
+
+                curl_close($ch);
+
+                /**
+                 * set request_type value back to default, just in case
+                 */
+                $this->request_type = 'GET';
+
+                return $content;
             }
-
-            curl_close($ch);
-
-            /**
-             * set request_type value back to default, just in case
-             */
-            $this->request_type = 'GET';
-
-            return $content;
         }
 
         return false;
