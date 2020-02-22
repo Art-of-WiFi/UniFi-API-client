@@ -132,96 +132,93 @@ class Client
         }
 
         /**
-         * check whether we have a "regular" controller or one based on UniFi OS
+         * first we check whether we have a "regular" controller or one based on UniFi OS
          */
-        if (!($ch = $this->get_curl_resource())) {
-            trigger_error('$ch as returned by get_curl_resource() is not a resource');
+        $ch = $this->get_curl_resource();
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_NOBODY, true);
+        curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/');
+
+        /**
+         * execute the cURL request and get the HTTP response code
+         */
+        curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        if (curl_errno($ch)) {
+            trigger_error('cURL error: ' . curl_error($ch));
+        }
+
+        if ($http_code === 200) {
+            $this->is_unifi_os = true;
+            curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
+            curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/auth/login');
         } else {
-            curl_setopt($ch, CURLOPT_HEADER, true);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_NOBODY, true);
-            curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/');
+            curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
+            curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/login');
+        }
 
-            /**
-             * execute the cURL request and get the HTTP response code
-             */
-            curl_exec($ch);
-            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_setopt($ch, CURLOPT_NOBODY, false);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
+        curl_setopt($ch, CURLOPT_HTTPHEADER, ['content-type: application/json; charset=utf-8']);
 
-            if (curl_errno($ch)) {
-                trigger_error('cURL error: ' . curl_error($ch));
-            }
+        /**
+         * execute the cURL request and get the HTTP response code
+         */
+        $content   = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
-            if ($http_code === 200) {
-                $this->is_unifi_os = true;
-            }
+        if (curl_errno($ch)) {
+            trigger_error('cURL error: ' . curl_error($ch));
+        }
 
-            if ($this->is_unifi_os) {
-                curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
-                curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/auth/login');
-            } else {
-                curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
-                curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/login');
-            }
+        if ($this->debug) {
+            print PHP_EOL . '<pre>';
+            print PHP_EOL . '-----------LOGIN-------------' . PHP_EOL;
+            print_r(curl_getinfo($ch));
+            print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
+            print $content;
+            print PHP_EOL . '-----------------------------' . PHP_EOL;
+            print '</pre>' . PHP_EOL;
+        }
 
-            curl_setopt($ch, CURLOPT_NOBODY, false);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['content-type: application/json; charset=utf-8']);
+        /**
+         * based on the HTTP response code we either trigger an error or
+         * extract the cookie from the headers
+         */
+        if ($http_code === 400) {
+            trigger_error('We received an HTTP response status: 400. Probably a controller login failure');
 
-            /**
-             * execute the cURL request and get the HTTP response code
-             */
-            $content   = curl_exec($ch);
-            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            return $http_code;
+        }
 
-            if (curl_errno($ch)) {
-                trigger_error('cURL error: ' . curl_error($ch));
-            }
+        $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+        $headers     = substr($content, 0, $header_size);
+        $body        = trim(substr($content, $header_size));
 
-            if ($this->debug) {
-                print PHP_EOL . '<pre>';
-                print PHP_EOL . '-----------LOGIN-------------' . PHP_EOL;
-                print_r(curl_getinfo($ch));
-                print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
-                print $content;
-                print PHP_EOL . '-----------------------------' . PHP_EOL;
-                print '</pre>' . PHP_EOL;
-            }
+        curl_close($ch);
 
-            /**
-             * based on the HTTP response code we either trigger an error or
-             * extract the cookie from the headers
-             */
-            if ($http_code === 400) {
-                trigger_error('We received an HTTP response status: 400. Probably a controller login failure');
+        /**
+         * we are good to extract the cookies
+         */
+        if ($http_code >= 200 && $http_code < 400 && !empty($body)) {
+            preg_match_all('|Set-Cookie: (.*);|Ui', $headers, $results);
+            if (isset($results[1])) {
+                $this->cookies = implode(';', $results[1]);
 
-                return $http_code;
-            }
-
-            $header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-            $headers     = substr($content, 0, $header_size);
-            $body        = trim(substr($content, $header_size));
-
-            curl_close($ch);
-
-            if ($http_code >= 200 && $http_code < 400 && !empty($body)) {
-                preg_match_all('|Set-Cookie: (.*);|Ui', $headers, $results);
-                if (isset($results[1])) {
-                    $this->cookies = implode(';', $results[1]);
-
+                /**
+                 * accept cookies from regular UniFI controllers or from UniFi OS
+                 */
+                if (strpos($this->cookies, 'unifises') !== false || strpos($this->cookies, 'TOKEN') !== false) {
                     /**
-                     * accept cookies from regular UniFI controllers or from UniFi OS
+                     * update the cookie value in $_SESSION['unificookie'], if it exists
                      */
-                    if (strpos($this->cookies, 'unifises') !== false || strpos($this->cookies, 'TOKEN') !== false) {
-                        /**
-                         * update the cookie value in $_SESSION['unificookie'], if it exists
-                         */
-                        if (isset($_SESSION['unificookie'])) {
-                            $_SESSION['unificookie'] = $this->cookies;
-                        }
-
-                        return $this->is_loggedin = true;
+                    if (isset($_SESSION['unificookie'])) {
+                        $_SESSION['unificookie'] = $this->cookies;
                     }
+
+                    return $this->is_loggedin = true;
                 }
             }
         }
@@ -240,13 +237,42 @@ class Client
             return false;
         }
 
+        /**
+         * prepare cURL
+         */
+        $ch = $this->get_curl_resource();
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+
+        /**
+         * constuct HTTP request headers as required
+         */
+        $headers = ['Content-Length: 0'];
         if ($this->is_unifi_os) {
-            $logout_url = '/api/auth/logout';
+            $logout_path = '/api/auth/logout';
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+
+            $csrf_token = $this->extract_csrf_token_from_cookie();
+            if ($csrf_token) {
+                $headers[] = 'x-csrf-token: ' . $csrf_token;
+            }
         } else {
-            $logout_url = '/logout';
+            $logout_path = '/logout';
         }
 
-        $this->exec_curl($logout_url, []);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_URL, $this->baseurl . $logout_path);
+
+        /**
+         * execute the cURL request to logout
+         */
+        $logout = curl_exec($ch);
+
+        if (curl_errno($ch)) {
+            trigger_error('cURL error: ' . curl_error($ch));
+        }
+
+        curl_close($ch);
 
         $this->is_loggedin = false;
         $this->cookies     = '';
@@ -3697,6 +3723,11 @@ class Client
         return $this->cookies;
     }
 
+    public function set_cookies($cookies_value)
+    {
+        $this->cookies = $cookies_value;
+    }
+
     public function get_request_type()
     {
         return $this->request_type;
@@ -3705,43 +3736,6 @@ class Client
     public function get_ssl_verify_peer()
     {
         return $this->curl_ssl_verify_peer;
-    }
-
-    public function get_ssl_verify_host()
-    {
-        return $this->curl_ssl_verify_host;
-    }
-
-    public function set_cookies($cookies_value)
-    {
-        $this->cookies = $cookies_value;
-    }
-
-    public function set_request_type($request_type)
-    {
-
-        if (!in_array($request_type, $this->request_types_allowed)) {
-            return false;
-        }
-
-        $this->request_type = $request_type;
-
-        return true;
-    }
-
-    public function set_connection_timeout($timeout)
-    {
-        $this->connect_timeout = $timeout;
-    }
-
-    public function set_last_results_raw($last_results)
-    {
-        $this->last_results_raw = $last_results;
-    }
-
-    public function set_last_error_message($last_error_message)
-    {
-        $this->last_error_message = $last_error_message;
     }
 
     /**
@@ -3759,6 +3753,11 @@ class Client
         return true;
     }
 
+    public function get_ssl_verify_host()
+    {
+        return $this->curl_ssl_verify_host;
+    }
+
     /**
      * set the value for cURL option CURLOPT_SSL_VERIFYHOST, should be 0/false or 2
      * https://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYHOST.html
@@ -3772,6 +3771,54 @@ class Client
         $this->curl_ssl_verify_host = $ssl_verify_host;
 
         return true;
+    }
+
+    public function set_request_type($request_type)
+    {
+
+        if (!in_array($request_type, $this->request_types_allowed)) {
+            return false;
+        }
+
+        $this->request_type = $request_type;
+
+        return true;
+    }
+
+    public function get_is_unifi_os()
+    {
+        return $this->is_unifi_os;
+    }
+
+    public function set_is_unifi_os($is_unifi_os)
+    {
+        if (!in_array($is_unifi_os, [0, false, 1, true])) {
+            return false;
+        }
+
+        $this->is_unifi_os = $is_unifi_os;
+
+        return true;
+    }
+
+    public function set_connection_timeout($timeout)
+    {
+        $this->connect_timeout = $timeout;
+    }
+
+    public function get_connection_timeout()
+    {
+        return $this->connect_timeout;
+    }
+
+    public function set_last_results_raw($last_results)
+    {
+        $this->last_results_raw = $last_results;
+    }
+
+    public function set_last_error_message($last_error_message)
+    {
+        $this->last_error_message = $last_error_message;
     }
 
     /****************************************************************
