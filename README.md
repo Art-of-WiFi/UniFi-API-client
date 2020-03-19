@@ -1,6 +1,6 @@
 ## UniFi Controller API client class
 
-A PHP class that provides access to Ubiquiti's [**UniFi SDN Controller**](https://unifi-sdn.ui.com/) API, versions 4.X.X and 5.X.X of the UniFi SDN Controller software are supported (version 5.12.35 has been confirmed to work) as well as UniFi OS-based controllers (version 5.12.59 has been confirmed to work). This class is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+A PHP class that provides access to Ubiquiti's [**UniFi SDN Controller**](https://unifi-sdn.ui.com/) API, versions 4.X.X and 5.X.X of the UniFi SDN Controller software are supported (version 5.12.66 has been confirmed to work) as well as UbiOS-based controllers (version 5.12.59 has been confirmed to work). This class is used in our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 The package can be installed manually or using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
@@ -9,11 +9,11 @@ The package can be installed manually or using composer/[packagist](https://pack
 - a web server with PHP and cURL modules installed (tested on Apache 2.4 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.2.24 and cURL 7.58.0)
 - network connectivity between this web server and the server and port (normally TCP port 8443) where the UniFi Controller is running
 
-## UniFi OS Support
+## UbiOS Support
 
-Support for UniFi OS-based controllers (UniFi Dream Machine Pro) has been added as of version 1.1.47. The class automatically detects UniFi OS devices and adjusts URLs and several functions/methods accordingly. If your own code applies strict validation of the URL that is passed to the constructor, please adapt your logic to allow URLs without a port suffix when dealing with a UniFi OS-based controller.
+Support for UbiOS-based controllers (UniFi Dream Machine Pro) has been added as of version 1.1.47. The class automatically detects UbiOS devices and adjusts URLs and several functions/methods accordingly. If your own code applies strict validation of the URL that is passed to the constructor, please adapt your logic to allow URLs without a port suffix when dealing with a UbiOS-based controller.
 
-Please test all methods you plan on using thoroughly before using the API Client with UniFi OS devices in a production environment.
+Please test all methods you plan on using thoroughly before using the API Client with UbiOS devices in a production environment.
 
 ## Installation
 
@@ -100,7 +100,7 @@ Please refer to the `examples/` directory for some more detailed examples which 
 
 ## Functions/methods supported
 
-The class currently supports the following functions/methods to GET/POST/PUT/DELETE data through the UniFi Controller API. Please refer to the source code for more details on the functions/methods and their respective parameters.
+The class currently supports the following functions/methods to GET/POST/PUT/DELETE data through the UniFi Controller API. Please refer to the comments in the source code for more details on the functions/methods and their respective parameters.
 
 - login()
 - logout()
@@ -242,15 +242,28 @@ The class currently supports the following functions/methods to GET/POST/PUT/DEL
 - cancel_rolling_upgrade()
 - cmd_stat()
 
-Internal functions, getters/setters:
+Other functions, getters/setters:
 
 - set_debug()
 - get_debug()
 - set_site()
 - get_site()
-- get_cookie() (renamed from getcookie())
+- set_cookies()
+- get_cookies()
+- get_cookie() (renamed from getcookie(), deprecated but still available, use get_cookies() instead)
 - get_last_results_raw()
 - get_last_error_message()
+- set_request_type()
+- get_request_type()
+- set_ssl_verify_peer()
+- get_ssl_verify_peer()
+- set_ssl_verify_host()
+- get_ssl_verify_host()
+- set_connection_timeout()
+- get_connection_timeout()
+- set_is_unifi_os()
+- get_is_unifi_os()
+
 
 ## Need help or have suggestions?
 

@@ -187,8 +187,8 @@ class Client
          * based on the HTTP response code we either trigger an error or
          * extract the cookie from the headers
          */
-        if ($http_code === 400) {
-            trigger_error('We received an HTTP response status: 400. Probably a controller login failure');
+        if ($http_code === 400 || $http_code === 401) {
+            trigger_error("We received the following HTTP response status: $http_code. Probably a controller login failure");
 
             return $http_code;
         }
@@ -3694,8 +3694,8 @@ class Client
     }
 
     /**
-     * Get Cookie from UniFi controller
-     * --------------------------------
+     * Get Cookie from UniFi controller (singular and plural)
+     * ------------------------------------------------------
      * returns the UniFi controller cookie
      *
      * NOTES:
@@ -3715,13 +3715,18 @@ class Client
         return $this->cookies;
     }
 
+    public function get_cookies()
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        return $this->cookies;
+    }
+
     /******************************************************************
      * other getter/setter functions/methods from here, use with care!
      ******************************************************************/
-    public function get_cookies()
-    {
-        return $this->cookies;
-    }
 
     public function set_cookies($cookies_value)
     {
@@ -3731,6 +3736,18 @@ class Client
     public function get_request_type()
     {
         return $this->request_type;
+    }
+
+    public function set_request_type($request_type)
+    {
+
+        if (!in_array($request_type, $this->request_types_allowed)) {
+            return false;
+        }
+
+        $this->request_type = $request_type;
+
+        return true;
     }
 
     public function get_ssl_verify_peer()
@@ -3769,18 +3786,6 @@ class Client
         }
 
         $this->curl_ssl_verify_host = $ssl_verify_host;
-
-        return true;
-    }
-
-    public function set_request_type($request_type)
-    {
-
-        if (!in_array($request_type, $this->request_types_allowed)) {
-            return false;
-        }
-
-        $this->request_type = $request_type;
 
         return true;
     }
@@ -4102,18 +4107,18 @@ class Client
              */
             $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if ($http_code == 401) {
-                curl_close($ch);
                 if ($this->debug) {
                     error_log('cURL debug: needed to reconnect to UniFi controller');
                 }
 
                 /**
-                 * explicitly clear the expired Cookie/Token before logging in again
+                 * explicitly clear the expired Cookie/Token and logging out before logging in again
                  */
                 if (isset($_SESSION['unificookie'])) {
                     $_SESSION['unificookie'] = '';
-                    $this->is_loggedin = false;
                 }
+
+                $this->is_loggedin = false;
 
                 /**
                  * then login again
@@ -4121,39 +4126,50 @@ class Client
                 $this->login();
 
                 /**
-                 * when login was successful, execute the same command again
+                 * when login was successful, execute the same cURL request again
                  */
                 if ($this->is_loggedin) {
-                    return $this->exec_curl($path, $payload);
-                }
-            } else {
-                if ($this->debug) {
-                    print PHP_EOL . '<pre>';
-                    print PHP_EOL . '---------cURL INFO-----------' . PHP_EOL;
-                    print_r(curl_getinfo($ch));
-                    print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
-                    print $url . PHP_EOL;
-                    if (empty($json_payload)) {
-                        print 'empty payload';
-                    } else {
-                        print $json_payload;
+                    $content = curl_exec($ch);
+                    if (curl_errno($ch)) {
+                        trigger_error('cURL error: ' . curl_error($ch));
+                        curl_close($ch);
+
+                        return false;
                     }
+                } else {
+                    curl_close($ch);
 
-                    print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
-                    print $content;
-                    print PHP_EOL . '-----------------------------' . PHP_EOL;
-                    print '</pre>' . PHP_EOL;
+                    return false;
+                }
+            }
+
+            if ($this->debug) {
+                print PHP_EOL . '<pre>';
+                print PHP_EOL . '---------cURL INFO-----------' . PHP_EOL;
+                print_r(curl_getinfo($ch));
+                print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
+                print $url . PHP_EOL;
+                if (empty($json_payload)) {
+                    print 'empty payload';
+                } else {
+                    print $json_payload;
                 }
 
-                curl_close($ch);
-
-                /**
-                 * set request_type value back to default, just in case
-                 */
-                $this->request_type = 'GET';
-
-                return $content;
+                print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
+                print $content;
+                print PHP_EOL . '-----------------------------' . PHP_EOL;
+                print '</pre>' . PHP_EOL;
             }
+
+            curl_close($ch);
+
+            /**
+             * set request_type value back to default, just in case
+             */
+            $this->request_type = 'GET';
+
+            return $content;
+
         }
 
         return false;

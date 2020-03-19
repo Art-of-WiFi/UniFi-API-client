@@ -47,7 +47,7 @@ $unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $
 $set_debug_mode   = $unifi_connection->set_debug($debug);
 $loginresults     = $unifi_connection->login(); // always true regardless of site id
 
-foreach ($macs_to_block as &$mac) {
+foreach ($macs_to_block as $mac) {
     // block_result is always true even if mac address does not exist :(
     $block_result = $unifi_connection->block_sta($mac);
 
