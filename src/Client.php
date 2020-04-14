@@ -32,6 +32,7 @@ class Client
     protected $debug               = false;
     protected $is_loggedin         = false;
     protected $is_unifi_os         = false;
+    protected $exec_retries        = 0;
     private $cookies               = '';
     private $request_type          = 'GET';
     private $request_types_allowed = ['GET', 'POST', 'PUT', 'DELETE'];
@@ -3816,16 +3817,6 @@ class Client
         return $this->connect_timeout;
     }
 
-    public function set_last_results_raw($last_results)
-    {
-        $this->last_results_raw = $last_results;
-    }
-
-    public function set_last_error_message($last_error_message)
-    {
-        $this->last_error_message = $last_error_message;
-    }
-
     /****************************************************************
      * internal (private and protected) functions from here:
      ****************************************************************/
@@ -4102,43 +4093,53 @@ class Client
             }
 
             /**
+             * fetch the HTTP response code
+             */
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+            /**
              * an HTTP response code 401 (Unauthorized) indicates the Cookie/Token has expired in which case
              * we need to login again.
              */
-            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
             if ($http_code == 401) {
                 if ($this->debug) {
-                    error_log('cURL debug: needed to reconnect to UniFi controller');
+                    error_log(__FUNCTION__ . ': needed to reconnect to UniFi controller');
                 }
 
-                /**
-                 * explicitly clear the expired Cookie/Token and logging out before logging in again
-                 */
-                if (isset($_SESSION['unificookie'])) {
-                    $_SESSION['unificookie'] = '';
-                }
+                if ($this->exec_retries == 0) {
+                    /**
+                     * explicitly clear the expired Cookie/Token, update other properties and log out before logging in again
+                     */
+                    if (isset($_SESSION['unificookie'])) {
+                        $_SESSION['unificookie'] = '';
+                    }
 
-                $this->is_loggedin = false;
+                    $this->is_loggedin = false;
+                    $this->exec_retries++;
+                    curl_close($ch);
 
-                /**
-                 * then login again
-                 */
-                $this->login();
+                    /**
+                     * then login again
+                     */
+                    $this->login();
 
-                /**
-                 * when login was successful, execute the same cURL request again
-                 */
-                if ($this->is_loggedin) {
-                    $content = curl_exec($ch);
-                    if (curl_errno($ch)) {
-                        trigger_error('cURL error: ' . curl_error($ch));
-                        curl_close($ch);
+                    /**
+                     * when re-login was successful, simply execute the same cURL request again
+                     */
+                    if ($this->is_loggedin) {
+                        if ($this->debug) {
+                            error_log(__FUNCTION__ . ': re-logged in, calling exec_curl again');
+                        }
+
+                        return $this->exec_curl($path, $payload);
+                    } else {
+                        if ($this->debug) {
+                            error_log(__FUNCTION__ . ': re-login failed');
+                        }
 
                         return false;
                     }
                 } else {
-                    curl_close($ch);
-
                     return false;
                 }
             }
