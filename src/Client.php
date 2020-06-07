@@ -33,6 +33,7 @@ class Client
     protected $is_loggedin         = false;
     protected $is_unifi_os         = false;
     protected $exec_retries        = 0;
+    protected $class_version       = '1.1.53';
     private $cookies               = '';
     private $request_type          = 'GET';
     private $request_types_allowed = ['GET', 'POST', 'PUT', 'DELETE'];
@@ -323,9 +324,7 @@ class Client
             $payload['ap_mac'] = strtolower($ap_mac);
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', $payload);
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/stamgr', $payload);
     }
 
     /**
@@ -340,10 +339,9 @@ class Client
             return false;
         }
 
-        $payload  = ['cmd' => 'unauthorize-guest', 'mac' => strtolower($mac)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', $payload);
+        $payload = ['cmd' => 'unauthorize-guest', 'mac' => strtolower($mac)];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/stamgr', $payload);
     }
 
     /**
@@ -358,10 +356,9 @@ class Client
             return false;
         }
 
-        $payload  = ['cmd' => 'kick-sta', 'mac' => strtolower($mac)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', $payload);
+        $payload = ['cmd' => 'kick-sta', 'mac' => strtolower($mac)];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/stamgr', $payload);
     }
 
     /**
@@ -376,10 +373,9 @@ class Client
             return false;
         }
 
-        $payload  = ['cmd' => 'block-sta', 'mac' => strtolower($mac)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', $payload);
+        $payload = ['cmd' => 'block-sta', 'mac' => strtolower($mac)];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/stamgr', $payload);
     }
 
     /**
@@ -394,10 +390,9 @@ class Client
             return false;
         }
 
-        $payload  = ['cmd' => 'unblock-sta', 'mac' => strtolower($mac)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', $payload);
+        $payload = ['cmd' => 'unblock-sta', 'mac' => strtolower($mac)];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/stamgr', $payload);
     }
 
     /**
@@ -416,11 +411,10 @@ class Client
             return false;
         }
 
-        $macs     = array_map('strtolower', $macs);
-        $payload  = ['cmd' => 'forget-sta', 'macs' => $macs];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stamgr', $payload);
+        $macs    = array_map('strtolower', $macs);
+        $payload = ['cmd' => 'forget-sta', 'macs' => $macs];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/stamgr', $payload);
     }
 
     /**
@@ -459,10 +453,9 @@ class Client
             $new_user['is_wired'] = $is_wired;
         }
 
-        $payload  = ['objects' => [['data' => $new_user]]];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/group/user', $payload);
+        $payload = ['objects' => [['data' => $new_user]]];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/group/user', $payload);
     }
 
     /**
@@ -481,11 +474,10 @@ class Client
             return false;
         }
 
-        $noted    = (is_null($note)) || (empty($note)) ? false : true;
-        $payload  = ['note' => $note, 'noted' => $noted];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
+        $noted   = is_null($note) || empty($note) ? false : true;
+        $payload = ['note' => $note, 'noted' => $noted];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
     }
 
     /**
@@ -504,10 +496,9 @@ class Client
             return false;
         }
 
-        $payload  = ['name' => $name];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
+        $payload = ['name' => $name];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
     }
 
     /**
@@ -529,9 +520,9 @@ class Client
             return false;
         }
 
-        $end        = is_null($end) ? (time() * 1000) : intval($end);
-        $start      = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
-        $attributes = [
+        $end     = is_null($end) ? time() * 1000 : intval($end);
+        $start   = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
+        $attribs = [
             'bytes',
             'wan-tx_bytes',
             'wan-rx_bytes',
@@ -541,10 +532,9 @@ class Client
             'wlan-num_sta',
             'time'
         ];
-        $payload  = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.site', $payload);
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/5minutes.site', $payload);
     }
 
     /**
@@ -564,9 +554,9 @@ class Client
             return false;
         }
 
-        $end        = is_null($end) ? (time() * 1000) : intval($end);
-        $start      = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $attributes = [
+        $end     = is_null($end) ? time() * 1000 : intval($end);
+        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = [
             'bytes',
             'wan-tx_bytes',
             'wan-rx_bytes',
@@ -576,10 +566,9 @@ class Client
             'wlan-num_sta',
             'time'
         ];
-        $payload  = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.site', $payload);
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/hourly.site', $payload);
     }
 
     /**
@@ -599,9 +588,9 @@ class Client
             return false;
         }
 
-        $end        = is_null($end) ? ((time() - (time() % 3600)) * 1000) : intval($end);
-        $start      = is_null($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
-        $attributes = [
+        $end     = is_null($end) ? (time() - (time() % 3600)) * 1000 : intval($end);
+        $start   = is_null($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = [
             'bytes',
             'wan-tx_bytes',
             'wan-rx_bytes',
@@ -611,10 +600,9 @@ class Client
             'wlan-num_sta',
             'time'
         ];
-        $payload  = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.site', $payload);
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/daily.site', $payload);
     }
 
     /**
@@ -637,17 +625,15 @@ class Client
             return false;
         }
 
-        $end        = is_null($end) ? (time() * 1000) : intval($end);
-        $start      = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
-        $attributes = ['bytes', 'num_sta', 'time'];
-        $payload = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
+        $end     = is_null($end) ? time() * 1000 : intval($end);
+        $start   = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
+        $attribs = ['bytes', 'num_sta', 'time'];
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
             $payload['mac'] = strtolower($mac);
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.ap', $payload);
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/5minutes.ap', $payload);
     }
 
     /**
@@ -668,17 +654,15 @@ class Client
             return false;
         }
 
-        $end        = is_null($end) ? (time() * 1000) : intval($end);
-        $start      = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $attributes = ['bytes', 'num_sta', 'time'];
-        $payload = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
+        $end     = is_null($end) ? (time() * 1000) : intval($end);
+        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = ['bytes', 'num_sta', 'time'];
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
             $payload['mac'] = strtolower($mac);
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.ap', $payload);
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/hourly.ap', $payload);
     }
 
     /**
@@ -699,17 +683,15 @@ class Client
             return false;
         }
 
-        $end        = is_null($end) ? (time() * 1000) : intval($end);
-        $start      = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $attributes = ['bytes', 'num_sta', 'time'];
-        $payload = ['attrs' => $attributes, 'start' => $start, 'end' => $end];
+        $end     = is_null($end) ? time() * 1000 : intval($end);
+        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = ['bytes', 'num_sta', 'time'];
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
         if (!is_null($mac)) {
             $payload['mac'] = strtolower($mac);
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.ap', $payload);
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/daily.ap', $payload);
     }
 
     /**
@@ -736,13 +718,12 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? (time() * 1000) : intval($end);
-        $start    = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
-        $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
-        $payload  = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.user', $payload);
+        $end     = is_null($end) ? time() * 1000 : intval($end);
+        $start   = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
+        $attribs = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/5minutes.user', $payload);
     }
 
     /**
@@ -767,13 +748,12 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? (time() * 1000) : intval($end);
-        $start    = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
-        $payload  = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.user', $payload);
+        $end     = is_null($end) ? time() * 1000 : intval($end);
+        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/hourly.user', $payload);
     }
 
     /**
@@ -798,18 +778,17 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? (time() * 1000) : intval($end);
-        $start    = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $attribs  = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
-        $payload  = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.user', $payload);
+        $end     = is_null($end) ? time() * 1000 : intval($end);
+        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/daily.user', $payload);
     }
 
     /**
      * 5 minutes gateway stats method
-     * -------------------------------
+     * ------------------------------
      * returns an array of 5-minute stats objects for the gateway belonging to the current site
      * optional parameter <start> = Unix timestamp in milliseconds
      * optional parameter <end>   = Unix timestamp in milliseconds
@@ -831,18 +810,17 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? (time() * 1000) : intval($end);
-        $start    = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
-        $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
-        $payload  = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/5minutes.gw', $payload);
+        $end     = is_null($end) ? time() * 1000 : intval($end);
+        $start   = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
+        $attribs = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/5minutes.gw', $payload);
     }
 
     /**
      * Hourly gateway stats method
-     * ----------------------------
+     * ---------------------------
      * returns an array of hourly stats objects for the gateway belonging to the current site
      * optional parameter <start> = Unix timestamp in milliseconds
      * optional parameter <end>   = Unix timestamp in milliseconds
@@ -861,18 +839,17 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? (time() * 1000) : intval($end);
-        $start    = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
-        $payload  = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/hourly.gw', $payload);
+        $end     = is_null($end) ? time() * 1000 : intval($end);
+        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/hourly.gw', $payload);
     }
 
     /**
      * Daily gateway stats method
-     * ---------------------------
+     * --------------------------
      * returns an array of daily stats objects for the gateway belonging to the current site
      * optional parameter <start> = Unix timestamp in milliseconds
      * optional parameter <end>   = Unix timestamp in milliseconds
@@ -891,13 +868,12 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? ((time() - (time() % 3600)) * 1000) : intval($end);
-        $start    = is_null($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
-        $attribs  = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
-        $payload  = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/daily.gw', $payload);
+        $end     = is_null($end) ? (time() - (time() % 3600)) * 1000 : intval($end);
+        $start   = is_null($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/daily.gw', $payload);
     }
 
     /**
@@ -917,17 +893,16 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? (time() * 1000) : intval($end);
-        $start    = is_null($start) ? $end - (24 * 3600 * 1000) : intval($start);
-        $payload  = ['attrs' => ['xput_download', 'xput_upload', 'latency', 'time'], 'start' => $start, 'end' => $end];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/report/archive.speedtest', $payload);
+        $end     = is_null($end) ? time() * 1000 : intval($end);
+        $start   = is_null($start) ? $end - (24 * 3600 * 1000) : intval($start);
+        $payload = ['attrs' => ['xput_download', 'xput_upload', 'latency', 'time'], 'start' => $start, 'end' => $end];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/archive.speedtest', $payload);
     }
 
     /**
      * Method to fetch IPS/IDS event
-     * ----------------------------------
+     * -----------------------------
      * returns an array of IPS/IDS event objects
      * optional parameter <start> = Unix timestamp in milliseconds
      * optional parameter <end>   = Unix timestamp in milliseconds
@@ -944,13 +919,12 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? (time() * 1000) : intval($end);
-        $start    = is_null($start) ? $end - (24 * 3600 * 1000) : intval($start);
-        $limit    = is_null($limit) ? 10000 : intval($limit);
-        $payload  = ['start' => $start, 'end' => $end, '_limit' => $limit];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/ips/event', $payload);
+        $end     = is_null($end) ? time() * 1000 : intval($end);
+        $start   = is_null($start) ? $end - (24 * 3600 * 1000) : intval($start);
+        $limit   = is_null($limit) ? 10000 : intval($limit);
+        $payload = ['start' => $start, 'end' => $end, '_limit' => $limit];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/ips/event', $payload);
     }
 
     /**
@@ -982,9 +956,7 @@ class Client
             $payload['mac'] = strtolower($mac);
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/session', $payload);
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/session', $payload);
     }
 
     /**
@@ -1000,11 +972,10 @@ class Client
             return false;
         }
 
-        $limit    = is_null($limit) ? 5 : intval($limit);
-        $payload  = ['mac' => strtolower($mac), '_limit' => $limit, '_sort'=> '-assoc_time'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/session', $payload);
+        $limit   = is_null($limit) ? 5 : intval($limit);
+        $payload = ['mac' => strtolower($mac), '_limit' => $limit, '_sort'=> '-assoc_time'];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/session', $payload);
     }
 
     /**
@@ -1023,12 +994,11 @@ class Client
             return false;
         }
 
-        $end      = is_null($end) ? time() : intval($end);
-        $start    = is_null($start) ? $end - (7 * 24 * 3600) : intval($start);
-        $payload  = ['start' => $start, 'end' => $end];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/authorization', $payload);
+        $end     = is_null($end) ? time() : intval($end);
+        $start   = is_null($start) ? $end - (7 * 24 * 3600) : intval($start);
+        $payload = ['start' => $start, 'end' => $end];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/authorization', $payload);
     }
 
     /**
@@ -1047,10 +1017,9 @@ class Client
             return false;
         }
 
-        $payload  = ['type' => 'all', 'conn' => 'all', 'within' => intval($historyhours)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/alluser', $payload);
+        $payload = ['type' => 'all', 'conn' => 'all', 'within' => intval($historyhours)];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/alluser', $payload);
     }
 
     /**
@@ -1065,10 +1034,9 @@ class Client
             return false;
         }
 
-        $payload  = ['within' => intval($within)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/guest', $payload);
+        $payload = ['within' => intval($within)];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/guest', $payload);
     }
 
     /**
@@ -1083,9 +1051,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/sta/' . strtolower(trim($client_mac)));
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/sta/' . strtolower(trim($client_mac)));
     }
 
     /**
@@ -1100,9 +1066,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/user/' . strtolower(trim($client_mac)));
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/user/' . strtolower(trim($client_mac)));
     }
 
     /**
@@ -1118,10 +1082,9 @@ class Client
             return false;
         }
 
-        $payload  = ['usergroup_id' => $group_id];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
+        $payload = ['usergroup_id' => $group_id];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
     }
 
     /**
@@ -1156,9 +1119,7 @@ class Client
             }
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/user/' . trim($client_id), $payload);
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/user/' . trim($client_id), $payload);
     }
 
     /**
@@ -1172,9 +1133,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/list/usergroup');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/list/usergroup');
     }
 
     /**
@@ -1191,10 +1150,9 @@ class Client
             return false;
         }
 
-        $payload  = ['name' => $group_name, 'qos_rate_max_down' => intval($group_dn), 'qos_rate_max_up' => intval($group_up)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup', $payload);
+        $payload = ['name' => $group_name, 'qos_rate_max_down' => intval($group_dn), 'qos_rate_max_up' => intval($group_up)];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/usergroup', $payload);
     }
 
     /**
@@ -1222,9 +1180,7 @@ class Client
             'site_id'           => $site_id
         ];
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup/' . trim($group_id), $payload);
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/usergroup/' . trim($group_id), $payload);
     }
 
     /**
@@ -1240,14 +1196,13 @@ class Client
         }
 
         $this->request_type = 'DELETE';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/usergroup/' . trim($group_id));
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/usergroup/' . trim($group_id));
     }
 
     /**
      * List firewall groups (using REST)
-     * ----------------------------------
+     * ---------------------------------
      * returns an array containing the current firewall groups or the selected firewall group on success
      * optional parameter <group_id> = _id value of the single firewall group to list
      */
@@ -1257,9 +1212,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id));
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id));
     }
 
     /**
@@ -1281,10 +1234,9 @@ class Client
             return false;
         }
 
-        $payload            = ['name' => $group_name, 'group_type' => $group_type, 'group_members' => $group_members];
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup', $payload);
+        $payload = ['name' => $group_name, 'group_type' => $group_type, 'group_members' => $group_members];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/firewallgroup', $payload);
     }
 
     /**
@@ -1320,9 +1272,7 @@ class Client
             'site_id'       => $site_id
         ];
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id), $payload);
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id), $payload);
     }
 
     /**
@@ -1338,14 +1288,13 @@ class Client
         }
 
         $this->request_type = 'DELETE';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id));
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id));
     }
 
     /**
      * List firewall rules (using REST)
-     * ----------------------------------
+     * --------------------------------
      * returns an array containing the current firewall rules on success
      */
     public function list_firewallrules()
@@ -1354,9 +1303,22 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/firewallrule');
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/firewallrule');
+    }
 
-        return $this->process_response($response);
+    /**
+     * List static routing settings (using REST)
+     * -----------------------------------------
+     * returns an array of static routes and their settings
+     * optional parameter <route_id> = string; _id value of the static route to get settings for
+     */
+    public function list_routing($route_id = '')
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/routing/' . trim($route_id));
     }
 
     /**
@@ -1370,9 +1332,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/health');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/health');
     }
 
     /**
@@ -1388,10 +1348,9 @@ class Client
             return false;
         }
 
-        $url_suffix = $five_minutes ? '?scale=5minutes' : null;
-        $response   = $this->exec_curl('/api/s/' . $this->site . '/stat/dashboard' . $url_suffix);
+        $path_suffix = $five_minutes ? '?scale=5minutes' : null;
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/dashboard' . $path_suffix);
     }
 
     /**
@@ -1405,9 +1364,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/list/user');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/list/user');
     }
 
     /**
@@ -1422,9 +1379,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/device/' . strtolower(trim($device_mac)));
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/device/' . strtolower(trim($device_mac)));
     }
 
     /**
@@ -1440,9 +1395,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/tag');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/tag');
     }
 
     /**
@@ -1457,10 +1410,9 @@ class Client
             return false;
         }
 
-        $payload  = ['within' => intval($within)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/rogueap', $payload);
+        $payload = ['within' => intval($within)];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/rogueap', $payload);
     }
 
     /**
@@ -1474,9 +1426,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/rogueknown');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/rogueknown');
     }
 
     /**
@@ -1494,10 +1444,9 @@ class Client
             return false;
         }
 
-        $payload  = ['cmd' => 'backup'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/backup', $payload);
+        $payload = ['cmd' => 'backup'];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/cmd/backup', $payload);
     }
 
     /**
@@ -1511,10 +1460,9 @@ class Client
             return false;
         }
 
-        $payload  = ['cmd' => 'list-backups'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/backup', $payload);
+        $payload = ['cmd' => 'list-backups'];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/cmd/backup', $payload);
     }
 
     /**
@@ -1528,9 +1476,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/self/sites');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/self/sites');
     }
 
     /**
@@ -1546,9 +1492,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/stat/sites');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/stat/sites');
     }
 
     /**
@@ -1565,10 +1509,9 @@ class Client
             return false;
         }
 
-        $payload  = ['desc' => $description, 'cmd' => 'add-site'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
+        $payload = ['desc' => $description, 'cmd' => 'add-site'];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
     }
 
     /**
@@ -1583,10 +1526,9 @@ class Client
             return false;
         }
 
-        $payload  = ['site' => $site_id, 'cmd' => 'delete-site'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
+        $payload = ['site' => $site_id, 'cmd' => 'delete-site'];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
     }
 
     /**
@@ -1603,10 +1545,9 @@ class Client
             return false;
         }
 
-        $payload  = ['cmd' => 'update-site', 'desc' => $site_name];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
+        $payload = ['cmd' => 'update-site', 'desc' => $site_name];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
     }
 
     /**
@@ -1625,9 +1566,8 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/country/' . trim($country_id), $payload);
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/country/' . trim($country_id), $payload);
     }
 
     /**
@@ -1645,9 +1585,8 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/locale/' . trim($locale_id), $payload);
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/locale/' . trim($locale_id), $payload);
     }
 
     /**
@@ -1665,9 +1604,8 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/snmp/' . trim($snmp_id), $payload);
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/snmp/' . trim($snmp_id), $payload);
     }
 
     /**
@@ -1685,9 +1623,8 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/mgmt/' . trim($mgmt_id), $payload);
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/mgmt/' . trim($mgmt_id), $payload);
     }
 
     /**
@@ -1705,9 +1642,8 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/guest_access/' . trim($guest_access_id), $payload);
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/guest_access/' . trim($guest_access_id), $payload);
     }
 
     /**
@@ -1725,9 +1661,8 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/ntp/' . trim($ntp_id), $payload);
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/ntp/' . trim($ntp_id), $payload);
     }
 
     /**
@@ -1745,9 +1680,8 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/setting/connectivity/' . trim($connectivity_id), $payload);
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/connectivity/' . trim($connectivity_id), $payload);
     }
 
     /**
@@ -1761,10 +1695,9 @@ class Client
             return false;
         }
 
-        $payload  = ['cmd' => 'get-admins'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
+        $payload = ['cmd' => 'get-admins'];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
     }
 
     /**
@@ -1778,9 +1711,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/stat/admin');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/stat/admin');
     }
 
     /**
@@ -1808,9 +1739,9 @@ class Client
     public function invite_admin(
         $name,
         $email,
-        $enable_sso = true,
-        $readonly = false,
-        $device_adopt = false,
+        $enable_sso     = true,
+        $readonly       = false,
+        $device_adopt   = false,
         $device_restart = false
     ) {
         if (!$this->is_loggedin) {
@@ -1824,25 +1755,28 @@ class Client
             return false;
         }
 
-        $permissions = [];
-        $payload     = ['name' => trim($name), 'email' => trim($email), 'for_sso' => $enable_sso, 'cmd' => 'invite-admin', 'role' => 'admin'];
+        $payload= [
+            'name'        => trim($name),
+            'email'       => trim($email),
+            'for_sso'     => $enable_sso,
+            'cmd'         => 'invite-admin',
+            'role'        => 'admin',
+            'permissions' => []
+        ];
 
         if ($readonly) {
             $payload['role'] = 'readonly';
         }
 
         if ($device_adopt) {
-            $permissions[] = 'API_DEVICE_ADOPT';
+            $payload['permissions'][] = 'API_DEVICE_ADOPT';
         }
 
         if ($device_restart) {
-            $permissions[] = 'API_DEVICE_RESTART';
+            $payload['permissions'][] = 'API_DEVICE_RESTART';
         }
 
-        $payload['permissions'] = $permissions;
-        $response               = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
     }
 
     /**
@@ -1867,25 +1801,26 @@ class Client
             return false;
         }
 
-        $permissions = [];
-        $payload     = ['cmd' => 'grant-admin', 'admin' => trim($admin_id), 'role' => 'admin'];
+        $payload = [
+            'cmd'         => 'grant-admin',
+            'admin'       => trim($admin_id),
+            'role'        => 'admin',
+            'permissions' => []
+        ];
 
         if ($readonly) {
             $payload['role'] = 'readonly';
         }
 
         if ($device_adopt) {
-            $permissions[] = 'API_DEVICE_ADOPT';
+            $payload['permissions'][] = 'API_DEVICE_ADOPT';
         }
 
         if ($device_restart) {
-            $permissions[] = 'API_DEVICE_RESTART';
+            $payload['permissions'][] = 'API_DEVICE_RESTART';
         }
 
-        $payload['permissions'] = $permissions;
-        $response               = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
     }
 
     /**
@@ -1904,10 +1839,9 @@ class Client
             return false;
         }
 
-        $payload  = ['cmd' => 'revoke-admin', 'admin' => $admin_id];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
+        $payload = ['cmd' => 'revoke-admin', 'admin' => $admin_id];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
     }
 
     /**
@@ -1921,9 +1855,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/list/wlangroup');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/list/wlangroup');
     }
 
     /**
@@ -1937,9 +1869,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/sysinfo');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/sysinfo');
     }
 
     /**
@@ -1952,9 +1882,7 @@ class Client
      */
     public function stat_status()
     {
-        $response = $this->exec_curl('/status');
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/status');
     }
 
     /**
@@ -1968,9 +1896,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/self');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/self');
     }
 
     /**
@@ -1985,10 +1911,9 @@ class Client
             return false;
         }
 
-        $payload  = (trim($create_time) != null) ? ['create_time' => intval($create_time)] : [];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/voucher', $payload);
+        $payload = trim($create_time) != null ? ['create_time' => intval($create_time)] : [];
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/voucher', $payload);
     }
 
     /**
@@ -2003,10 +1928,9 @@ class Client
             return false;
         }
 
-        $url_suffix = (($within != null) ? '?within=' . intval($within) : '');
-        $response   = $this->exec_curl('/api/s/' . $this->site . '/stat/payment' . $url_suffix);
+        $path_suffix = $within != null ? '?within=' . intval($within) : '';
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/payment' . $path_suffix);
     }
 
     /**
@@ -2027,9 +1951,8 @@ class Client
         if (isset($note)) {
             $payload['note'] = trim($note);
         }
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/hotspotop', $payload);
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/hotspotop', $payload);
     }
 
     /**
@@ -2043,9 +1966,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/hotspotop');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/hotspotop');
     }
 
     /**
@@ -2099,9 +2020,7 @@ class Client
             $payload['bytes'] = intval($MBytes);
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/hotspot', $payload);
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/cmd/hotspot', $payload);
     }
 
     /**
@@ -2116,10 +2035,9 @@ class Client
             return false;
         }
 
-        $payload  = ['_id' => $voucher_id, 'cmd' => 'delete-voucher'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/hotspot', $payload);
+        $payload = ['_id' => $voucher_id, 'cmd' => 'delete-voucher'];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/hotspot', $payload);
     }
 
     /**
@@ -2134,10 +2052,9 @@ class Client
             return false;
         }
 
-        $payload  = ['_id' => $guest_id, 'cmd' => 'extend'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/hotspot', $payload);
+        $payload = ['_id' => $guest_id, 'cmd' => 'extend'];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/hotspot', $payload);
     }
 
     /**
@@ -2151,9 +2068,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/portforward');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/portforward');
     }
 
     /**
@@ -2167,9 +2082,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/dpi');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/dpi');
     }
 
     /**
@@ -2193,9 +2106,7 @@ class Client
             $payload['cats'] = $cat_filter;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/sitedpi', $payload);
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/sitedpi', $payload);
     }
 
     /**
@@ -2209,9 +2120,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/current-channel');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/current-channel');
     }
 
     /**
@@ -2229,9 +2138,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/ccode');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/ccode');
     }
 
     /**
@@ -2245,9 +2152,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/list/portforward');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/list/portforward');
     }
 
     /**
@@ -2261,9 +2166,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/list/dynamicdns');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/list/dynamicdns');
     }
 
     /**
@@ -2277,9 +2180,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/list/portconf');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/list/portconf');
     }
 
     /**
@@ -2293,9 +2194,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/list/extension');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/list/extension');
     }
 
     /**
@@ -2309,9 +2208,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/get/setting');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/get/setting');
     }
 
     /**
@@ -2326,10 +2223,9 @@ class Client
             return false;
         }
 
-        $payload  = ['mac' => strtolower($mac), 'cmd' => 'adopt'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+        $payload = ['mac' => strtolower($mac), 'cmd' => 'adopt'];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
     }
 
     /**
@@ -2354,9 +2250,7 @@ class Client
             $payload['type'] = strtolower($type);
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
     }
 
     /**
@@ -2371,11 +2265,10 @@ class Client
             return false;
         }
 
-        $payload  = ['mac' => strtolower($mac), 'cmd' => 'force-provision'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+        $payload = ['mac' => strtolower($mac), 'cmd' => 'force-provision'];
 
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
     }
 
     /**
@@ -2391,10 +2284,9 @@ class Client
             return false;
         }
 
-        $payload  = ['cmd' => 'reboot'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/system', $payload);
+        $payload = ['cmd' => 'reboot'];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/system', $payload);
     }
 
     /**
@@ -2421,9 +2313,8 @@ class Client
 
         $this->request_type = 'PUT';
         $payload            = ['disabled' => $disable];
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/device/' . trim($ap_id), $payload);
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/device/' . trim($ap_id), $payload);
     }
 
     /**
@@ -2449,10 +2340,9 @@ class Client
             return false;
         }
 
-        $payload  = ['led_override' => $override_mode];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/device/' . trim($device_id), $payload);
+        $payload = ['led_override' => $override_mode];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/device/' . trim($device_id), $payload);
     }
 
     /**
@@ -2475,11 +2365,10 @@ class Client
             return false;
         }
 
-        $cmd      = (($enable) ? 'set-locate' : 'unset-locate');
-        $payload  = ['cmd' => $cmd, 'mac' => strtolower($mac)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+        $cmd     = $enable ? 'set-locate' : 'unset-locate';
+        $payload = ['cmd' => $cmd, 'mac' => strtolower($mac)];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
     }
 
     /**
@@ -2498,10 +2387,9 @@ class Client
             return false;
         }
 
-        $payload  = ['led_enabled' => $enable];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/mgmt', $payload);
+        $payload = ['led_enabled' => $enable];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/mgmt', $payload);
     }
 
     /**
@@ -2534,9 +2422,7 @@ class Client
             ]
         ];
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($ap_id), $payload);
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/upd/device/' . trim($ap_id), $payload);
     }
 
     /**
@@ -2562,9 +2448,7 @@ class Client
             'wlangroup_id_' . $type_id => $group_id
         ];
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($device_id), $payload);
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/upd/device/' . trim($device_id), $payload);
     }
 
     /**
@@ -2610,9 +2494,7 @@ class Client
             '_id'               => $section_id
         ];
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/guest_access', $payload);
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/guest_access', $payload);
     }
 
     /**
@@ -2628,9 +2510,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/guest_access', $payload);
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/guest_access', $payload);
     }
 
     /**
@@ -2646,9 +2526,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/ips', $payload);
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/ips', $payload);
     }
 
     /**
@@ -2666,9 +2544,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/super_mgmt/' . trim($settings_id), $payload);
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/super_mgmt/' . trim($settings_id), $payload);
     }
 
     /**
@@ -2686,9 +2562,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/super_smtp/' . trim($settings_id), $payload);
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/super_smtp/' . trim($settings_id), $payload);
     }
 
     /**
@@ -2706,9 +2580,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/set/setting/super_identity/' . trim($settings_id), $payload);
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/super_identity/' . trim($settings_id), $payload);
     }
 
     /**
@@ -2724,10 +2596,9 @@ class Client
             return false;
         }
 
-        $payload  = ['name' => $apname];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/upd/device/' . trim($ap_id), $payload);
+        $payload = ['name' => $apname];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/upd/device/' . trim($ap_id), $payload);
     }
 
     /**
@@ -2743,10 +2614,9 @@ class Client
             return false;
         }
 
-        $payload  = ['site' => $site_id, 'mac' => strtolower($mac), 'cmd' => 'move-device'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
+        $payload = ['site' => $site_id, 'mac' => strtolower($mac), 'cmd' => 'move-device'];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
     }
 
     /**
@@ -2761,10 +2631,9 @@ class Client
             return false;
         }
 
-        $payload  = ['mac' => strtolower($mac), 'cmd' => 'delete-device'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
+        $payload = ['mac' => strtolower($mac), 'cmd' => 'delete-device'];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
     }
 
     /**
@@ -2779,9 +2648,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id));
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id));
     }
 
     /**
@@ -2798,9 +2665,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/networkconf', $payload);
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/networkconf', $payload);
     }
 
     /**
@@ -2818,9 +2683,8 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id), $payload);
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id), $payload);
     }
 
     /**
@@ -2836,9 +2700,8 @@ class Client
         }
 
         $this->request_type = 'DELETE';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id));
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id));
     }
 
     /**
@@ -2854,9 +2717,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id));
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id));
     }
 
     /**
@@ -2928,9 +2789,7 @@ class Client
             $payload['x_passphrase'] = $x_passphrase;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/add/wlanconf', $payload);
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/add/wlanconf', $payload);
     }
 
     /**
@@ -2948,9 +2807,8 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id), $payload);
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id), $payload);
     }
 
     /**
@@ -3008,9 +2866,8 @@ class Client
         }
 
         $this->request_type = 'DELETE';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id));
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id));
     }
 
     /**
@@ -3066,9 +2923,7 @@ class Client
             '_limit' => intval($limit)
         ];
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/event', $payload);
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/event', $payload);
     }
 
     /**
@@ -3084,7 +2939,7 @@ class Client
 
         $response = $this->exec_curl('/api/s/' . $this->site . '/list/alarm');
 
-        return $this->process_response($response);
+        return $this->fetch_results($response);
     }
 
     /**
@@ -3099,10 +2954,9 @@ class Client
             return false;
         }
 
-        $url_suffix = ($archived === false) ? '?archived=false' : null;
-        $response   = $this->exec_curl('/api/s/' . $this->site . '/cnt/alarm' . $url_suffix);
+        $path_suffix = $archived === false ? '?archived=false' : null;
 
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/cnt/alarm' . $path_suffix);
     }
 
     /**
@@ -3123,9 +2977,7 @@ class Client
             $payload = ['_id' => $alarm_id, 'cmd' => 'archive-alarm'];
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/evtmgr', $payload);
-
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/evtmgr', $payload);
     }
 
     /**
@@ -3143,10 +2995,9 @@ class Client
             return false;
         }
 
-        $payload  = ['mac' => strtolower($device_mac)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr/upgrade', $payload);
+        $payload = ['mac' => strtolower($device_mac)];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/upgrade', $payload);
     }
 
     /**
@@ -3166,10 +3017,9 @@ class Client
             return false;
         }
 
-        $payload  = ['url' => filter_var($firmware_url, FILTER_SANITIZE_URL), 'mac' => strtolower($device_mac)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr/upgrade-external', $payload);
+        $payload = ['url' => filter_var($firmware_url, FILTER_SANITIZE_URL), 'mac' => strtolower($device_mac)];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/upgrade-external', $payload);
     }
 
     /**
@@ -3187,10 +3037,9 @@ class Client
             return false;
         }
 
-        $payload  = ['cmd' => 'set-rollupgrade'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+        $payload = ['cmd' => 'set-rollupgrade'];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
     }
 
     /**
@@ -3204,10 +3053,30 @@ class Client
             return false;
         }
 
-        $payload  = ['cmd' => 'unset-rollupgrade'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+        $payload = ['cmd' => 'unset-rollupgrade'];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+    }
+
+    /**
+     * List firmware versions
+     * ----------------------
+     * returns an array of firmware versions
+     * optional parameter <type> = string; "available" or "cached", determines which firmware types to return
+     */
+    public function list_firmware($type = 'available')
+    {
+        if (!$this->is_loggedin) {
+            return false;
+        }
+
+        if (!in_array($type, ['available', 'cached'])) {
+            return false;
+        }
+
+        $payload = ['cmd' => 'list-' . $type];
+
+        return $this->fetch_results('/api/s/' . $this->site . '/cmd/firmware', $payload);
     }
 
     /**
@@ -3226,10 +3095,9 @@ class Client
         if (!$this->is_loggedin) {
             return false;
         }
-        $payload  = ['mac' => strtolower($switch_mac), 'port_idx' => intval($port_idx), 'cmd' => 'power-cycle'];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+        $payload = ['mac' => strtolower($switch_mac), 'port_idx' => intval($port_idx), 'cmd' => 'power-cycle'];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
     }
 
     /**
@@ -3245,9 +3113,8 @@ class Client
         }
 
         $payload  = ['cmd' => 'spectrum-scan', 'mac' => strtolower($ap_mac)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/devmgr', $payload);
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
     }
 
     /**
@@ -3262,9 +3129,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/stat/spectrum-scan/' . strtolower(trim($ap_mac)));
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/spectrum-scan/' . strtolower(trim($ap_mac)));
     }
 
     /**
@@ -3282,9 +3147,8 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/device/' . trim($device_id), $payload);
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/device/' . trim($device_id), $payload);
     }
 
     /**
@@ -3301,9 +3165,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/radiusprofile');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/radiusprofile');
     }
 
     /**
@@ -3320,9 +3182,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/account');
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/account');
     }
 
     /**
@@ -3389,9 +3249,7 @@ class Client
             $payload['vlan'] = (int) $vlan;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/rest/account', $payload);
-
-        return $this->process_response($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/account', $payload);
     }
 
     /**
@@ -3412,9 +3270,8 @@ class Client
         }
 
         $this->request_type = 'PUT';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/account/' . trim($account_id), $payload);
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/account/' . trim($account_id), $payload);
     }
 
     /**
@@ -3433,9 +3290,8 @@ class Client
         }
 
         $this->request_type = 'DELETE';
-        $response           = $this->exec_curl('/api/s/' . $this->site . '/rest/account/' . trim($account_id));
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/account/' . trim($account_id));
     }
 
     /**
@@ -3455,10 +3311,9 @@ class Client
             return false;
         }
 
-        $payload  = ['cmd' => trim($command)];
-        $response = $this->exec_curl('/api/s/' . $this->site . '/cmd/stat', $payload);
+        $payload = ['cmd' => trim($command)];
 
-        return $this->process_response_boolean($response);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/stat', $payload);
     }
 
     /****************************************************************
@@ -3588,12 +3443,11 @@ class Client
         }
 
         $this->request_type = $request_type;
-        $response           = $this->exec_curl($path, $payload);
 
         if ($return === 'array') {
-            return $this->process_response($response);
+            return $this->fetch_results($path, $payload);
         } elseif ($return === 'boolean') {
-            return $this->process_response_boolean($response);
+            return $this->fetch_results_boolean($path, $payload);
         }
 
         return false;
@@ -3725,6 +3579,14 @@ class Client
         return $this->cookies;
     }
 
+    /**
+     * get version of the Class
+     */
+    public function get_class_version()
+    {
+        return $this->class_version;
+    }
+
     /******************************************************************
      * other getter/setter functions/methods from here, use with care!
      ******************************************************************/
@@ -3822,17 +3684,23 @@ class Client
      ****************************************************************/
 
     /**
-     * Process regular responses where output is the content of the data array
+     * Fetch results
+     * -------------------------------------
+     * execute the cURL request and return results
+     * required parameter <path>    = request path
+     * optional parameter <payload> = payload to pass with the request
+     * optional parameter <boolean> = whether the method should return a boolean result, else return
+     *                                the "data" array
      */
-    protected function process_response($response_json)
+    protected function fetch_results($path, $payload = null, $boolean = false)
     {
-        $response = json_decode($response_json);
+        $response = json_decode($this->exec_curl($path, $payload));
         $this->catch_json_last_error();
         $this->last_results_raw = $response;
         if (isset($response->meta->rc)) {
             if ($response->meta->rc === 'ok') {
                 $this->last_error_message = null;
-                if (is_array($response->data)) {
+                if (is_array($response->data) && !$boolean) {
                     return $response->data;
                 }
 
@@ -3855,33 +3723,15 @@ class Client
     }
 
     /**
-     * Process responses where output should be boolean (true/false)
+     * Fetch results where output should be boolean (true/false)
+     * -------------------------------------
+     * execute the cURL request and return a boolean value
+     * required parameter <path>    = request path
+     * optional parameter <payload> = payload to pass with the request
      */
-    protected function process_response_boolean($response_json)
+    protected function fetch_results_boolean($path, $payload = null)
     {
-        $response = json_decode($response_json);
-        $this->catch_json_last_error();
-        $this->last_results_raw = $response;
-        if (isset($response->meta->rc)) {
-            if ($response->meta->rc === 'ok') {
-                $this->last_error_message = null;
-
-                return true;
-            } elseif ($response->meta->rc === 'error') {
-                /**
-                 * we have an error:
-                 * set $this->last_error_message if the returned error message is available
-                 */
-                if (isset($response->meta->msg)) {
-                    $this->last_error_message = $response->meta->msg;
-                }
-                if ($this->debug) {
-                    trigger_error('Debug: Last error message: ' . $this->last_error_message);
-                }
-            }
-        }
-
-        return false;
+        return $this->fetch_results($path, $payload, true);
     }
 
     /**
@@ -4188,6 +4038,7 @@ class Client
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->curl_ssl_verify_host);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
+            curl_setopt($ch, CURLOPT_ENCODING, '');
 
             if ($this->debug) {
                 curl_setopt($ch, CURLOPT_VERBOSE, true);

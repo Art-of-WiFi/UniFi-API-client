@@ -6,8 +6,10 @@ The package can be installed manually or using composer/[packagist](https://pack
 
 ## Requirements
 
-- a web server with PHP and cURL modules installed (tested on Apache 2.4 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.2.24 and cURL 7.58.0)
-- network connectivity between this web server and the server and port (normally TCP port 8443) where the UniFi Controller is running
+- a server with PHP and cURL modules installed (tested on Apache 2.4 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.2.24 and cURL 7.58.0)
+- network connectivity between this server and the host and port (normally TCP port 8443) where the UniFi Controller is running
+- you must use **local accounts**, not UniFi Cloud accounts, to access the UniFi Controller API through this class
+
 
 ## UbiOS Support
 
@@ -263,6 +265,7 @@ Other functions, getters/setters:
 - get_connection_timeout()
 - set_is_unifi_os()
 - get_is_unifi_os()
+- get_class_version()
 
 
 ## Need help or have suggestions?
