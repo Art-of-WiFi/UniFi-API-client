@@ -33,7 +33,7 @@ class Client
     protected $is_loggedin         = false;
     protected $is_unifi_os         = false;
     protected $exec_retries        = 0;
-    protected $class_version       = '1.1.53';
+    protected $class_version       = '1.1.54';
     private $cookies               = '';
     private $request_type          = 'GET';
     private $request_types_allowed = ['GET', 'POST', 'PUT', 'DELETE'];
@@ -2937,9 +2937,7 @@ class Client
             return false;
         }
 
-        $response = $this->exec_curl('/api/s/' . $this->site . '/list/alarm');
-
-        return $this->fetch_results($response);
+        return $this->fetch_results('/api/s/' . $this->site . '/list/alarm');
     }
 
     /**
