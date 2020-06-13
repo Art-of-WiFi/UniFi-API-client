@@ -33,7 +33,7 @@ class Client
     protected $is_loggedin         = false;
     protected $is_unifi_os         = false;
     protected $exec_retries        = 0;
-    protected $class_version       = '1.1.55';
+    protected $class_version       = '1.1.56';
     private $cookies               = '';
     private $request_type          = 'GET';
     private $request_types_allowed = ['GET', 'POST', 'PUT', 'DELETE'];
@@ -92,8 +92,7 @@ class Client
      * https://www.php.net/manual/en/language.oop5.decon.php
      *
      * NOTES:
-     * to force the class instance to log out when you're done, simply call logout() or unset
-     * $_SESSION['unificookie']
+     * to force the class instance to log out when you're done, simply call logout()
      */
     public function __destruct()
     {
@@ -133,13 +132,18 @@ class Client
         }
 
         /**
-         * first we check whether we have a "regular" controller or one based on UniFi OS
+         * first we check whether we have a "regular" controller or one based on UniFi OS,
+         * prepare cURL and options
          */
         $ch = $this->get_curl_resource();
-        curl_setopt($ch, CURLOPT_HEADER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_NOBODY, true);
-        curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/');
+        $curl_options = [
+            CURLOPT_HEADER => true,
+            CURLOPT_POST   => true,
+            CURLOPT_NOBODY => true,
+            CURLOPT_URL    => $this->baseurl . '/',
+        ];
+
+        curl_setopt_array($ch, $curl_options);
 
         /**
          * execute the cURL request and get the HTTP response code
@@ -151,18 +155,25 @@ class Client
             trigger_error('cURL error: ' . curl_error($ch));
         }
 
+        /**
+         * we now proceed with the actual login
+         */
+        $curl_options = [
+            CURLOPT_NOBODY     => false,
+            CURLOPT_POSTFIELDS => json_encode(['username' => $this->user, 'password' => $this->password]),
+            CURLOPT_HTTPHEADER => ['content-type: application/json; charset=utf-8']
+        ];
+
         if ($http_code === 200) {
-            $this->is_unifi_os = true;
-            curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
-            curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/auth/login');
+            $this->is_unifi_os             = true;
+            $curl_options[CURLOPT_REFERER] = $this->baseurl . '/login';
+            $curl_options[CURLOPT_URL]     = $this->baseurl . '/api/auth/login';
         } else {
-            curl_setopt($ch, CURLOPT_REFERER, $this->baseurl . '/login');
-            curl_setopt($ch, CURLOPT_URL, $this->baseurl . '/api/login');
+            $curl_options[CURLOPT_REFERER] = $this->baseurl . '/login';
+            $curl_options[CURLOPT_URL]     = $this->baseurl . '/api/login';
         }
 
-        curl_setopt($ch, CURLOPT_NOBODY, false);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['username' => $this->user, 'password' => $this->password]));
-        curl_setopt($ch, CURLOPT_HTTPHEADER, ['content-type: application/json; charset=utf-8']);
+        curl_setopt_array($ch, $curl_options);
 
         /**
          * execute the cURL request and get the HTTP response code
@@ -235,11 +246,13 @@ class Client
     public function logout()
     {
         /**
-         * prepare cURL
+         * prepare cURL and options
          */
         $ch = $this->get_curl_resource();
-        curl_setopt($ch, CURLOPT_HEADER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
+        $curl_options = [
+            CURLOPT_HEADER => true,
+            CURLOPT_POST   => true
+        ];
 
         /**
          * constuct HTTP request headers as required
@@ -247,7 +260,7 @@ class Client
         $headers = ['Content-Length: 0'];
         if ($this->is_unifi_os) {
             $logout_path = '/api/auth/logout';
-            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+            $curl_options[CURLOPT_CUSTOMREQUEST] = 'POST';
 
             $csrf_token = $this->extract_csrf_token_from_cookie();
             if ($csrf_token) {
@@ -257,8 +270,10 @@ class Client
             $logout_path = '/logout';
         }
 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_URL, $this->baseurl . $logout_path);
+        $curl_options[CURLOPT_HTTPHEADER] = $headers;
+        $curl_options[CURLOPT_URL]        = $this->baseurl . $logout_path;
+
+        curl_setopt_array($ch, $curl_options);
 
         /**
          * execute the cURL request to logout
@@ -3145,7 +3160,7 @@ class Client
     protected function fetch_results($path, $payload = null, $boolean = false, $login_required = true)
     {
         /**
-         * guard clause to check if logged in when needed
+         * guard clause to check if we are logged in when needed
          */
         if ($login_required && !$this->is_loggedin) {
             return false;
@@ -3170,6 +3185,7 @@ class Client
                 if (isset($response->meta->msg)) {
                     $this->last_error_message = $response->meta->msg;
                 }
+
                 if ($this->debug) {
                     trigger_error('Debug: Last error message: ' . $this->last_error_message);
                 }
@@ -3244,7 +3260,7 @@ class Client
                     break;
             }
 
-            if ($error !== '') {
+            if (!empty($error)) {
                 trigger_error('JSON decode error: ' . $error);
 
                 return false;
@@ -3308,7 +3324,7 @@ class Client
      */
     private function extract_csrf_token_from_cookie()
     {
-        if ($this->cookies !== '') {
+        if (!empty($this->cookies)) {
             $cookie_bits = explode('=', $this->cookies);
             if (!empty($cookie_bits) && array_key_exists(1, $cookie_bits)) {
                 $jwt = $cookie_bits[1];
@@ -3349,12 +3365,17 @@ class Client
                 $url = $this->baseurl . $path;
             }
 
-            curl_setopt($ch, CURLOPT_URL, $url);
+            /**
+             * prepare cURL options
+             */
+            $curl_options = [
+                CURLOPT_URL => $url
+            ];
 
             if ($payload !== null) {
-                curl_setopt($ch, CURLOPT_POST, true);
-                $json_payload = json_encode($payload, JSON_UNESCAPED_SLASHES);
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $json_payload);
+                $json_payload                     = json_encode($payload, JSON_UNESCAPED_SLASHES);
+                $curl_options[CURLOPT_POST]       = true;
+                $curl_options[CURLOPT_POSTFIELDS] = $json_payload;
 
                 $headers = [
                     'Content-Type: application/json;charset=UTF-8',
@@ -3368,7 +3389,7 @@ class Client
                     }
                 }
 
-                curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+                $curl_options[CURLOPT_HTTPHEADER] = $headers;
 
                 /**
                  * we shouldn't be using GET (the default request type) or DELETE when passing a payload,
@@ -3379,17 +3400,19 @@ class Client
                 }
 
                 if ($this->request_type === 'PUT') {
-                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+                    $curl_options[CURLOPT_CUSTOMREQUEST] = 'PUT';
                 }
 
                 if ($this->request_type === 'POST') {
-                    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+                    $curl_options[CURLOPT_CUSTOMREQUEST] = 'POST';
                 }
             }
 
             if ($this->request_type === 'DELETE') {
-                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
+                $curl_options[CURLOPT_CUSTOMREQUEST] = 'DELETE';
             }
+
+            curl_setopt_array($ch, $curl_options);
 
             /**
              * execute the cURL request
@@ -3491,20 +3514,24 @@ class Client
     {
         $ch = curl_init();
         if (is_resource($ch)) {
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, $this->curl_ssl_verify_peer);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, $this->curl_ssl_verify_host);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, $this->connect_timeout);
-            curl_setopt($ch, CURLOPT_ENCODING, '');
+            $curl_options = [
+                CURLOPT_SSL_VERIFYPEER => $this->curl_ssl_verify_peer,
+                CURLOPT_SSL_VERIFYHOST => $this->curl_ssl_verify_host,
+                CURLOPT_CONNECTTIMEOUT => $this->connect_timeout,
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_ENCODING       => '',
+            ];
 
             if ($this->debug) {
-                curl_setopt($ch, CURLOPT_VERBOSE, true);
+                $curl_options[CURLOPT_VERBOSE] = true;
             }
 
-            if ($this->cookies != '') {
-                curl_setopt($ch, CURLOPT_COOKIESESSION, true);
-                curl_setopt($ch, CURLOPT_COOKIE, $this->cookies);
+            if (!empty($this->cookies)) {
+                $curl_options[CURLOPT_COOKIESESSION] = true;
+                $curl_options[CURLOPT_COOKIE]        = $this->cookies;
             }
+
+            curl_setopt_array($ch, $curl_options);
 
             return $ch;
         }
