@@ -1,6 +1,8 @@
 <?php
+namespace UniFi_API;
+
 /**
- * This file is part of the art-of-wifi/unifi-api-client package
+ * the UniFi API client class
  *
  * This UniFi API client class is based on the work done by the following developers:
  *    domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
@@ -8,16 +10,12 @@
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/<UniFi controller version number>/unifi_sh_api
  *
- * Copyright (c) 2017, Art of WiFi <info@artofwifi.net>
- *
- * This source file is subject to the MIT license that is bundled
- * with this package in the file LICENSE.md
- */
-
-namespace UniFi_API;
-
-/**
- * the UniFi API client class
+ * @package art-of-wifi/unifi-api-client
+ * @author  Art of WiFi <info@artofwifi.net>
+ * @version 1.1.57
+ * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
+ * @example See this directory in the package repository for a variety of examples:
+ *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
  */
 class Client
 {
@@ -33,7 +31,7 @@ class Client
     protected $is_loggedin         = false;
     protected $is_unifi_os         = false;
     protected $exec_retries        = 0;
-    protected $class_version       = '1.1.56';
+    protected $class_version       = '1.1.57';
     private $cookies               = '';
     private $request_type          = 'GET';
     private $request_types_allowed = ['GET', 'POST', 'PUT', 'DELETE'];
@@ -45,18 +43,17 @@ class Client
 
     /**
      * Construct an instance of the UniFi API client class
-     * ---------------------------------------------------
-     * returns a new class instance
-     * required parameter <user>       = string; user name to use when connecting to the UniFi controller
-     * required parameter <password>   = string; password to use when connecting to the UniFi controller
-     * optional parameter <baseurl>    = string; base URL of the UniFi controller which *must* include 'https://'' prefix,
-     *                                   a port suffix (e.g. :8443) is required for non-UniFi OS controllers,
-     *                                   do not add trailing slashes, defaults to 'https://127.0.0.1:8443'
-     * optional parameter <site>       = string; short site name to access, defaults to 'default'
-     * optional parameter <version>    = string; the version number of the controller
-     * optional parameter <ssl_verify> = boolean; whether to validate the controller's SSL certificate or not, a value of true is
-     *                                   recommended for production environments to prevent potential MitM attacks, default value (false)
-     *                                   disables validation of the controller certificate
+     *
+     * @param string  $user       user name to use when connecting to the UniFi controller
+     * @param string  $password   password to use when connecting to the UniFi controller
+     * @param string  $baseurl    optional, base URL of the UniFi controller which *must* include 'https://'' prefix,
+     *                            a port suffix (e.g. :8443) is required for non-UniFi OS controllers,
+     *                            do not add trailing slashes, defaults to 'https://127.0.0.1:8443'
+     * @param string  $site       optional, short site name to access, defaults to 'default'
+     * @param string  $version    optional, the version number of the controller
+     * @param bool    $ssl_verify optional, whether to validate the controller's SSL certificate or not, a value of true is
+     *                            recommended for production environments to prevent potential MitM attacks, default value (false)
+     *                            disables validation of the controller certificate
      */
     public function __construct($user, $password, $baseurl = '', $site = '', $version = '', $ssl_verify = false)
     {
@@ -81,7 +78,7 @@ class Client
             $this->version = trim($version);
         }
 
-        if ((boolean)$ssl_verify === true) {
+        if ((boolean) $ssl_verify === true) {
             $this->curl_ssl_verify_peer = true;
             $this->curl_ssl_verify_host = 2;
         }
@@ -91,8 +88,7 @@ class Client
      * This method is called as soon as there are no other references to the class instance
      * https://www.php.net/manual/en/language.oop5.decon.php
      *
-     * NOTES:
-     * to force the class instance to log out when you're done, simply call logout()
+     * NOTE: to force the class instance to log out when you're done, simply call logout()
      */
     public function __destruct()
     {
@@ -113,8 +109,8 @@ class Client
 
     /**
      * Login to the UniFi controller
-     * -----------------------------
-     * returns true upon success
+     *
+     * @return bool returns true upon success
      */
     public function login()
     {
@@ -240,8 +236,8 @@ class Client
 
     /**
      * Logout from the UniFi controller
-     * --------------------------------
-     * returns true upon success
+     *
+     * @return bool returns true upon success
      */
     public function logout()
     {
@@ -298,14 +294,14 @@ class Client
 
     /**
      * Authorize a client device
-     * -------------------------
-     * return true on success
-     * required parameter <mac>     = client MAC address
-     * required parameter <minutes> = minutes (from now) until authorization expires
-     * optional parameter <up>      = upload speed limit in kbps
-     * optional parameter <down>    = download speed limit in kbps
-     * optional parameter <MBytes>  = data transfer limit in MB
-     * optional parameter <ap_mac>  = AP MAC address to which client is connected, should result in faster authorization
+     *
+     * @param  string $mac     client MAC address
+     * @param  int    $minutes minutes (from now) until authorization expires
+     * @param  int    $up      optional, upload speed limit in kbps
+     * @param  int    $down    optional, download speed limit in kbps
+     * @param  int    $MBytes  optional, data transfer limit in MB
+     * @param  int    $ap_mac  optional, AP MAC address to which client is connected, should result in faster authorization
+     * @return bool            returns true upon success
      */
     public function authorize_guest($mac, $minutes, $up = null, $down = null, $MBytes = null, $ap_mac = null)
     {
@@ -335,9 +331,9 @@ class Client
 
     /**
      * Unauthorize a client device
-     * ---------------------------
-     * return true on success
-     * required parameter <mac> = client MAC address
+     *
+     * @param  string $mac client MAC address
+     * @return bool        returns true upon success
      */
     public function unauthorize_guest($mac)
     {
@@ -348,9 +344,9 @@ class Client
 
     /**
      * Reconnect a client device
-     * -------------------------
-     * return true on success
-     * required parameter <mac> = client MAC address
+     *
+     * @param  string $mac client MAC address
+     * @return bool        returns true upon success
      */
     public function reconnect_sta($mac)
     {
@@ -361,9 +357,9 @@ class Client
 
     /**
      * Block a client device
-     * ---------------------
-     * return true on success
-     * required parameter <mac> = client MAC address
+     *
+     * @param  string $mac client MAC address
+     * @return bool        returns true upon success
      */
     public function block_sta($mac)
     {
@@ -374,9 +370,9 @@ class Client
 
     /**
      * Unblock a client device
-     * -----------------------
-     * return true on success
-     * required parameter <mac> = client MAC address
+     *
+     * @param  string $mac client MAC address
+     * @return bool        returns true upon success
      */
     public function unblock_sta($mac)
     {
@@ -387,13 +383,13 @@ class Client
 
     /**
      * Forget one or more client devices
-     * ---------------------------------
-     * return true on success
-     * required parameter <macs> = array of client MAC addresses
      *
      * NOTE:
      * only supported with controller versions 5.9.X and higher, can be
      * slow (up to 5 minutes) on larger controllers
+     *
+     * @param  array $macs array of client MAC addresses (strings)
+     * @return bool        returns true upon success
      */
     public function forget_sta($macs)
     {
@@ -404,15 +400,15 @@ class Client
 
     /**
      * Create a new user/client-device
-     * -------------------------------
-     * return an array with a single object containing details of the new user/client-device on success, else return false
-     * required parameter <mac>           = client MAC address
-     * required parameter <user_group_id> = _id value for the user group the new user/client-device should belong to which
-     *                                      can be obtained from the output of list_usergroups()
-     * optional parameter <name>          = name to be given to the new user/client-device
-     * optional parameter <note>          = note to be applied to the new user/client-device
-     * optional parameter <is_guest>      = boolean; defines whether the new user/client-device is a guest or not
-     * optional parameter <is_wired>      = boolean; defines whether the new user/client-device is wired or not
+     *
+     * @param  string $mac           client MAC address
+     * @param  string $user_group_id _id value for the user group the new user/client-device should belong to which
+     *                               can be obtained from the output of list_usergroups()
+     * @param  string $name          optional, name to be given to the new user/client-device
+     * @param  string $note          optional, note to be applied to the new user/client-device
+     * @param  bool   $is_guest      optional, defines whether the new user/client-device is a guest or not
+     * @param  bool   $is_wired      optional, defines whether the new user/client-device is wired or not
+     * @return array                 returns an array with a single object containing details of the new user/client-device on success, else returns false
      */
     public function create_user($mac, $user_group_id, $name = null, $note = null, $is_guest = null, $is_wired = null)
     {
@@ -441,13 +437,11 @@ class Client
 
     /**
      * Add/modify/remove a client-device note
-     * --------------------------------------
-     * return true on success
-     * required parameter <user_id> = id of the client-device to be modified
-     * optional parameter <note>    = note to be applied to the client-device
      *
-     * NOTES:
-     * - when note is empty or not set, the existing note for the client-device will be removed and "noted" attribute set to false
+     * @param  string $user_id id of the client-device to be modified
+     * @param  string $note    optional, note to be applied to the client-device, when empty or not set,
+     *                         the existing note for the client-device will be removed and "noted" attribute set to false
+     * @return bool            returns true upon success
      */
     public function set_sta_note($user_id, $note = null)
     {
@@ -459,13 +453,11 @@ class Client
 
     /**
      * Add/modify/remove a client device name
-     * --------------------------------------
-     * return true on success
-     * required parameter <user_id> = id of the client device to be modified
-     * optional parameter <name>    = name to be applied to the client device
      *
-     * NOTES:
-     * - when name is empty or not set, the existing name for the client device will be removed
+     * @param  string $user_id id of the client-device to be modified
+     * @param  string $note    optional, name to be applied to the client device, when empty or not set,
+     *                         the existing name for the client device will be removed
+     * @return bool            returns true upon success
      */
     public function set_sta_name($user_id, $name = null)
     {
@@ -476,16 +468,16 @@ class Client
 
     /**
      * 5 minutes site stats method
-     * ---------------------------
-     * returns an array of 5-minute stats objects for the current site
-     * optional parameter <start> = Unix timestamp in milliseconds
-     * optional parameter <end>   = Unix timestamp in milliseconds
      *
      * NOTES:
      * - defaults to the past 12 hours
      * - this function/method is only supported on controller versions 5.5.* and later
      * - make sure that the retention policy for 5 minutes stats is set to the correct value in
      *   the controller settings
+     *
+     * @param  int   $start optional, Unix timestamp in milliseconds
+     * @param  int   $end   optional, Unix timestamp in milliseconds
+     * @return array        returns an array of 5-minute stats objects for the current site
      */
     public function stat_5minutes_site($start = null, $end = null)
     {
@@ -1500,7 +1492,7 @@ class Client
             return false;
         }
 
-        $payload= [
+        $payload = [
             'name'        => trim($name),
             'email'       => trim($email),
             'for_sso'     => $enable_sso,
@@ -1830,16 +1822,6 @@ class Client
     public function list_portforwarding()
     {
         return $this->fetch_results('/api/s/' . $this->site . '/list/portforward');
-    }
-
-    /**
-     * List dynamic DNS settings
-     * -------------------------
-     * returns an array of dynamic DNS settings
-     */
-    public function list_dynamicdns()
-    {
-        return $this->fetch_results('/api/s/' . $this->site . '/list/dynamicdns');
     }
 
     /**
@@ -2219,6 +2201,43 @@ class Client
         $payload = ['mac' => strtolower($mac), 'cmd' => 'delete-device'];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
+    }
+
+    /**
+     * List dynamic DNS settings (using REST)
+     * --------------------------------------
+     * returns an array of dynamic DNS settings
+     */
+    public function list_dynamicdns()
+    {
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/dynamicdns');
+    }
+
+    /**
+     * Create dynamic DNS settings, base (using REST)
+     * ----------------------------------------------
+     * return true on success
+     * required parameter <payload> = stdClass object or associative array containing the configuration to apply to the site, must be a
+     *                                (partial) object/array structured in the same manner as is returned by list_dynamicdns() for the site.
+     */
+    public function create_dynamicdns($payload)
+    {
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/dynamicdns', $payload);
+    }
+
+    /**
+     * Update site dynamic DNS, base (using REST)
+     * ------------------------------------------
+     * return true on success
+     * required parameter <dynamicdns_id> = 24 char string; _id of the settings which can be found with the list_dynamicdns() function
+     * required parameter <payload>       = stdClass object or associative array containing the configuration to apply to the site, must be a
+     *                                      (partial) object/array structured in the same manner as is returned by list_dynamicdns() for the site.
+     */
+    public function set_dynamicdns($dynamicdns_id, $payload)
+    {
+        $this->request_type = 'PUT';
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/dynamicdns/' . trim($dynamicdns_id), $payload);
     }
 
     /**
@@ -2620,7 +2639,7 @@ class Client
      */
     public function spectrum_scan($ap_mac)
     {
-        $payload  = ['cmd' => 'spectrum-scan', 'mac' => strtolower($ap_mac)];
+        $payload = ['cmd' => 'spectrum-scan', 'mac' => strtolower($ap_mac)];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
     }
@@ -3151,11 +3170,11 @@ class Client
      * Fetch results
      * -------------
      * execute the cURL request and return results
-     * required parameter <path>           = request path
-     * optional parameter <payload>        = payload to pass with the request
-     * optional parameter <boolean>        = whether the method should return a boolean result, else return
+     * required parameter <path>           = string, request path
+     * optional parameter <payload>        = PHP associative array or stdClass Object, payload to pass with the request
+     * optional parameter <boolean>        = boolean, whether the method should return a boolean result, else return
      *                                       the "data" array
-     * optional parameter <login_required> = whether the method requires to be logged in or not
+     * optional parameter <login_required> = boolean, whether the method requires to be logged in or not
      */
     protected function fetch_results($path, $payload = null, $boolean = false, $login_required = true)
     {
@@ -3199,9 +3218,9 @@ class Client
      * Fetch results where output should be boolean (true/false)
      * ---------------------------------------------------------
      * execute the cURL request and return a boolean value
-     * required parameter <path>           = request path
-     * optional parameter <payload>        = payload to pass with the request
-     * optional parameter <login_required> = whether the method requires to be logged in or not
+     * required parameter <path>           = string, request path
+     * optional parameter <payload>        = PHP associative array or stdClass Object, payload to pass with the request
+     * optional parameter <login_required> = boolean, whether the method requires to be logged in or not
      */
     protected function fetch_results_boolean($path, $payload = null, $login_required = true)
     {
