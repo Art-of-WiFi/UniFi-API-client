@@ -3275,7 +3275,7 @@ class Client
      */
     private function check_base_url($baseurl)
     {
-        if (!filter_var($baseurl, FILTER_VALIDATE_URL)) {
+        if (!filter_var($baseurl, FILTER_VALIDATE_URL) || substr($baseurl, -1) === '/') {
             trigger_error('The URL provided is incomplete or invalid!');
 
             return false;
