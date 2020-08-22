@@ -1,27 +1,28 @@
 {
-    "name": 		"art-of-wifi/unifi-api-client",
-    "type": 		"library",
-    "description": 	"API client class for use with Ubiquiti's UniFi controller",
+    "name":        "art-of-wifi/unifi-api-client",
+    "type":        "library",
+    "description": "API client class for use with Ubiquiti's UniFi controller",
     "keywords": [
-		"ubnt",
-		"ubiquiti",
-		"unifi",
-		"controller",
-		"api",
-		"client"
-	],
-    "homepage": 	"https://github.com/Art-of-WiFi/UniFi-API-client",
-    "license": 		"MIT",
+        "ubnt",
+        "ubiquiti",
+        "unifi",
+        "controller",
+        "api",
+        "client"
+    ],
+    "homepage":    "https://github.com/Art-of-WiFi/UniFi-API-client",
+    "license":     "MIT",
     "authors": [
         {
-            "name": 	"Art of WiFi",
-            "email": 	"info@artofowifi.net",
+            "name":     "Art of WiFi",
+            "email":    "info@artofowifi.net",
             "homepage": "http://artofwifi.net"
         }
     ],
     "require": {
-        "php": ">=5.4.0",
-		"ext-curl": "*"
+        "php": ">=5.5.0",
+        "ext-curl": "*",
+        "ext-json": "*"
     },
     "autoload": {
         "psr-4": {

@@ -6,8 +6,8 @@ The package can be installed manually or using composer/[packagist](https://pack
 
 ## Requirements
 
-- a server with PHP and cURL modules installed (tested on Apache 2.4 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.2.24 and cURL 7.58.0)
-- network connectivity between this server and the host and port (normally TCP port 8443) where the UniFi Controller is running
+- a server with PHP, version 5.5.0 or higher, and the PHP cURL module installed (tested on Apache 2.4 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.2.24 and cURL 7.58.0)
+- direct network connectivity between this server and the host and port (normally TCP port 8443) where the UniFi Controller is running
 - you must use **local accounts**, not UniFi Cloud accounts, to access the UniFi Controller API through this class
 
 
@@ -189,6 +189,7 @@ The class currently supports the following functions/methods to GET/POST/PUT/DEL
 - set_ap_radiosettings()
 - set_device_settings_base()
 - set_dynamicdns()
+- set_element_adoption() (supported on controller version 5.13.X and higher)
 - set_guestlogin_settings()
 - set_guestlogin_settings_base()
 - set_ips_settings_base() (supported on controller version 5.9.10 and higher)

@@ -216,7 +216,7 @@ class Client
                 $this->cookies = implode(';', $results[1]);
 
                 /**
-                 * accept cookies from regular UniFI controllers or from UniFi OS
+                 * accept cookies from regular UniFi controllers or from UniFi OS
                  */
                 if (strpos($this->cookies, 'unifises') !== false || strpos($this->cookies, 'TOKEN') !== false) {
                     /**
@@ -253,7 +253,8 @@ class Client
         /**
          * constuct HTTP request headers as required
          */
-        $headers = ['Content-Length: 0'];
+        $headers     = ['Content-Length: 0'];
+        $logout_path = '/logout';
         if ($this->is_unifi_os) {
             $logout_path = '/api/auth/logout';
             $curl_options[CURLOPT_CUSTOMREQUEST] = 'POST';
@@ -262,8 +263,6 @@ class Client
             if ($csrf_token) {
                 $headers[] = 'x-csrf-token: ' . $csrf_token;
             }
-        } else {
-            $logout_path = '/logout';
         }
 
         $curl_options[CURLOPT_HTTPHEADER] = $headers;
@@ -274,7 +273,7 @@ class Client
         /**
          * execute the cURL request to logout
          */
-        $logout = curl_exec($ch);
+        curl_exec($ch);
 
         if (curl_errno($ch)) {
             trigger_error('cURL error: ' . curl_error($ch));
@@ -413,20 +412,20 @@ class Client
     public function create_user($mac, $user_group_id, $name = null, $note = null, $is_guest = null, $is_wired = null)
     {
         $new_user = ['mac' => strtolower($mac), 'usergroup_id' => $user_group_id];
-        if (!is_null($name)) {
+        if (!empty($name)) {
             $new_user['name'] = $name;
         }
 
-        if (!is_null($note)) {
+        if (!empty($note)) {
             $new_user['note']  = $note;
             $new_user['noted'] = true;
         }
 
-        if (!is_null($is_guest) && is_bool($is_guest)) {
+        if (!empty($is_guest) && is_bool($is_guest)) {
             $new_user['is_guest'] = $is_guest;
         }
 
-        if (!is_null($is_wired) && is_bool($is_wired)) {
+        if (!empty($is_wired) && is_bool($is_wired)) {
             $new_user['is_wired'] = $is_wired;
         }
 
@@ -445,7 +444,7 @@ class Client
      */
     public function set_sta_note($user_id, $note = null)
     {
-        $noted   = is_null($note) || empty($note) ? false : true;
+        $noted   = empty($note) ? false : true;
         $payload = ['note' => $note, 'noted' => $noted];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
@@ -455,7 +454,7 @@ class Client
      * Add/modify/remove a client device name
      *
      * @param  string $user_id id of the client-device to be modified
-     * @param  string $note    optional, name to be applied to the client device, when empty or not set,
+     * @param  string $name    optional, name to be applied to the client device, when empty or not set,
      *                         the existing name for the client device will be removed
      * @return bool            returns true upon success
      */
@@ -467,7 +466,7 @@ class Client
     }
 
     /**
-     * 5 minutes site stats method
+     * 5 minutes site stats
      *
      * NOTES:
      * - defaults to the past 12 hours
@@ -481,8 +480,8 @@ class Client
      */
     public function stat_5minutes_site($start = null, $end = null)
     {
-        $end     = is_null($end) ? time() * 1000 : intval($end);
-        $start   = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
+        $end     = empty($end) ? time() * 1000 : intval($end);
+        $start   = empty($start) ? $end - (12 * 3600 * 1000) : intval($start);
         $attribs = [
             'bytes',
             'wan-tx_bytes',
@@ -499,20 +498,20 @@ class Client
     }
 
     /**
-     * Hourly site stats method
-     * ------------------------
-     * returns an array of hourly stats objects for the current site
-     * optional parameter <start> = Unix timestamp in milliseconds
-     * optional parameter <end>   = Unix timestamp in milliseconds
+     * Hourly site stats
      *
      * NOTES:
      * - defaults to the past 7*24 hours
      * - "bytes" are no longer returned with controller version 4.9.1 and later
+     *
+     * @param  int   $start optional, Unix timestamp in milliseconds
+     * @param  int   $end   optional, Unix timestamp in milliseconds
+     * @return array        returns an array of hourly stats objects for the current site
      */
     public function stat_hourly_site($start = null, $end = null)
     {
-        $end     = is_null($end) ? time() * 1000 : intval($end);
-        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $end     = empty($end) ? time() * 1000 : intval($end);
+        $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $attribs = [
             'bytes',
             'wan-tx_bytes',
@@ -529,20 +528,20 @@ class Client
     }
 
     /**
-     * Daily site stats method
-     * ------------------------
-     * returns an array of daily stats objects for the current site
-     * optional parameter <start> = Unix timestamp in milliseconds
-     * optional parameter <end>   = Unix timestamp in milliseconds
+     * Daily site stats
      *
      * NOTES:
      * - defaults to the past 52*7*24 hours
      * - "bytes" are no longer returned with controller version 4.9.1 and later
+     *
+     * @param  int   $start optional, Unix timestamp in milliseconds
+     * @param  int   $end   optional, Unix timestamp in milliseconds
+     * @return array        returns an array of daily stats objects for the current site
      */
     public function stat_daily_site($start = null, $end = null)
     {
-        $end     = is_null($end) ? (time() - (time() % 3600)) * 1000 : intval($end);
-        $start   = is_null($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
+        $end     = empty($end) ? (time() - (time() % 3600)) * 1000 : intval($end);
+        $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
         $attribs = [
             'bytes',
             'wan-tx_bytes',
@@ -559,26 +558,27 @@ class Client
     }
 
     /**
-     * 5 minutes stats method for a single access point or all access points
-     * ---------------------------------------------------------------------
-     * returns an array of 5-minute stats objects
-     * optional parameter <start> = Unix timestamp in milliseconds
-     * optional parameter <end>   = Unix timestamp in milliseconds
-     * optional parameter <mac>   = AP MAC address to return stats for
+     * 5 minutes stats for a single access point or all access points
      *
      * NOTES:
      * - defaults to the past 12 hours
      * - this function/method is only supported on controller versions 5.5.* and later
      * - make sure that the retention policy for 5 minutes stats is set to the correct value in
      *   the controller settings
+     *
+     * @param  int    $start optional, Unix timestamp in milliseconds
+     * @param  int    $end   optional, Unix timestamp in milliseconds
+     * @param  string $mac   optional, AP MAC address to return stats for, when empty,
+     *                       stats for all APs are returned
+     * @return array         returns an array of 5-minute stats objects
      */
     public function stat_5minutes_aps($start = null, $end = null, $mac = null)
     {
-        $end     = is_null($end) ? time() * 1000 : intval($end);
-        $start   = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
+        $end     = empty($end) ? time() * 1000 : intval($end);
+        $start   = empty($start) ? $end - (12 * 3600 * 1000) : intval($start);
         $attribs = ['bytes', 'num_sta', 'time'];
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) {
+        if (!empty($mac)) {
             $payload['mac'] = strtolower($mac);
         }
 
@@ -586,24 +586,26 @@ class Client
     }
 
     /**
-     * Hourly stats method for a single access point or all access points
-     * ------------------------------------------------------------------
-     * returns an array of hourly stats objects
-     * optional parameter <start> = Unix timestamp in milliseconds
-     * optional parameter <end>   = Unix timestamp in milliseconds
-     * optional parameter <mac>   = AP MAC address to return stats for
+     * Hourly stats for a single access point or all access points
      *
      * NOTES:
      * - defaults to the past 7*24 hours
-     * - UniFi controller does not keep these stats longer than 5 hours with versions < 4.6.6
+     * - make sure that the retention policy for hourly stats is set to the correct value in
+     *   the controller settings
+     *
+     * @param  int    $start optional, Unix timestamp in milliseconds
+     * @param  int    $end   optional, Unix timestamp in milliseconds
+     * @param  string $mac   optional, AP MAC address to return stats for, when empty,
+     *                       stats for all APs are returned
+     * @return array         returns an array of hourly stats objects
      */
     public function stat_hourly_aps($start = null, $end = null, $mac = null)
     {
-        $end     = is_null($end) ? (time() * 1000) : intval($end);
-        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $end     = empty($end) ? (time() * 1000) : intval($end);
+        $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $attribs = ['bytes', 'num_sta', 'time'];
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) {
+        if (!empty($mac)) {
             $payload['mac'] = strtolower($mac);
         }
 
@@ -611,24 +613,26 @@ class Client
     }
 
     /**
-     * Daily stats method for a single access point or all access points
-     * -----------------------------------------------------------------
-     * returns an array of daily stats objects
-     * optional parameter <start> = Unix timestamp in milliseconds
-     * optional parameter <end>   = Unix timestamp in milliseconds
-     * optional parameter <mac>   = AP MAC address to return stats for
+     * Daily stats for a single access point or all access points
      *
      * NOTES:
      * - defaults to the past 7*24 hours
-     * - UniFi controller does not keep these stats longer than 5 hours with versions < 4.6.6
+     * - make sure that the retention policy for hourly stats is set to the correct value in
+     *   the controller settings
+     *
+     * @param  int    $start optional, Unix timestamp in milliseconds
+     * @param  int    $end   optional, Unix timestamp in milliseconds
+     * @param  string $mac   optional, AP MAC address to return stats for, when empty,
+     *                       stats for all APs are returned
+     * @return array         returns an array of daily stats objects
      */
     public function stat_daily_aps($start = null, $end = null, $mac = null)
     {
-        $end     = is_null($end) ? time() * 1000 : intval($end);
-        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $end     = empty($end) ? time() * 1000 : intval($end);
+        $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
         $attribs = ['bytes', 'num_sta', 'time'];
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) {
+        if (!empty($mac)) {
             $payload['mac'] = strtolower($mac);
         }
 
@@ -636,15 +640,7 @@ class Client
     }
 
     /**
-     * 5 minutes stats method for a single user/client device
-     * ------------------------------------------------------
-     * returns an array of 5-minute stats objects
-     * required parameter <mac>     = MAC address of user/client device to return stats for
-     * optional parameter <start>   = Unix timestamp in milliseconds
-     * optional parameter <end>     = Unix timestamp in milliseconds
-     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
-     *                                rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
-     *                                default is ['rx_bytes', 'tx_bytes']
+     * 5 minutes stats for a single user/client device
      *
      * NOTES:
      * - defaults to the past 12 hours
@@ -652,64 +648,76 @@ class Client
      * - make sure that the retention policy for 5 minutes stats is set to the correct value in
      *   the controller settings
      * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance section
+     *
+     * @param  string $mac     MAC address of user/client device to return stats for
+     * @param  int    $start   optional, Unix timestamp in milliseconds
+     * @param  int    $end     optional, Unix timestamp in milliseconds
+     * @param  array  $attribs array containing attributes (strings) to be returned, valid values are:
+     *                         rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
+     *                         default is ['rx_bytes', 'tx_bytes']
+     * @return array           returns an array of 5-minute stats objects
      */
     public function stat_5minutes_user($mac, $start = null, $end = null, $attribs = null)
     {
-        $end     = is_null($end) ? time() * 1000 : intval($end);
-        $start   = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
-        $attribs = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
+        $end     = empty($end) ? time() * 1000 : intval($end);
+        $start   = empty($start) ? $end - (12 * 3600 * 1000) : intval($start);
+        $attribs = empty($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/5minutes.user', $payload);
     }
 
     /**
-     * Hourly stats method for a a single user/client device
-     * -----------------------------------------------------
-     * returns an array of hourly stats objects
-     * required parameter <mac>     = MAC address of user/client device to return stats for
-     * optional parameter <start>   = Unix timestamp in milliseconds
-     * optional parameter <end>     = Unix timestamp in milliseconds
-     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
-     *                                rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
-     *                                default is ['rx_bytes', 'tx_bytes']
+     * Hourly stats for a single user/client device
      *
      * NOTES:
      * - defaults to the past 7*24 hours
      * - only supported with UniFi controller versions 5.8.X and higher
+     * - make sure that the retention policy for hourly stats is set to the correct value in
+     *   the controller settings
      * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance section
+     *
+     * @param  string $mac     MAC address of user/client device to return stats fo
+     * @param  int    $start   optional, Unix timestamp in milliseconds
+     * @param  int    $end     optional, Unix timestamp in milliseconds
+     * @param  array  $attribs array containing attributes (strings) to be returned, valid values are:
+     *                         rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
+     *                         default is ['rx_bytes', 'tx_bytes']
+     * @return array           returns an array of hourly stats objects
      */
     public function stat_hourly_user($mac, $start = null, $end = null, $attribs = null)
     {
-        $end     = is_null($end) ? time() * 1000 : intval($end);
-        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $attribs = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
+        $end     = empty($end) ? time() * 1000 : intval($end);
+        $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = empty($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/hourly.user', $payload);
     }
 
     /**
-     * Daily stats method for a single user/client device
-     * --------------------------------------------------
-     * returns an array of daily stats objects
-     * required parameter <mac>     = MAC address of user/client device to return stats for
-     * optional parameter <start>   = Unix timestamp in milliseconds
-     * optional parameter <end>     = Unix timestamp in milliseconds
-     * optional parameter <attribs> = array containing attributes (strings) to be returned, valid values are:
-     *                                rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
-     *                                default is ['rx_bytes', 'tx_bytes']
+     * Daily stats for a single user/client device
      *
      * NOTES:
      * - defaults to the past 7*24 hours
      * - only supported with UniFi controller versions 5.8.X and higher
+     * - make sure that the retention policy for daily stats is set to the correct value in
+     *   the controller settings
      * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance section
+     *
+     * @param  string $mac     MAC address of user/client device to return stats fo
+     * @param  int    $start   optional, Unix timestamp in milliseconds
+     * @param  int    $end     optional, Unix timestamp in milliseconds
+     * @param  array  $attribs array containing attributes (strings) to be returned, valid values are:
+     *                         rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
+     *                         default is ['rx_bytes', 'tx_bytes']
+     * @return array           returns an array of daily stats objects
      */
     public function stat_daily_user($mac, $start = null, $end = null, $attribs = null)
     {
-        $end     = is_null($end) ? time() * 1000 : intval($end);
-        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $attribs = is_null($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
+        $end     = empty($end) ? time() * 1000 : intval($end);
+        $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = empty($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/daily.user', $payload);
@@ -735,9 +743,9 @@ class Client
      */
     public function stat_5minutes_gateway($start = null, $end = null, $attribs = null)
     {
-        $end     = is_null($end) ? time() * 1000 : intval($end);
-        $start   = is_null($start) ? $end - (12 * 3600 * 1000) : intval($start);
-        $attribs = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
+        $end     = empty($end) ? time() * 1000 : intval($end);
+        $start   = empty($start) ? $end - (12 * 3600 * 1000) : intval($start);
+        $attribs = empty($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/5minutes.gw', $payload);
@@ -760,9 +768,9 @@ class Client
      */
     public function stat_hourly_gateway($start = null, $end = null, $attribs = null)
     {
-        $end     = is_null($end) ? time() * 1000 : intval($end);
-        $start   = is_null($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
-        $attribs = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
+        $end     = empty($end) ? time() * 1000 : intval($end);
+        $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = empty($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/hourly.gw', $payload);
@@ -785,9 +793,9 @@ class Client
      */
     public function stat_daily_gateway($start = null, $end = null, $attribs = null)
     {
-        $end     = is_null($end) ? (time() - (time() % 3600)) * 1000 : intval($end);
-        $start   = is_null($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
-        $attribs = is_null($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
+        $end     = empty($end) ? (time() - (time() % 3600)) * 1000 : intval($end);
+        $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = empty($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/daily.gw', $payload);
@@ -806,8 +814,8 @@ class Client
      */
     public function stat_speedtest_results($start = null, $end = null)
     {
-        $end     = is_null($end) ? time() * 1000 : intval($end);
-        $start   = is_null($start) ? $end - (24 * 3600 * 1000) : intval($start);
+        $end     = empty($end) ? time() * 1000 : intval($end);
+        $start   = empty($start) ? $end - (24 * 3600 * 1000) : intval($start);
         $payload = ['attrs' => ['xput_download', 'xput_upload', 'latency', 'time'], 'start' => $start, 'end' => $end];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/archive.speedtest', $payload);
@@ -828,9 +836,9 @@ class Client
      */
     public function stat_ips_events($start = null, $end = null, $limit = null)
     {
-        $end     = is_null($end) ? time() * 1000 : intval($end);
-        $start   = is_null($start) ? $end - (24 * 3600 * 1000) : intval($start);
-        $limit   = is_null($limit) ? 10000 : intval($limit);
+        $end     = empty($end) ? time() * 1000 : intval($end);
+        $start   = empty($start) ? $end - (24 * 3600 * 1000) : intval($start);
+        $limit   = empty($limit) ? 10000 : intval($limit);
         $payload = ['start' => $start, 'end' => $end, '_limit' => $limit];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/ips/event', $payload);
@@ -854,10 +862,10 @@ class Client
             return false;
         }
 
-        $end     = is_null($end) ? time() : intval($end);
-        $start   = is_null($start) ? $end - (7 * 24 * 3600) : intval($start);
+        $end     = empty($end) ? time() : intval($end);
+        $start   = empty($start) ? $end - (7 * 24 * 3600) : intval($start);
         $payload = ['type' => $type, 'start' => $start, 'end' => $end];
-        if (!is_null($mac)) {
+        if (!empty($mac)) {
             $payload['mac'] = strtolower($mac);
         }
 
@@ -873,7 +881,7 @@ class Client
      */
     public function stat_sta_sessions_latest($mac, $limit = null)
     {
-        $limit   = is_null($limit) ? 5 : intval($limit);
+        $limit   = empty($limit) ? 5 : intval($limit);
         $payload = ['mac' => strtolower($mac), '_limit' => $limit, '_sort'=> '-assoc_time'];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/session', $payload);
@@ -891,8 +899,8 @@ class Client
      */
     public function stat_auths($start = null, $end = null)
     {
-        $end     = is_null($end) ? time() : intval($end);
-        $start   = is_null($start) ? $end - (7 * 24 * 3600) : intval($start);
+        $end     = empty($end) ? time() : intval($end);
+        $start   = empty($start) ? $end - (7 * 24 * 3600) : intval($start);
         $payload = ['start' => $start, 'end' => $end];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/authorization', $payload);
@@ -1881,7 +1889,7 @@ class Client
     public function restart_device($mac, $type = 'soft')
     {
         $payload = ['cmd' => 'restart', 'mac' => strtolower($mac)];
-        if (!is_null($type) && in_array($type, ['soft', 'hard'])) {
+        if (!empty($type) && in_array($type, ['soft', 'hard'])) {
             $payload['type'] = strtolower($type);
         }
 
@@ -1897,7 +1905,6 @@ class Client
     public function force_provision($mac)
     {
         $payload = ['mac' => strtolower($mac), 'cmd' => 'force-provision'];
-
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
     }
@@ -2080,8 +2087,7 @@ class Client
         $expire_number,
         $expire_unit,
         $section_id
-    )
-    {
+    ) {
         $payload = [
             'portal_enabled'    => $portal_enabled,
             'portal_customized' => $portal_customized,
@@ -2343,8 +2349,7 @@ class Client
         $uapsd_enabled    = false,
         $schedule_enabled = false,
         $schedule         = []
-    )
-    {
+    ) {
         $payload = [
             'name'             => $name,
             'usergroup_id'     => $usergroup_id,
@@ -2361,7 +2366,7 @@ class Client
             'schedule'         => $schedule,
         ];
 
-        if (!is_null($vlan) && $vlan_enabled) {
+        if (!empty($vlan) && $vlan_enabled) {
             $payload['vlan'] = $vlan;
         }
 
@@ -2399,11 +2404,9 @@ class Client
     public function set_wlansettings($wlan_id, $x_passphrase, $name = null)
     {
         $payload = [];
-        if (!is_null($x_passphrase)) {
-            $payload['x_passphrase'] = trim($x_passphrase);
-        }
+        $payload['x_passphrase'] = trim($x_passphrase);
 
-        if (!is_null($name)) {
+        if (!empty($name)) {
             $payload['name'] = trim($name);
         }
 
@@ -2527,7 +2530,7 @@ class Client
     public function archive_alarm($alarm_id = null)
     {
         $payload = ['cmd' => 'archive-all-alarms'];
-        if (!is_null($alarm_id)) {
+        if (!empty($alarm_id)) {
             $payload = ['_id' => $alarm_id, 'cmd' => 'archive-alarm'];
         }
 
@@ -2811,6 +2814,23 @@ class Client
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/stat', $payload);
     }
 
+    /**
+    * Toggle Element Adoption ON or OFF
+    * ----------------------------------------------
+    * return true on success
+    * required parameter <enable> = boolean; true will enable Element Adoption, false will disable Element Adoption
+    */
+    public function set_element_adoption($enable)
+    {
+        if (!is_bool($enable)) {
+            return false;
+        }
+
+        $payload = ['enabled' => $enable];
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/element_adopt', $payload);
+    }
+
     /****************************************************************
      * "Aliases" for deprecated functions from here, to support
      * backward compatibility:
@@ -2913,7 +2933,6 @@ class Client
         return $this->restart_device($mac);
     }
 
-
     /**
      * Custom API request
      * ------------------
@@ -2930,6 +2949,10 @@ class Client
     public function custom_api_request($path, $request_type = 'GET', $payload = null, $return = 'array')
     {
         if (!in_array($request_type, $this->request_types_allowed)) {
+            return false;
+        }
+
+        if (strpos($path, '/') !== 0) {
             return false;
         }
 
@@ -3235,9 +3258,8 @@ class Client
         if ($this->debug) {
             switch (json_last_error()) {
                 case JSON_ERROR_NONE:
-                    // JSON is valid, no error has occurred
-                    $error = '';
-                    break;
+                    // JSON is valid, no error has occurred and we return true early
+                    return true;
                 case JSON_ERROR_DEPTH:
                     $error = 'The maximum stack depth has been exceeded';
                     break;
@@ -3279,11 +3301,9 @@ class Client
                     break;
             }
 
-            if (!empty($error)) {
-                trigger_error('JSON decode error: ' . $error);
+            trigger_error('JSON decode error: ' . $error);
 
-                return false;
-            }
+            return false;
         }
 
         return true;
@@ -3294,8 +3314,8 @@ class Client
      */
     private function check_base_url($baseurl)
     {
-        if (!filter_var($baseurl, FILTER_VALIDATE_URL)) {
-            trigger_error('The URL provided is incomplete or invalid!');
+        if (!filter_var($baseurl, FILTER_VALIDATE_URL) || substr($baseurl, -1) === '/') {
+            trigger_error('The URL provided is incomplete, invalid or ends with a / character!');
 
             return false;
         }
@@ -3375,154 +3395,156 @@ class Client
 
         if (!($ch = $this->get_curl_resource())) {
             trigger_error('$ch as returned by get_curl_resource() is not a resource');
-        } else {
-            $json_payload = '';
 
-            if ($this->is_unifi_os) {
-                $url = $this->baseurl . '/proxy/network' . $path;
-            } else {
-                $url = $this->baseurl . $path;
-            }
-
-            /**
-             * prepare cURL options
-             */
-            $curl_options = [
-                CURLOPT_URL => $url
-            ];
-
-            if ($payload !== null) {
-                $json_payload                     = json_encode($payload, JSON_UNESCAPED_SLASHES);
-                $curl_options[CURLOPT_POST]       = true;
-                $curl_options[CURLOPT_POSTFIELDS] = $json_payload;
-
-                $headers = [
-                    'Content-Type: application/json;charset=UTF-8',
-                    'Content-Length: ' . strlen($json_payload)
-                ];
-
-                if ($this->is_unifi_os) {
-                    $csrf_token = $this->extract_csrf_token_from_cookie();
-                    if ($csrf_token) {
-                        $headers[] = 'x-csrf-token: ' . $csrf_token;
-                    }
-                }
-
-                $curl_options[CURLOPT_HTTPHEADER] = $headers;
-
-                /**
-                 * we shouldn't be using GET (the default request type) or DELETE when passing a payload,
-                 * we switch to POST instead
-                 */
-                if ($this->request_type === 'GET' || $this->request_type === 'DELETE') {
-                    $this->request_type = 'POST';
-                }
-
-                if ($this->request_type === 'PUT') {
-                    $curl_options[CURLOPT_CUSTOMREQUEST] = 'PUT';
-                }
-
-                if ($this->request_type === 'POST') {
-                    $curl_options[CURLOPT_CUSTOMREQUEST] = 'POST';
-                }
-            }
-
-            if ($this->request_type === 'DELETE') {
-                $curl_options[CURLOPT_CUSTOMREQUEST] = 'DELETE';
-            }
-
-            curl_setopt_array($ch, $curl_options);
-
-            /**
-             * execute the cURL request
-             */
-            $content = curl_exec($ch);
-            if (curl_errno($ch)) {
-                trigger_error('cURL error: ' . curl_error($ch));
-            }
-
-            /**
-             * fetch the HTTP response code
-             */
-            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-            /**
-             * an HTTP response code 401 (Unauthorized) indicates the Cookie/Token has expired in which case
-             * we need to login again.
-             */
-            if ($http_code == 401) {
-                if ($this->debug) {
-                    error_log(__FUNCTION__ . ': needed to reconnect to UniFi controller');
-                }
-
-                if ($this->exec_retries == 0) {
-                    /**
-                     * explicitly clear the expired Cookie/Token, update other properties and log out before logging in again
-                     */
-                    if (isset($_SESSION['unificookie'])) {
-                        $_SESSION['unificookie'] = '';
-                    }
-
-                    $this->is_loggedin = false;
-                    $this->exec_retries++;
-                    curl_close($ch);
-
-                    /**
-                     * then login again
-                     */
-                    $this->login();
-
-                    /**
-                     * when re-login was successful, simply execute the same cURL request again
-                     */
-                    if ($this->is_loggedin) {
-                        if ($this->debug) {
-                            error_log(__FUNCTION__ . ': re-logged in, calling exec_curl again');
-                        }
-
-                        return $this->exec_curl($path, $payload);
-                    } else {
-                        if ($this->debug) {
-                            error_log(__FUNCTION__ . ': re-login failed');
-                        }
-
-                        return false;
-                    }
-                } else {
-                    return false;
-                }
-            }
-
-            if ($this->debug) {
-                print PHP_EOL . '<pre>';
-                print PHP_EOL . '---------cURL INFO-----------' . PHP_EOL;
-                print_r(curl_getinfo($ch));
-                print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
-                print $url . PHP_EOL;
-                if (empty($json_payload)) {
-                    print 'empty payload';
-                } else {
-                    print $json_payload;
-                }
-
-                print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
-                print $content;
-                print PHP_EOL . '-----------------------------' . PHP_EOL;
-                print '</pre>' . PHP_EOL;
-            }
-
-            curl_close($ch);
-
-            /**
-             * set request_type value back to default, just in case
-             */
-            $this->request_type = 'GET';
-
-            return $content;
-
+            return false;
         }
 
-        return false;
+        $json_payload = '';
+
+        if ($this->is_unifi_os) {
+            $url = $this->baseurl . '/proxy/network' . $path;
+        } else {
+            $url = $this->baseurl . $path;
+        }
+
+        /**
+         * prepare cURL options
+         */
+        $curl_options = [
+            CURLOPT_URL => $url
+        ];
+
+        if ($payload !== null) {
+            $json_payload                     = json_encode($payload, JSON_UNESCAPED_SLASHES);
+            $curl_options[CURLOPT_POST]       = true;
+            $curl_options[CURLOPT_POSTFIELDS] = $json_payload;
+
+            $headers = [
+                'Content-Type: application/json;charset=UTF-8',
+                'Content-Length: ' . strlen($json_payload)
+            ];
+
+            if ($this->is_unifi_os) {
+                $csrf_token = $this->extract_csrf_token_from_cookie();
+                if ($csrf_token) {
+                    $headers[] = 'x-csrf-token: ' . $csrf_token;
+                }
+            }
+
+            $curl_options[CURLOPT_HTTPHEADER] = $headers;
+
+            /**
+             * we shouldn't be using GET (the default request type) or DELETE when passing a payload,
+             * switch to POST instead
+             */
+            switch ($this->request_type){
+                case 'GET':
+                    $this->request_type = 'POST';
+                    break;
+                case 'DELETE':
+                    $this->request_type = 'POST';
+                    break;
+                case 'PUT':
+                    $curl_options[CURLOPT_CUSTOMREQUEST] = 'PUT';
+                    break;
+            }
+        }
+
+        switch ($this->request_type){
+            case 'DELETE':
+                $curl_options[CURLOPT_CUSTOMREQUEST] = 'DELETE';
+                break;
+            case 'POST':
+                $curl_options[CURLOPT_CUSTOMREQUEST] = 'POST';
+                break;
+        }
+
+        curl_setopt_array($ch, $curl_options);
+
+        /**
+         * execute the cURL request
+         */
+        $content = curl_exec($ch);
+        if (curl_errno($ch)) {
+            trigger_error('cURL error: ' . curl_error($ch));
+        }
+
+        /**
+         * fetch the HTTP response code
+         */
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+
+        /**
+         * an HTTP response code 401 (Unauthorized) indicates the Cookie/Token has expired in which case
+         * we need to login again.
+         */
+        if ($http_code == 401) {
+            if ($this->debug) {
+                error_log(__FUNCTION__ . ': needed to reconnect to UniFi controller');
+            }
+
+            if ($this->exec_retries == 0) {
+                /**
+                 * explicitly clear the expired Cookie/Token, update other properties and log out before logging in again
+                 */
+                if (isset($_SESSION['unificookie'])) {
+                    $_SESSION['unificookie'] = '';
+                }
+
+                $this->is_loggedin = false;
+                $this->exec_retries++;
+                curl_close($ch);
+
+                /**
+                 * then login again
+                 */
+                $this->login();
+
+                /**
+                 * when re-login was successful, simply execute the same cURL request again
+                 */
+                if ($this->is_loggedin) {
+                    if ($this->debug) {
+                        error_log(__FUNCTION__ . ': re-logged in, calling exec_curl again');
+                    }
+
+                    return $this->exec_curl($path, $payload);
+                }
+
+                if ($this->debug) {
+                    error_log(__FUNCTION__ . ': re-login failed');
+                }
+            }
+
+            return false;
+        }
+
+        if ($this->debug) {
+            print PHP_EOL . '<pre>';
+            print PHP_EOL . '---------cURL INFO-----------' . PHP_EOL;
+            print_r(curl_getinfo($ch));
+            print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
+            print $url . PHP_EOL;
+            if (empty($json_payload)) {
+                print 'empty payload';
+            } else {
+                print $json_payload;
+            }
+
+            print PHP_EOL . '----------RESPONSE-----------' . PHP_EOL;
+            print $content;
+            print PHP_EOL . '-----------------------------' . PHP_EOL;
+            print '</pre>' . PHP_EOL;
+        }
+
+        curl_close($ch);
+
+        /**
+         * set request_type value back to default, just in case
+         */
+        $this->request_type = 'GET';
+
+        return $content;
     }
 
     /**
