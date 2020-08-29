@@ -2501,10 +2501,13 @@ class Client
      * List alarms
      * -----------
      * returns an array of known alarms
+     * optional parameter <payload> = array of flags to filter
+     *                                Example: ["archived"=> false, "key"=>"EVT_GW_WANTransition"]
+     *                                return only unarchived for a specific key
      */
-    public function list_alarms()
+    public function list_alarms($payload = [])
     {
-        return $this->fetch_results('/api/s/' . $this->site . '/list/alarm');
+        return $this->fetch_results('/api/s/' . $this->site . '/list/alarm', $payload);
     }
 
     /**
