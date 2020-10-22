@@ -1,6 +1,6 @@
 ## UniFi Controller API client class
 
-A PHP class that provides access to Ubiquiti's [**UniFi SDN Controller**](https://unifi-sdn.ui.com/) API, versions 4.X.X and 5.X.X of the UniFi SDN Controller software are supported (version 5.12.72 has been confirmed to work) as well as UbiOS-based controllers (version 5.12.59 has been confirmed to work). This class is used by our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+A PHP class that provides access to Ubiquiti's [**UniFi Network Controller**](https://unifi-network.ui.com/) API, versions 4.X.X and 5.X.X of the UniFi Network Controller software are supported (version 5.12.72 has been confirmed to work) as well as UbiOS-based controllers (version 5.12.59 has been confirmed to work). This class is used by our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 The package can be installed manually or using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
@@ -92,7 +92,7 @@ Please refer to the `examples/` directory for some more detailed examples which 
 
 #### IMPORTANT NOTES:
 
-1. In the above example, `$site_id` is the short site "name" (usually 8 characters long) that is visible in the URL when managing the site in the UniFi SDN Controller. For example with this URL:
+1. In the above example, `$site_id` is the short site "name" (usually 8 characters long) that is visible in the URL when managing the site in the UniFi Network Controller. For example with this URL:
 
    `https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
 

@@ -31,7 +31,7 @@ class Client
     protected $is_loggedin         = false;
     protected $is_unifi_os         = false;
     protected $exec_retries        = 0;
-    protected $class_version       = '1.1.57';
+    protected $class_version       = '1.1.58';
     private $cookies               = '';
     private $request_type          = 'GET';
     private $request_types_allowed = ['GET', 'POST', 'PUT', 'DELETE'];
@@ -131,7 +131,10 @@ class Client
          * first we check whether we have a "regular" controller or one based on UniFi OS,
          * prepare cURL and options
          */
-        $ch = $this->get_curl_resource();
+        if (!($ch = $this->get_curl_resource())) {
+            return false;
+        }
+
         $curl_options = [
             CURLOPT_HEADER => true,
             CURLOPT_POST   => true,
@@ -157,16 +160,17 @@ class Client
         $curl_options = [
             CURLOPT_NOBODY     => false,
             CURLOPT_POSTFIELDS => json_encode(['username' => $this->user, 'password' => $this->password]),
-            CURLOPT_HTTPHEADER => ['content-type: application/json; charset=utf-8']
+            CURLOPT_HTTPHEADER => ['content-type: application/json; charset=utf-8'],
+            CURLOPT_REFERER    => $this->baseurl . '/login',
+            CURLOPT_URL        => $this->baseurl . '/api/login'
         ];
 
+        /**
+         * specific to UniFi OS-based controllers
+         */
         if ($http_code === 200) {
-            $this->is_unifi_os             = true;
-            $curl_options[CURLOPT_REFERER] = $this->baseurl . '/login';
-            $curl_options[CURLOPT_URL]     = $this->baseurl . '/api/auth/login';
-        } else {
-            $curl_options[CURLOPT_REFERER] = $this->baseurl . '/login';
-            $curl_options[CURLOPT_URL]     = $this->baseurl . '/api/login';
+            $this->is_unifi_os         = true;
+            $curl_options[CURLOPT_URL] = $this->baseurl . '/api/auth/login';
         }
 
         curl_setopt_array($ch, $curl_options);
@@ -212,7 +216,7 @@ class Client
          */
         if ($http_code >= 200 && $http_code < 400 && !empty($body)) {
             preg_match_all('|Set-Cookie: (.*);|Ui', $headers, $results);
-            if (isset($results[1])) {
+            if (array_key_exists(1, $results)) {
                 $this->cookies = implode(';', $results[1]);
 
                 /**
@@ -244,7 +248,10 @@ class Client
         /**
          * prepare cURL and options
          */
-        $ch = $this->get_curl_resource();
+        if (!($ch = $this->get_curl_resource())) {
+            return false;
+        }
+
         $curl_options = [
             CURLOPT_HEADER => true,
             CURLOPT_POST   => true
@@ -309,19 +316,19 @@ class Client
         /**
          * if we have received values for up/down/MBytes/ap_mac we append them to the payload array to be submitted
          */
-        if (!empty($up)) {
+        if (!is_null($up)) {
             $payload['up'] = intval($up);
         }
 
-        if (!empty($down)) {
+        if (!is_null($down)) {
             $payload['down'] = intval($down);
         }
 
-        if (!empty($MBytes)) {
+        if (!is_null($MBytes)) {
             $payload['bytes'] = intval($MBytes);
         }
 
-        if (isset($ap_mac)) {
+        if (!is_null($ap_mac)) {
             $payload['ap_mac'] = strtolower($ap_mac);
         }
 
@@ -1661,7 +1668,7 @@ class Client
     public function create_hotspotop($name, $x_password, $note = null)
     {
         $payload = ['name' => $name, 'x_password' => $x_password];
-        if (isset($note)) {
+        if (!is_null($note)) {
             $payload['note'] = trim($note);
         }
 
@@ -1709,19 +1716,19 @@ class Client
             'quota'  => intval($quota)
         ];
 
-        if (isset($note)) {
+        if (!is_null($note)) {
             $payload['note'] = trim($note);
         }
 
-        if (!empty($up)) {
+        if (!is_null($up)) {
             $payload['up'] = intval($up);
         }
 
-        if (!empty($down)) {
+        if (!is_null($down)) {
             $payload['down'] = intval($down);
         }
 
-        if (!empty($MBytes)) {
+        if (!is_null($MBytes)) {
             $payload['bytes'] = intval($MBytes);
         }
 
@@ -1791,7 +1798,7 @@ class Client
 
         $payload = ['type' => $type];
 
-        if ($cat_filter !== null && $type == 'by_app' && is_array($cat_filter)) {
+        if (!is_null($cat_filter) && $type == 'by_app' && is_array($cat_filter)) {
             $payload['cats'] = $cat_filter;
         }
 
@@ -1879,18 +1886,18 @@ class Client
      * Reboot a device
      * ----------------------
      * return true on success
-     * required parameter <mac>  = device MAC address
-     * optional parameter <type> = string; two options: 'soft' or 'hard', defaults to soft
-     *                             soft can be used for all devices, requests a plain restart of that device
-     *                             hard is special for PoE switches and besides the restart also requests a
-     *                             power cycle on all PoE capable ports. Keep in mind that a 'hard' reboot
-     *                             does *NOT* trigger a factory-reset, as it somehow could suggest.
+     * required parameter <mac>         = device MAC address
+     * optional parameter <reboot_type> = string; two options: 'soft' or 'hard', defaults to soft
+     *                                    soft can be used for all devices, requests a plain restart of that device
+     *                                    hard is special for PoE switches and besides the restart also requests a
+     *                                    power cycle on all PoE capable ports. Keep in mind that a 'hard' reboot
+     *                                    does *NOT* trigger a factory-reset.
      */
-    public function restart_device($mac, $type = 'soft')
+    public function restart_device($mac, $reboot_type = 'soft')
     {
         $payload = ['cmd' => 'restart', 'mac' => strtolower($mac)];
-        if (!empty($type) && in_array($type, ['soft', 'hard'])) {
-            $payload['type'] = strtolower($type);
+        if (!empty($reboot_type) && in_array($reboot_type, ['soft', 'hard'])) {
+            $payload['reboot_type'] = strtolower($reboot_type);
         }
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
@@ -2501,10 +2508,13 @@ class Client
      * List alarms
      * -----------
      * returns an array of known alarms
+     * optional parameter <payload> = array of flags to filter by
+     *                                Example: ["archived" => false, "key" => "EVT_GW_WANTransition"]
+     *                                return only unarchived for a specific key
      */
-    public function list_alarms()
+    public function list_alarms($payload = [])
     {
-        return $this->fetch_results('/api/s/' . $this->site . '/list/alarm');
+        return $this->fetch_results('/api/s/' . $this->site . '/list/alarm', $payload);
     }
 
     /**
@@ -2755,7 +2765,7 @@ class Client
             'tunnel_medium_type' => (int) $tunnel_medium_type
         ];
 
-        if (isset($vlan)) {
+        if (!is_null($vlan)) {
             $payload['vlan'] = (int) $vlan;
         }
 
@@ -3037,7 +3047,7 @@ class Client
      */
     public function get_last_results_raw($return_json = false)
     {
-        if ($this->last_results_raw !== null) {
+        if (!is_null($this->last_results_raw)) {
             if ($return_json) {
                 return json_encode($this->last_results_raw, JSON_PRETTY_PRINT);
             }
@@ -3055,7 +3065,7 @@ class Client
      */
     public function get_last_error_message()
     {
-        if ($this->last_error_message !== null) {
+        if (!is_null($this->last_error_message)) {
             return $this->last_error_message;
         }
 
@@ -3414,7 +3424,7 @@ class Client
             CURLOPT_URL => $url
         ];
 
-        if ($payload !== null) {
+        if (!is_null($payload)) {
             $json_payload                     = json_encode($payload, JSON_UNESCAPED_SLASHES);
             $curl_options[CURLOPT_POST]       = true;
             $curl_options[CURLOPT_POSTFIELDS] = $json_payload;
