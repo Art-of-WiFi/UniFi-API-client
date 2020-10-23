@@ -2548,6 +2548,30 @@ class Client
     }
 
     /**
+     * Check controller update
+     * -----------------------
+     * returns current known latest controller version info
+     *
+     * NOTE: It's trigger an update of the controller cached known latest version.
+     */
+    public function check_controller_update()
+    {
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/fwupdate/latest-version');
+    }
+
+    /**
+     * Check firmware update
+     * ---------------------
+     * return true on success
+     */
+    public function check_firmware_update()
+    {
+        $payload = ['cmd' => 'check-firmware-update'];
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/productinfo', $payload);
+    }
+
+    /**
      * Upgrade a device to the latest firmware
      * ---------------------------------------
      * return true on success
