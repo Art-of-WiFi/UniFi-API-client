@@ -2549,11 +2549,12 @@ class Client
 
     /**
      * Check controller update
-     * -----------------------
+     *
+     * NOTE:
+     * It's trigger an update of the controller cached known latest version.
+     *
      * @return array returns an array with a single object containing details of the current known latest controller version info
      *               on success, else returns false
-     *
-     * NOTE: It's trigger an update of the controller cached known latest version.
      */
     public function check_controller_update()
     {
@@ -2562,7 +2563,7 @@ class Client
 
     /**
      * Check firmware update
-     * ---------------------
+     *
      * @return bool returns true upon success
      */
     public function check_firmware_update()
