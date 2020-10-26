@@ -2,7 +2,7 @@
 
 A PHP class that provides access to Ubiquiti's [**UniFi Network Controller**](https://unifi-network.ui.com/) API, versions 4.X.X and 5.X.X of the UniFi Network Controller software are supported (version 5.12.72 has been confirmed to work) as well as UbiOS-based controllers (version 5.12.59 has been confirmed to work). This class is used by our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
-The package can be installed manually or using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
+The package can be installed manually or by using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
 ## Requirements
 
@@ -114,6 +114,9 @@ The class currently supports the following functions/methods to GET/POST/PUT/DEL
 - cancel_rolling_upgrade()
 - cmd_stat()
 - count_alarms()
+- check_controller_update()
+- check_firmware_update()
+- create_apgroup() (supported with controller versions 6.0.X and higher)
 - create_dynamicdns()
 - create_firewallgroup()
 - create_hotspotop()
@@ -125,6 +128,7 @@ The class currently supports the following functions/methods to GET/POST/PUT/DEL
 - create_voucher()
 - create_wlan()
 - custom_api_request()
+- delete_apgroup() (supported with controller versions 6.0.X and higher)
 - delete_device()
 - delete_firewallgroup()
 - delete_network()
@@ -133,6 +137,7 @@ The class currently supports the following functions/methods to GET/POST/PUT/DEL
 - delete_usergroup()
 - delete_wlan()
 - disable_ap()
+- edit_apgroup() (supported with controller versions 6.0.X and higher)
 - edit_client_fixedip()
 - edit_firewallgroup()
 - edit_usergroup()
@@ -143,6 +148,7 @@ The class currently supports the following functions/methods to GET/POST/PUT/DEL
 - list_admins()
 - list_alarms()
 - list_all_admins()
+- list_apgroups() (supported with controller versions 6.0.X and higher)
 - list_aps() (deprecated but still available as alias)
 - list_backups()
 - list_clients()
