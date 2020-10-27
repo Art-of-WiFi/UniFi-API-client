@@ -2410,6 +2410,7 @@ class Client
         $x_passphrase,
         $usergroup_id,
         $wlangroup_id,
+        $apgroup_id,
         $enabled          = true,
         $hide_ssid        = false,
         $is_guest         = false,
@@ -2436,6 +2437,7 @@ class Client
             'uapsd_enabled'    => $uapsd_enabled,
             'schedule_enabled' => $schedule_enabled,
             'schedule'         => $schedule,
+            'ap_group_ids'       => [$apgroup_id],
         ];
 
         if (!empty($vlan) && $vlan_enabled) {
