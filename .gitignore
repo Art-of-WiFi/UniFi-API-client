@@ -5,5 +5,9 @@
 /vendor/
 /composer.lock
 
+# ignore phpdoc files
+/build
+.phpdoc-md
+
 # ignore XML files
 *.xml
