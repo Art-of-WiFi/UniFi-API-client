@@ -12,9 +12,9 @@ namespace UniFi_API;
  *
  * @package UniFi Controller API client class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version 1.1.60
+ * @version 1.1.61
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
- * @example See this directory in the package repository for a collection of examples:
+ * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
  */
 class Client
@@ -31,7 +31,7 @@ class Client
     protected $is_loggedin         = false;
     protected $is_unifi_os         = false;
     protected $exec_retries        = 0;
-    protected $class_version       = '1.1.60';
+    protected $class_version       = '1.1.61';
     private $cookies               = '';
     private $request_type          = 'GET';
     private $request_types_allowed = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
@@ -46,9 +46,9 @@ class Client
      *
      * @param string  $user       user name to use when connecting to the UniFi controller
      * @param string  $password   password to use when connecting to the UniFi controller
-     * @param string  $baseurl    optional, base URL of the UniFi controller which *must* include 'https://'' prefix,
+     * @param string  $baseurl    optional, base URL of the UniFi controller which *must* include an 'https://' prefix,
      *                            a port suffix (e.g. :8443) is required for non-UniFi OS controllers,
-     *                            do not add trailing slashes, defaults to 'https://127.0.0.1:8443'
+     *                            do not add trailing slashes, default value is 'https://127.0.0.1:8443'
      * @param string  $site       optional, short site name to access, defaults to 'default'
      * @param string  $version    optional, the version number of the controller
      * @param bool    $ssl_verify optional, whether to validate the controller's SSL certificate or not, a value of true is
@@ -301,20 +301,20 @@ class Client
     /**
      * Authorize a client device
      *
-     * @param  string $mac     client MAC address
-     * @param  int    $minutes minutes (from now) until authorization expires
-     * @param  int    $up      optional, upload speed limit in kbps
-     * @param  int    $down    optional, download speed limit in kbps
-     * @param  int    $MBytes  optional, data transfer limit in MB
-     * @param  int    $ap_mac  optional, AP MAC address to which client is connected, should result in faster authorization
-     * @return bool            returns true upon success
+     * @param  string $mac       client MAC address
+     * @param  int    $minutes   minutes (from now) until authorization expires
+     * @param  int    $up        optional, upload speed limit in kbps
+     * @param  int    $down      optional, download speed limit in kbps
+     * @param  int    $megabytes optional, data transfer limit in MB
+     * @param  int    $ap_mac    optional, AP MAC address to which client is connected, should result in faster authorization
+     * @return bool              returns true upon success
      */
-    public function authorize_guest($mac, $minutes, $up = null, $down = null, $MBytes = null, $ap_mac = null)
+    public function authorize_guest($mac, $minutes, $up = null, $down = null, $megabytes = null, $ap_mac = null)
     {
         $payload = ['cmd' => 'authorize-guest', 'mac' => strtolower($mac), 'minutes' => intval($minutes)];
 
         /**
-         * if we have received values for up/down/MBytes/ap_mac we append them to the payload array to be submitted
+         * if we have received values for up/down/megabytes/ap_mac we append them to the payload array to be submitted
          */
         if (!is_null($up)) {
             $payload['up'] = intval($up);
@@ -324,8 +324,8 @@ class Client
             $payload['down'] = intval($down);
         }
 
-        if (!is_null($MBytes)) {
-            $payload['bytes'] = intval($MBytes);
+        if (!is_null($megabytes)) {
+            $payload['bytes'] = intval($megabytes);
         }
 
         if (!is_null($ap_mac)) {
@@ -446,7 +446,7 @@ class Client
      *
      * @param  string $user_id id of the client-device to be modified
      * @param  string $note    optional, note to be applied to the client-device, when empty or not set,
-     *                         the existing note for the client-device will be removed and "noted" attribute set to false
+     *                         the existing note for the client-device is removed and "noted" attribute set to false
      * @return bool            returns true upon success
      */
     public function set_sta_note($user_id, $note = null)
@@ -462,7 +462,7 @@ class Client
      *
      * @param  string $user_id id of the client-device to be modified
      * @param  string $name    optional, name to be applied to the client device, when empty or not set,
-     *                         the existing name for the client device will be removed
+     *                         the existing name for the client device is removed
      * @return bool            returns true upon success
      */
     public function set_sta_name($user_id, $name = null)
@@ -1108,7 +1108,7 @@ class Client
      * @param  string $group_id    _id value of the AP group to modify
      * @param  string $group_name  name to assign to the AP group
      * @param  array  $device_macs array containing the members of the AP group which overwrites the existing
-     *                             group_members (passing an empty array will clear the AP member list)
+     *                             group_members (passing an empty array clears the AP member list)
      * @return object              returns a single object with attributes of the updated AP group on success
      */
     public function edit_apgroup($group_id, $group_name, $device_macs)
@@ -1177,7 +1177,7 @@ class Client
      * @param  string $group_type    firewall group type; valid values are address-group, ipv6-address-group, port-group,
      *                               group_type cannot be changed for an existing firewall group!
      * @param  array  $group_members array containing the members of the group (IPv4 addresses, IPv6 addresses or port numbers)
-     *                               which will overwrite the existing group_members (default is an empty array)
+     *                               which overwrites the existing group_members (default is an empty array)
      * @return array                 containing a single object with attributes of the updated firewall group on success
      */
     public function edit_firewallgroup($group_id, $site_id, $group_name, $group_type, $group_members = [])
@@ -1267,10 +1267,10 @@ class Client
     }
 
     /**
-     * Fetch client devices
+     * Fetch UniFi devices
      *
-     * @param  string $device_mac optional, the MAC address of a single device for which the call must be made
-     * @return array              containing known device objects (or a single device when using the <device_mac> parameter)
+     * @param  string $device_mac optional, the MAC address of a single UniFi device for which the call must be made
+     * @return array              containing known UniFi device objects (or a single device when using the <device_mac> parameter)
      */
     public function list_devices($device_mac = null)
     {
@@ -1389,7 +1389,7 @@ class Client
     /**
      * Change the current site's name
      *
-     * NOTES: immediately after being changed, the site will be available in the output of the list_sites() function
+     * NOTES: immediately after being changed, the site is available in the output of the list_sites() function
      *
      * @param  string $site_name the new long name for the current site
      * @return bool              true on success
@@ -1408,7 +1408,7 @@ class Client
      * @param  object|array $payload    stdClass object or associative array containing the configuration to apply to the site, must be a (partial)
      *                                  object/array structured in the same manner as is returned by list_settings() for the section with the "country" key.
      *                                  Valid country codes can be obtained using the list_country_codes() function/method.
-     *                                  Do not include the _id property, it will be assigned by the controller and returned upon success.
+     *                                  Do not include the _id property, it is assigned by the controller and returned upon success.
      * @return bool                     true on success
      */
     public function set_site_country($country_id, $payload)
@@ -1427,7 +1427,7 @@ class Client
      *                                 Valid timezones can be obtained in Javascript as explained here:
      *                                 https://stackoverflow.com/questions/38399465/how-to-get-list-of-all-timezones-in-javascript
      *                                 or in PHP using timezone_identifiers_list().
-     *                                 Do not include the _id property, it will be assigned by the controller and returned upon success.
+     *                                 Do not include the _id property, it is assigned by the controller and returned upon success.
      * @return bool                    true on success
      */
     public function set_site_locale($locale_id, $payload)
@@ -1443,7 +1443,7 @@ class Client
      * @param  string       $snmp_id _id value of the snmp section
      * @param  object|array $payload stdClass object or associative array containing the configuration to apply to the site, must be a (partial)
      *                               object/array structured in the same manner as is returned by list_settings() for the section with the "snmp" key.
-     *                               Do not include the _id property, it will be assigned by the controller and returned upon success.
+     *                               Do not include the _id property, it is assigned by the controller and returned upon success.
      * @return bool                  true on success
      */
     public function set_site_snmp($snmp_id, $payload)
@@ -1459,7 +1459,7 @@ class Client
      * @param  string       $mgmt_id _id value of the mgmt section
      * @param  object|array $payload stdClass object or associative array containing the configuration to apply to the site, must be a (partial)
      *                               object/array structured in the same manner as is returned by list_settings() for the section with the "mgmt" key.
-     *                               Do not include the _id property, it will be assigned by the controller and returned upon success.
+     *                               Do not include the _id property, it is assigned by the controller and returned upon success.
      * @return bool                  true on success
      */
     public function set_site_mgmt($mgmt_id, $payload)
@@ -1475,7 +1475,7 @@ class Client
      * @param string       $guest_access_id _id value of the guest_access section
      * @param object|array $payload         stdClass object or associative array containing the configuration to apply to the site, must be a (partial)
      *                                      object/array structured in the same manner as is returned by list_settings() for the section with the "guest_access" key.
-     *                                      Do not include the _id property, it will be assigned by the controller and returned upon success.
+     *                                      Do not include the _id property, it is assigned by the controller and returned upon success.
      * @return bool                         true on success
      */
     public function set_site_guest_access($guest_access_id, $payload)
@@ -1491,7 +1491,7 @@ class Client
      * @param  string       $ntp_id  _id value of the ntp section
      * @param  object|array $payload stdClass object or associative array containing the configuration to apply to the site, must be a (partial)
      *                               object/array structured in the same manner as is returned by list_settings() for the section with the "ntp" key.
-     *                               Do not include the _id property, it will be assigned by the controller and returned upon success.
+     *                               Do not include the _id property, it is assigned by the controller and returned upon success.
      * @return bool                  true on success
      */
     public function set_site_ntp($ntp_id, $payload)
@@ -1507,7 +1507,7 @@ class Client
      * @param  string       $connectivity_id _id value of the connectivity section
      * @param  object|array $payload         stdClass object or associative array containing the configuration to apply to the site, must be a (partial)
      *                                       object/array structured in the same manner as is returned by list_settings() for the section with the "connectivity" key.
-     *                                       Do not include the _id property, it will be assigned by the controller and returned upon success.
+     *                                       Do not include the _id property, it is assigned by the controller and returned upon success.
      * @return bool                          true on success
      */
     public function set_site_connectivity($connectivity_id, $payload)
@@ -1543,20 +1543,20 @@ class Client
      * Invite a new admin for access to the current site
      *
      * NOTES:
-     * - after issuing a valid request, an invite will be sent to the email address provided
-     * - issuing this command against an existing admin will trigger a "re-invite"
+     * - after issuing a valid request, an invite is sent to the email address provided
+     * - issuing this command against an existing admin triggers a "re-invite"
      *
      * @param  string $name           name to assign to the new admin user
      * @param  string $email          email address to assign to the new admin user
-     * @param  bool   $enable_sso     optional, whether or not SSO will be allowed for the new admin
+     * @param  bool   $enable_sso     optional, whether or not SSO is allowed for the new admin
      *                                default value is true which enables the SSO capability
-     * @param  bool   $readonly       optional, whether or not the new admin will have readonly
+     * @param  bool   $readonly       optional, whether or not the new admin has readonly
      *                                permissions, default value is false which gives the new admin
      *                                Administrator permissions
-     * @param  bool   $device_adopt   optional, whether or not the new admin will have permissions to
+     * @param  bool   $device_adopt   optional, whether or not the new admin has permissions to
      *                                adopt devices, default value is false. With versions < 5.9.X this only applies
      *                                when readonly is true.
-     * @param  bool   $device_restart optional, whether or not the new admin will have permissions to
+     * @param  bool   $device_restart optional, whether or not the new admin has permissions to
      *                                restart devices, default value is false. With versions < 5.9.X this only applies
      *                                when readonly is true.
      * @return bool                   true on success
@@ -1605,13 +1605,13 @@ class Client
      *
      * @param  string $admin_id       _id value of the admin user to assign, can be obtained using the
      *                                list_all_admins() method/function
-     * @param  bool   $readonly       optional, whether or not the new admin will have readonly
+     * @param  bool   $readonly       optional, whether or not the new admin has readonly
      *                                permissions, default value is false which gives the new admin
      *                                Administrator permissions
-     * @param  bool   $device_adopt   optional, whether or not the new admin will have permissions to
+     * @param  bool   $device_adopt   optional, whether or not the new admin has permissions to
      *                                adopt devices, default value is false. With versions < 5.9.X this only applies
      *                                when readonly is true.
-     * @param  bool   $device_restart optional, whether or not the new admin will have permissions to
+     * @param  bool   $device_restart optional, whether or not the new admin has permissions to
      *                                restart devices, default value is false. With versions < 5.9.X this only applies
      *                                when readonly is true.
      * @return bool                   true on success
@@ -1759,15 +1759,15 @@ class Client
      *
      * NOTES: please use the stat_voucher() method/function to retrieve the newly created voucher(s) by create_time
      *
-     * @param  int    $minutes minutes the voucher is valid after activation (expiration time)
-     * @param  int    $count   number of vouchers to create, default value is 1
-     * @param  int    $quota   single-use or multi-use vouchers, value '0' is for multi-use, '1' is for single-use,
-     *                         'n' is for multi-use n times
-     * @param  string $note    note text to add to voucher when printing
-     * @param  int    $up      upload speed limit in kbps
-     * @param  int    $down    download speed limit in kbps
-     * @param  int    $MBytes  data transfer limit in MB
-     * @return array           containing a single object which contains the create_time(stamp) of the voucher(s) created
+     * @param  int    $minutes   minutes the voucher is valid after activation (expiration time)
+     * @param  int    $count     number of vouchers to create, default value is 1
+     * @param  int    $quota     single-use or multi-use vouchers, value '0' is for multi-use, '1' is for single-use,
+       *                         'n' is for multi-use n times
+     * @param  string $note      note text to add to voucher when printing
+     * @param  int    $up        upload speed limit in kbps
+     * @param  int    $down      download speed limit in kbps
+     * @param  int    $megabytes data transfer limit in MB
+     * @return array             containing a single object which contains the create_time(stamp) of the voucher(s) created
      */
     public function create_voucher(
         $minutes,
@@ -1776,7 +1776,7 @@ class Client
         $note   = null,
         $up     = null,
         $down   = null,
-        $MBytes = null
+        $megabytes = null
     ) {
         $payload = [
             'cmd'    => 'create-voucher',
@@ -1797,8 +1797,8 @@ class Client
             $payload['down'] = intval($down);
         }
 
-        if (!is_null($MBytes)) {
-            $payload['bytes'] = intval($MBytes);
+        if (!is_null($megabytes)) {
+            $payload['bytes'] = intval($megabytes);
         }
 
         return $this->fetch_results('/api/s/' . $this->site . '/cmd/hotspot', $payload);
@@ -2004,7 +2004,7 @@ class Client
      * Disable/enable an access point (using REST)
      *
      * NOTES:
-     * - a disabled device will be excluded from the dashboard status and device count and its LED and WLAN will be turned off
+     * - a disabled device is excluded from the dashboard status and device count and its LED and WLAN are turned off
      * - appears to only be supported for access points
      * - available since controller versions 5.2.X
      *
@@ -2031,9 +2031,9 @@ class Client
      * - available since controller versions 5.2.X
      *
      * @param  string $device_id     value of _id for the device which can be obtained from the device list
-     * @param  string $override_mode off/on/default; "off" will disable the LED of the device,
-     *                               "on" will enable the LED of the device,
-     *                               "default" will apply the site-wide setting for device LEDs
+     * @param  string $override_mode off/on/default; "off" disables the LED of the device,
+     *                               "on" enables the LED of the device,
+     *                               "default" applies the site-wide setting for device LEDs
      * @return bool                  true on success
      */
     public function led_override($device_id, $override_mode)
@@ -2055,7 +2055,7 @@ class Client
      * replaces the old set_locate_ap() and unset_locate_ap() methods/functions
      *
      * @param  string $mac    device MAC address
-     * @param  bool   $enable true will enable flashing LED, false will disable
+     * @param  bool   $enable true enables flashing LED, false disables flashing LED
      * @return bool           true on success
      */
     public function locate_ap($mac, $enable)
@@ -2073,7 +2073,7 @@ class Client
     /**
      * Toggle LEDs of all the access points ON or OFF
      *
-     * @param  bool $enable true will switch LEDs of all the access points ON, false will switch them OFF
+     * @param  bool $enable true switches LEDs of all the access points ON, false switches them OFF
      * @return bool         true on success
      */
     public function site_leds($enable)
@@ -2338,7 +2338,7 @@ class Client
      *
      * @param  object|array $payload stdClass object or associative array containing the configuration to apply to the network, must be a (partial)
      *                                object structured in the same manner as is returned by list_networkconf() for the specific network type.
-     *                                Do not include the _id property, it will be assigned by the controller and returned upon success.
+     *                                Do not include the _id property, it is assigned by the controller and returned upon success.
      * @return array|bool             containing a single object with details of the new network on success, else returns false
      */
     public function create_network($payload)
@@ -2471,7 +2471,7 @@ class Client
      *
      * @param string $wlan_id      the "_id" value for the WLAN which can be found with the list_wlanconf() function
      * @param string $x_passphrase new pre-shared key, minimal length is 8 characters, maximum length is 63,
-     *                             will be ignored if set to null
+     *                             is ignored if set to null
      * @param string $name         optional, SSID
      * @return bool                true on success
      */
@@ -2587,7 +2587,7 @@ class Client
     /**
      * Count alarms
      *
-     * @param  bool  $archived if true all alarms will be counted, if false only non-archived (active) alarms will be counted
+     * @param  bool  $archived if true all alarms are counted, if false only non-archived (active) alarms are counted
      * @return array           containing the alarm count
      */
     public function count_alarms($archived = null)
@@ -3171,7 +3171,7 @@ class Client
      * Get Cookie from UniFi controller (singular and plural)
      *
      * NOTES:
-     * - when the results from this method are stored in $_SESSION['unificookie'], the Class will initially not
+     * - when the results from this method are stored in $_SESSION['unificookie'], the Class initially does not
      *   log in to the controller when a subsequent request is made using a new instance. This speeds up the
      *   overall request considerably. Only when a subsequent request fails (e.g. cookies have expired) is a new login
      *   executed and the value of $_SESSION['unificookie'] updated.
