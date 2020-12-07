@@ -1083,7 +1083,7 @@ class Client
      *
      * @return array returns an array containing the current AP groups on success
      */
-    public function list_apgroups()
+    public function list_apgroups($group_id = null)
     {
         return $this->fetch_results('/v2/api/site/' . $this->site . '/apgroups/' . trim($group_id));
     }
