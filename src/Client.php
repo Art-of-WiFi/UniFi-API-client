@@ -3764,7 +3764,7 @@ class Client
     protected function get_curl_resource()
     {
         $ch = curl_init();
-        if (is_resource($ch)) {
+        if (is_object($ch)) {
             $curl_options = [
                 CURLOPT_SSL_VERIFYPEER => $this->curl_ssl_verify_peer,
                 CURLOPT_SSL_VERIFYHOST => $this->curl_ssl_verify_host,
