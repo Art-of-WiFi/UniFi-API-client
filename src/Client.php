@@ -12,7 +12,7 @@ namespace UniFi_API;
  *
  * @package UniFi Controller API client class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version 1.1.61
+ * @version 1.1.62
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -31,7 +31,7 @@ class Client
     protected $is_loggedin         = false;
     protected $is_unifi_os         = false;
     protected $exec_retries        = 0;
-    protected $class_version       = '1.1.61';
+    protected $class_version       = '1.1.62';
     private $cookies               = '';
     private $request_type          = 'GET';
     private $request_types_allowed = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
@@ -565,6 +565,36 @@ class Client
     }
 
     /**
+     * Fetch monthly site stats
+     *
+     * NOTES:
+     * - defaults to the past 52 weeks (52*7*24 hours)
+     * - "bytes" are no longer returned with controller version 4.9.1 and later
+     *
+     * @param  int   $start optional, Unix timestamp in milliseconds
+     * @param  int   $end   optional, Unix timestamp in milliseconds
+     * @return array        returns an array of monthly stats objects for the current site
+     */
+    public function stat_monthly_site($start = null, $end = null)
+    {
+        $end     = empty($end) ? (time() - (time() % 3600)) * 1000 : intval($end);
+        $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = [
+            'bytes',
+            'wan-tx_bytes',
+            'wan-rx_bytes',
+            'wlan_bytes',
+            'num_sta',
+            'lan-num_sta',
+            'wlan-num_sta',
+            'time'
+        ];
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
+
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/monthly.site', $payload);
+    }
+
+    /**
      * Fetch 5 minutes stats for a single access point or all access points
      *
      * NOTES:
@@ -644,6 +674,33 @@ class Client
         }
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/daily.ap', $payload);
+    }
+
+    /**
+     * Fetch monthly stats for a single access point or all access points
+     *
+     * NOTES:
+     * - defaults to the past 52 weeks (52*7*24 hours)
+     * - make sure that the retention policy for hourly stats is set to the correct value in
+     *   the controller settings
+     *
+     * @param  int    $start optional, Unix timestamp in milliseconds
+     * @param  int    $end   optional, Unix timestamp in milliseconds
+     * @param  string $mac   optional, AP MAC address to return stats for, when empty,
+     *                       stats for all APs are returned
+     * @return array         returns an array of monthly stats objects
+     */
+    public function stat_monthly_aps($start = null, $end = null, $mac = null)
+    {
+        $end     = empty($end) ? time() * 1000 : intval($end);
+        $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = ['bytes', 'num_sta', 'time'];
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
+        if (!empty($mac)) {
+            $payload['mac'] = strtolower($mac);
+        }
+
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/monthly.ap', $payload);
     }
 
     /**
@@ -731,6 +788,34 @@ class Client
     }
 
     /**
+     * Fetch monthly stats for a single user/client device
+     *
+     * NOTES:
+     * - defaults to the past 13 weeks (52*7*24 hours)
+     * - only supported with UniFi controller versions 5.8.X and higher
+     * - make sure that the retention policy for monthly stats is set to the correct value in
+     *   the controller settings
+     * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance section
+     *
+     * @param  string $mac     MAC address of user/client device to return stats for
+     * @param  int    $start   optional, Unix timestamp in milliseconds
+     * @param  int    $end     optional, Unix timestamp in milliseconds
+     * @param  array  $attribs array containing attributes (strings) to be returned, valid values are:
+     *                         rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets, tx_packets
+     *                         default is ['rx_bytes', 'tx_bytes']
+     * @return array           returns an array of monthly stats objects
+     */
+    public function stat_monthly_user($mac, $start = null, $end = null, $attribs = null)
+    {
+        $end     = empty($end) ? time() * 1000 : intval($end);
+        $start   = empty($start) ? $end - (13 * 7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = empty($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
+
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/monthly.user', $payload);
+    }
+
+    /**
      * Fetch 5 minutes gateway stats
      *
      * NOTES:
@@ -787,7 +872,7 @@ class Client
      * Fetch daily gateway stats
      *
      * NOTES:
-     * - defaults to the past 52*7*24 hours
+     * - defaults to the past 52 weeks (52*7*24 hours)
      * - requires a USG
      *
      * @param  int   $start   optional, Unix timestamp in milliseconds
@@ -806,6 +891,31 @@ class Client
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/daily.gw', $payload);
+    }
+
+    /**
+     * Fetch monthly gateway stats
+     *
+     * NOTES:
+     * - defaults to the past 52 weeks (52*7*24 hours)
+     * - requires a USG
+     *
+     * @param  int   $start   optional, Unix timestamp in milliseconds
+     * @param  int   $end     optional, Unix timestamp in milliseconds
+     * @param  array $attribs array containing attributes (strings) to be returned, valid values are:
+     *                        mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
+     *                        lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
+     *                        default is ['time', 'mem', 'cpu', 'loadavg_5']
+     * @return array          returns an array of monthly stats objects for the gateway belonging to the current site
+     */
+    public function stat_monthly_gateway($start = null, $end = null, $attribs = null)
+    {
+        $end     = empty($end) ? (time() - (time() % 3600)) * 1000 : intval($end);
+        $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : intval($start);
+        $attribs = empty($attribs) ? ['time', 'mem', 'cpu', 'loadavg_5'] : array_merge(['time'], $attribs);
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
+
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/report/monthly.gw', $payload);
     }
 
     /**
@@ -1085,7 +1195,7 @@ class Client
      */
     public function list_apgroups()
     {
-        return $this->fetch_results('/v2/api/site/' . $this->site . '/apgroups/' . trim($group_id));
+        return $this->fetch_results('/v2/api/site/' . $this->site . '/apgroups');
     }
 
     /**
@@ -2405,6 +2515,7 @@ class Client
      * @param  boolean $uapsd_enabled    optional, enable/disable Unscheduled Automatic Power Save Delivery
      * @param  boolean $schedule_enabled optional, enable/disable wlan schedule
      * @param  array   $schedule         optional, schedule rules
+     * @param  array   $ap_group_ids     optional, array of ap group ids, required for UniFi controller versions 6.0.X and higher
      * @return bool                      true on success
      */
     public function create_wlan(
@@ -2422,7 +2533,8 @@ class Client
         $vlan             = null,
         $uapsd_enabled    = false,
         $schedule_enabled = false,
-        $schedule         = []
+        $schedule         = [],
+        $ap_group_ids     = null
     ) {
         $payload = [
             'name'             => $name,
@@ -2446,6 +2558,10 @@ class Client
 
         if (!empty($x_passphrase) && $security !== 'open') {
             $payload['x_passphrase'] = $x_passphrase;
+        }
+
+        if (!empty($ap_group_ids) && is_array($ap_group_ids)) {
+            $payload['ap_group_ids'] = $ap_group_ids;
         }
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/add/wlanconf', $payload);
@@ -3584,9 +3700,6 @@ class Client
     }
 
     /**
-     */
-
-    /**
      * Execute the cURL request
      *
      * @param  string       $path    path for the request
@@ -3764,7 +3877,7 @@ class Client
     protected function get_curl_resource()
     {
         $ch = curl_init();
-        if (is_resource($ch)) {
+        if (is_object($ch) || is_resource($ch)) {
             $curl_options = [
                 CURLOPT_SSL_VERIFYPEER => $this->curl_ssl_verify_peer,
                 CURLOPT_SSL_VERIFYHOST => $this->curl_ssl_verify_host,
