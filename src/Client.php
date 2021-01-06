@@ -10,9 +10,9 @@ namespace UniFi_API;
  * and the API as published by Ubiquiti:
  *    https://www.ubnt.com/downloads/unifi/<UniFi controller version number>/unifi_sh_api
  *
- * @package UniFi Controller API client class
+ * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version 1.1.62
+ * @version Release: 1.1.63
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -31,7 +31,7 @@ class Client
     protected $is_loggedin         = false;
     protected $is_unifi_os         = false;
     protected $exec_retries        = 0;
-    protected $class_version       = '1.1.62';
+    protected $class_version       = '1.1.63';
     private $cookies               = '';
     private $request_type          = 'GET';
     private $request_types_allowed = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
@@ -160,7 +160,7 @@ class Client
         $curl_options = [
             CURLOPT_NOBODY     => false,
             CURLOPT_POSTFIELDS => json_encode(['username' => $this->user, 'password' => $this->password]),
-            CURLOPT_HTTPHEADER => ['content-type: application/json; charset=utf-8'],
+            CURLOPT_HTTPHEADER => ['content-type: application/json'],
             CURLOPT_REFERER    => $this->baseurl . '/login',
             CURLOPT_URL        => $this->baseurl . '/api/login'
         ];
@@ -260,7 +260,7 @@ class Client
         /**
          * constuct HTTP request headers as required
          */
-        $headers     = ['Content-Length: 0'];
+        $headers     = ['content-length: 0'];
         $logout_path = '/logout';
         if ($this->is_unifi_os) {
             $logout_path = '/api/auth/logout';
@@ -3420,9 +3420,9 @@ class Client
     }
 
     /**
-     * Is current controller UnifiOS-based/UbiOS-based
+     * Is current controller UniFi OS-based
      *
-     * @return bool whether current controller is UnifiOS-based/UbiOS-based
+     * @return bool whether current controller is UniFi OS-based
      */
     public function get_is_unifi_os()
     {
@@ -3599,7 +3599,7 @@ class Client
                     break;
                 default:
                     // we have an unknown error
-                    $error = 'Unknown JSON error occured';
+                    $error = 'Unknown JSON error occurred';
                     break;
             }
 
@@ -3718,7 +3718,11 @@ class Client
             return false;
         }
 
+        /**
+         * assigne default values to these vars
+         */
         $json_payload = '';
+        $headers      = [];
 
         if ($this->is_unifi_os) {
             $url = $this->baseurl . '/proxy/network' . $path;
@@ -3733,39 +3737,25 @@ class Client
             CURLOPT_URL => $url
         ];
 
+        /**
+         * what we do when a payload is passed
+         */
         if (!is_null($payload)) {
             $json_payload                     = json_encode($payload, JSON_UNESCAPED_SLASHES);
             $curl_options[CURLOPT_POST]       = true;
             $curl_options[CURLOPT_POSTFIELDS] = $json_payload;
 
             $headers = [
-                'Content-Type: application/json;charset=UTF-8',
-                'Content-Length: ' . strlen($json_payload)
+                'content-type: application/json',
+                'content-length: ' . strlen($json_payload)
             ];
-
-            if ($this->is_unifi_os) {
-                $csrf_token = $this->extract_csrf_token_from_cookie();
-                if ($csrf_token) {
-                    $headers[] = 'x-csrf-token: ' . $csrf_token;
-                }
-            }
-
-            $curl_options[CURLOPT_HTTPHEADER] = $headers;
 
             /**
              * we shouldn't be using GET (the default request type) or DELETE when passing a payload,
              * switch to POST instead
              */
-            switch ($this->request_type) {
-                case 'GET':
-                    $this->request_type = 'POST';
-                    break;
-                case 'DELETE':
-                    $this->request_type = 'POST';
-                    break;
-                case 'PUT':
-                    $curl_options[CURLOPT_CUSTOMREQUEST] = 'PUT';
-                    break;
+            if ($this->request_type === 'GET' || $this->request_type === 'DELETE') {
+                $this->request_type = 'POST';
             }
         }
 
@@ -3779,6 +3769,20 @@ class Client
             case 'POST':
                 $curl_options[CURLOPT_CUSTOMREQUEST] = 'POST';
                 break;
+            case 'PUT':
+                $curl_options[CURLOPT_CUSTOMREQUEST] = 'PUT';
+                break;
+        }
+
+        if ($this->is_unifi_os && $this->request_type !== 'GET') {
+            $csrf_token = $this->extract_csrf_token_from_cookie();
+            if ($csrf_token) {
+                $headers[] = 'x-csrf-token: ' . $csrf_token;
+            }
+        }
+
+        if (count($headers) > 0) {
+            $curl_options[CURLOPT_HTTPHEADER] = $headers;
         }
 
         curl_setopt_array($ch, $curl_options);
