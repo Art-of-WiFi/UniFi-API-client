@@ -3,27 +3,26 @@
  * PHP API usage example
  *
  * contributed by: @malcolmcif, based on another Art of WiFi example
- * description: basic PHP script to block a list of mac addresses passed in via command line,
- *              output is to console in non json format
+ * description:    basic PHP script to block a list of mac addresses passed in via command line,
+ *                 output is to console in non json format
  *
  * usage:
  *  php block_list.php <list of comma seperated mac addresses>
  *
  * example:
  *  php block_list.php 09:09:09:09:09:09,10:10:10:10:10:10
- *
  */
 
 /**
  * using the composer autoloader
  */
-require_once('vendor/autoload.php');
+require_once 'vendor/autoload.php';
 
 /**
  * include the config file (place your credentials etc. there if not already present)
  * see the config.template.php file for an example
  */
-require_once('config.php');
+require_once 'config.php';
 $debug = false;
 
 /**

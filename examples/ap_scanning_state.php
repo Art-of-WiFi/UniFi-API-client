@@ -3,19 +3,19 @@
  * PHP API usage example
  *
  * contributed by: Art of WiFi
- * description: example basic PHP script to fetch an Access Point's scanning state/results
+ * description:    example basic PHP script to fetch an Access Point's scanning state/results
  */
 
 /**
  * using the composer autoloader
  */
-require_once('vendor/autoload.php');
+require_once 'vendor/autoload.php';
 
 /**
  * include the config file (place your credentials etc. there if not already present)
  * see the config.template.php file for an example
  */
-require_once('config.php');
+require_once 'config.php';
 
 /**
  * site id and MAC address of AP to query

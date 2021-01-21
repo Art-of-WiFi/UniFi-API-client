@@ -3,7 +3,7 @@
  * Test the connection to your UniFi controller
  *
  * contributed by: Art of WiFi
- * description: PHP script to check/debug the connection to your controller using PHP and cURL
+ * description:    PHP script to check/debug the connection to your controller using PHP and cURL
  */
 
 /**
@@ -11,7 +11,7 @@
  * see the config.template.php file for an example.
  * (will only be used here to get the URL to the controller)
  */
-require_once('config.php');
+require_once 'config.php';
 
 /**
  * Check whether the cURL module supports SSL

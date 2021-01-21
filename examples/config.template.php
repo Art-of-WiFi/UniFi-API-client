@@ -1,10 +1,8 @@
 <?php
 /**
- * Copyright (c) 2017, Art of WiFi
+ * Copyright (c) 2021, Art of WiFi
  *
- * This file is subject to the MIT license that is bundled
- * with this package in the file LICENSE.md
- *
+ * This file is subject to the MIT license that is bundled with this package in the file LICENSE.md
  */
 
 /**

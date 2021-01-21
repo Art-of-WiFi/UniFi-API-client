@@ -1,6 +1,6 @@
 ## UniFi Controller API client class
 
-A PHP class that provides access to Ubiquiti's [**UniFi Network Controller**](https://unifi-network.ui.com/) API, versions 4.X.X, 5.X.X and 6.0.X of the UniFi Network Controller software are supported (version 6.0.42 has been confirmed to work) as well as UniFi OS-based controllers (version 5.12.59 has been confirmed to work). This class is used by our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+A PHP class that provides access to Ubiquiti's [**UniFi Network Controller**](https://unifi-network.ui.com/) API, versions 4.X.X, 5.X.X and 6.0.X of the UniFi Network Controller software are supported (version 6.0.43 has been confirmed to work) as well as UniFi OS-based controllers (version 5.12.59 has been confirmed to work). This class is used by our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 The package can be installed manually or by using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
@@ -13,13 +13,13 @@ The package can be installed manually or by using composer/[packagist](https://p
 
 ## UniFi OS Support
 
-Support for UniFi OS-based controllers (UniFi Dream Machine Pro) has been added as of version 1.1.47. The class automatically detects UniFi OS devices and adjusts URLs and several functions/methods accordingly. If your own code applies strict validation of the URL that is passed to the constructor, please adapt your logic to allow URLs without a port suffix when dealing with a UniFi OS-based controller.
+Support for UniFi OS-based controllers (UniFi Dream Machine Pro or Cloud Key Gen2/Cloud Key Gen2 Plus with firmware version 2.0.24 or higher) has been added as of version 1.1.47. The class automatically detects UniFi OS devices and adjusts URLs and several functions/methods accordingly. If your own code applies strict validation of the URL that is passed to the constructor, please adapt your logic to allow URLs without a port suffix when dealing with a UniFi OS-based controller.
 
 Please test all methods you plan on using thoroughly before using the API Client with UniFi OS devices in a production environment.
 
 ## Installation
 
-You can use [Composer](#composer), [Git](#git) or simply [Download the Release](#download-the-release) to install the API client class.
+Use [Composer](#composer), [Git](#git) or simply [Download the Release](#download-the-release) to install the API client class.
 
 ### Composer
 
@@ -31,7 +31,7 @@ Once composer is installed, simply execute this command from the shell in your p
 composer require art-of-wifi/unifi-api-client
 ```
 
- Or you can manually add the package to your composer.json file:
+ Or manually add the package to your composer.json file:
 
 ```javascript
 {
@@ -44,7 +44,7 @@ composer require art-of-wifi/unifi-api-client
 Finally, be sure to include the autoloader in your code:
 
 ```php
-require_once('vendor/autoload.php');
+require_once 'vendor/autoload.php';
 ```
 
 ### Git
@@ -58,15 +58,15 @@ git clone https://github.com/Art-of-WiFi/UniFi-API-client.git
 When git is done cloning, include the file containing the class like so in your code:
 
 ```php
-require_once('path/to/src/Client.php');
+require_once 'path/to/src/Client.php';
 ```
 
 ### Download the Release
 
-If you prefer not to use composer or git, you can simply [download the package](https://github.com/Art-of-WiFi/UniFi-API-client/archive/master.zip), uncompress the zip file, then include the file containing the class in your code like so:
+If you prefer not to use composer or git, simply [download the package](https://github.com/Art-of-WiFi/UniFi-API-client/archive/master.zip), uncompress the zip file, then include the file containing the class in your code like so:
 
 ```php
-require_once('path/to/src/Client.php');
+require_once 'path/to/src/Client.php';
 ```
 
 ## Example usage
@@ -77,7 +77,7 @@ A basic example how to use the class:
 /**
  * load the class using the composer autoloader
  */
-require_once('vendor/autoload.php');
+require_once 'vendor/autoload.php';
 
 /**
  * initialize the Unifi API connection class, log in to the controller and request the alarms collection
@@ -88,7 +88,7 @@ $login            = $unifi_connection->login();
 $results          = $unifi_connection->list_alarms(); // returns a PHP array containing alarm objects
 ```
 
-Please refer to the `examples/` directory for some more detailed examples which you can use as a starting point for your own PHP code.
+Please refer to the `examples/` directory for some more detailed examples which can be used as a starting point for your own PHP code.
 
 #### IMPORTANT NOTES:
 
@@ -269,7 +269,7 @@ Other functions, getters/setters:
 - get_is_unifi_os()
 - get_last_error_message()
 - get_last_results_raw()
-- get_request_type()
+- get_request_method()
 - get_site()
 - get_ssl_verify_host()
 - get_ssl_verify_peer()
@@ -277,7 +277,7 @@ Other functions, getters/setters:
 - set_cookies()
 - set_debug()
 - set_is_unifi_os()
-- set_request_type()
+- set_request_method()
 - set_site()
 - set_ssl_verify_host()
 - set_ssl_verify_peer()

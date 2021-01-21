@@ -3,14 +3,14 @@
  * PHP API usage example
  *
  * contributed by: Art of WiFi
- * description: example basic PHP script to modify the super_mgmt settings for UniFi controller and output results
- *              in json format
+ * description:    example basic PHP script to modify the super_mgmt settings for UniFi controller and output results
+ *                 in json format
  */
 
 /**
  * using the composer autoloader
  */
-require_once('vendor/autoload.php');
+require_once 'vendor/autoload.php';
 
 /**
  * UniFi controller credentials and the site to use, in this case since we are modifying global settings you can select
@@ -18,7 +18,7 @@ require_once('vendor/autoload.php');
  *
  * NOTE: in this case you need to enter Super Administrator account credentials in config.php
  */
-require_once('config.php');
+require_once 'config.php';
 $site_id = 'default';
 $debug   = false;
 
