@@ -4,6 +4,7 @@ A PHP class that provides access to Ubiquiti's [**UniFi Network Controller**](ht
 
 The package can be installed manually or by using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
+
 ## Requirements
 
 - a server with PHP, version 5.5.0 or higher, and the PHP cURL module installed (tested on Apache 2.4 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.2.24 and cURL 7.58.0)
@@ -17,9 +18,11 @@ Support for UniFi OS-based controllers (UniFi Dream Machine Pro or Cloud Key Gen
 
 Please test all methods you plan on using thoroughly before using the API Client with UniFi OS devices in a production environment.
 
+
 ## Installation
 
 Use [Composer](#composer), [Git](#git) or simply [Download the Release](#download-the-release) to install the API client class.
+
 
 ### Composer
 
@@ -47,6 +50,7 @@ Finally, be sure to include the autoloader in your code:
 require_once 'vendor/autoload.php';
 ```
 
+
 ### Git
 
 Execute the following `git` command from the shell in your project directory:
@@ -61,6 +65,7 @@ When git is done cloning, include the file containing the class like so in your 
 require_once 'path/to/src/Client.php';
 ```
 
+
 ### Download the Release
 
 If you prefer not to use composer or git, simply [download the package](https://github.com/Art-of-WiFi/UniFi-API-client/archive/master.zip), uncompress the zip file, then include the file containing the class in your code like so:
@@ -68,6 +73,7 @@ If you prefer not to use composer or git, simply [download the package](https://
 ```php
 require_once 'path/to/src/Client.php';
 ```
+
 
 ## Example usage
 
@@ -90,6 +96,7 @@ $results          = $unifi_connection->list_alarms(); // returns a PHP array con
 
 Please refer to the `examples/` directory for some more detailed examples which can be used as a starting point for your own PHP code.
 
+
 #### IMPORTANT NOTES:
 
 1. In the above example, `$site_id` is the short site "name" (usually 8 characters long) that is visible in the URL when managing the site in the UniFi Network Controller. For example with this URL:
@@ -99,6 +106,7 @@ Please refer to the `examples/` directory for some more detailed examples which 
    `jl3z2shm` is the short site "name" and the value to assign to $site_id.
 
 2. The last optional parameter that is passed to the constructor in the above example (`true`), enables validation of the controller's SSL certificate which is otherwise **disabled** by default. It is **highly recommended** to enable this feature in production environments where you have a valid SSL cert installed on the UniFi Controller that is associated with the FQDN in the `controller_url` parameter. This option was added with API client version 1.1.16.
+
 
 ## Functions/methods supported
 
@@ -156,6 +164,7 @@ The class currently supports the following functions/methods to GET/POST/PUT/DEL
 - list_current_channels()
 - list_dashboard()
 - list_devices()
+- list_device_name_mappings()
 - list_dpi_stats()
 - list_dynamicdns()
 - list_events()
@@ -247,6 +256,7 @@ The class currently supports the following functions/methods to GET/POST/PUT/DEL
 - stat_speedtest_results()
 - stat_sta_sessions_latest()
 - stat_status()
+- stat_full_status()
 - stat_sysinfo()
 - stat_voucher()
 - stat_monthly_aps()
@@ -287,9 +297,11 @@ Other functions, getters/setters:
 
 There is still work to be done to add functionality and further improve the usability of this class, so all suggestions/comments are welcome. Please use the GitHub [issue list](https://github.com/Art-of-WiFi/UniFi-API-client/issues) or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/PHP-class-to-access-the-UniFi-controller-API-updates-and/td-p/1512870) to share your suggestions and questions.
 
+
 ## Contribute
 
 If you would like to contribute code (improvements), please open an issue and include your code there or else create a pull request.
+
 
 ## Credits
 
@@ -301,6 +313,7 @@ This class is based on the initial work by the following developers:
 and the API as published by Ubiquiti:
 
 - https://dl.ui.com/unifi/6.0.41/unifi_sh_api
+
 
 ## Important Disclaimer
 
