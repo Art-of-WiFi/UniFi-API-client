@@ -12,7 +12,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.64
+ * @version Release: 1.1.65
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -31,7 +31,7 @@ class Client
     protected $is_loggedin           = false;
     protected $is_unifi_os           = false;
     protected $exec_retries          = 0;
-    protected $class_version         = '1.1.64';
+    protected $class_version         = '1.1.65';
     private $cookies                 = '';
     private $headers                 = [];
     private $request_method          = 'GET';
@@ -314,19 +314,19 @@ class Client
         /**
          * if we have received values for up/down/megabytes/ap_mac we append them to the payload array to be submitted
          */
-        if (!is_null($up)) {
+        if (!empty($up)) {
             $payload['up'] = intval($up);
         }
 
-        if (!is_null($down)) {
+        if (!empty($down)) {
             $payload['down'] = intval($down);
         }
 
-        if (!is_null($megabytes)) {
+        if (!empty($megabytes)) {
             $payload['bytes'] = intval($megabytes);
         }
 
-        if (!is_null($ap_mac)) {
+        if (!empty($ap_mac) && filter_var($ap_mac, FILTER_VALIDATE_MAC)) {
             $payload['ap_mac'] = strtolower($ap_mac);
         }
 
@@ -1193,7 +1193,7 @@ class Client
     /**
      * Fetch AP groups
      *
-     * @return array returns an array containing the current AP groups on success
+     * @return array  containing the current AP groups on success
      */
     public function list_apgroups()
     {
@@ -1255,7 +1255,7 @@ class Client
      * @param  string $group_id optional, _id value of the single firewall group to list
      * @return array            containing the current firewall groups or the selected firewall group on success
      */
-    public function list_firewallgroups($group_id = null)
+    public function list_firewallgroups($group_id = '')
     {
         return $this->fetch_results('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id));
     }
@@ -1632,7 +1632,7 @@ class Client
     /**
      * Fetch admins
      *
-     * @return array containing administrator objects for selected site
+     * @return array  containing administrator objects for selected site
      */
     public function list_admins()
     {
@@ -1644,7 +1644,7 @@ class Client
     /**
      * Fetch all admins
      *
-     * @return array containing administrator objects for all sites
+     * @return array  containing administrator objects for all sites
      */
     public function list_all_admins()
     {
@@ -1772,7 +1772,7 @@ class Client
     /**
      * Fetch wlan_groups
      *
-     * @return array containing known wlan_groups
+     * @return array  containing known wlan_groups
      */
     public function list_wlan_groups()
     {
@@ -1782,7 +1782,7 @@ class Client
     /**
      * Fetch sysinfo
      *
-     * @return array containing known sysinfo data
+     * @return array  containing known sysinfo data
      */
     public function stat_sysinfo()
     {
@@ -1792,8 +1792,8 @@ class Client
     /**
      * Fetch controller status
      *
-     * NOTES: in order to get useful results (e.g. controller version) you can call get_last_results_raw()
-     * immediately after this method. Login not required.
+     * NOTES:
+     * login not required
      *
      * @return bool true upon success (controller is online)
      */
@@ -1803,9 +1803,41 @@ class Client
     }
 
     /**
+     * Fetch full controller status
+     *
+     * NOTES:
+     * login not required
+     *
+     * @return bool|array  staus array upon success, false upon failure
+     */
+    public function stat_full_status()
+    {
+        $initial_fetch = $this->fetch_results_boolean('/status', null, false);
+        $mappings = $this->get_last_results_raw();
+
+        return json_decode($mappings);
+    }
+
+    /**
+     * Fetch device name mappings
+     *
+     * NOTES:
+     * login not required
+     *
+     * @return bool|array  mappings array upon success, false upon failure
+     */
+    public function list_device_name_mappings()
+    {
+        $initial_fetch = $this->fetch_results_boolean('/dl/firmware/bundles.json', null, false);
+        $mappings = $this->get_last_results_raw();
+
+        return json_decode($mappings);
+    }
+
+    /**
      * Fetch self
      *
-     * @return array containing information about the logged in user
+     * @return array  containing information about the logged in user
      */
     public function list_self()
     {
@@ -1820,7 +1852,7 @@ class Client
      */
     public function stat_voucher($create_time = null)
     {
-        $payload = trim($create_time) != null ? ['create_time' => intval($create_time)] : [];
+        $payload = isset($create_time) ? ['create_time' => intval($create_time)] : [];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/voucher', $payload);
     }
@@ -1833,7 +1865,7 @@ class Client
      */
     public function stat_payment($within = null)
     {
-        $path_suffix = $within != null ? '?within=' . intval($within) : '';
+        $path_suffix = isset($within) ? '?within=' . intval($within) : '';
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/payment' . $path_suffix);
     }
@@ -1849,7 +1881,7 @@ class Client
     public function create_hotspotop($name, $x_password, $note = null)
     {
         $payload = ['name' => $name, 'x_password' => $x_password];
-        if (!is_null($note)) {
+        if (!isset($note)) {
             $payload['note'] = trim($note);
         }
 
@@ -1859,7 +1891,7 @@ class Client
     /**
      * Fetch hotspot operators (using REST)
      *
-     * @return array containing hotspot operators
+     * @return array  containing hotspot operators
      */
     public function list_hotspotop()
     {
@@ -1883,11 +1915,11 @@ class Client
      */
     public function create_voucher(
         $minutes,
-        $count  = 1,
-        $quota  = 0,
-        $note   = null,
-        $up     = null,
-        $down   = null,
+        $count     = 1,
+        $quota     = 0,
+        $note      = null,
+        $up        = null,
+        $down      = null,
         $megabytes = null
     ) {
         $payload = [
@@ -1945,7 +1977,7 @@ class Client
     /**
      * Fetch port forwarding stats
      *
-     * @return array containing port forwarding stats
+     * @return array  containing port forwarding stats
      */
     public function list_portforward_stats()
     {
@@ -1955,7 +1987,7 @@ class Client
     /**
      * Fetch DPI stats
      *
-     * @return array containing DPI stats
+     * @return array  containing DPI stats
      */
     public function list_dpi_stats()
     {
@@ -1989,7 +2021,7 @@ class Client
     /**
      * Fetch current channels
      *
-     * @return array containing currently allowed channels
+     * @return array  containing currently allowed channels
      */
     public function list_current_channels()
     {
@@ -2003,7 +2035,7 @@ class Client
      * these codes following the ISO standard:
      * https://en.wikipedia.org/wiki/ISO_3166-1_numeric
      *
-     * @return array containing available country codes
+     * @return array  containing available country codes
      */
     public function list_country_codes()
     {
@@ -2013,7 +2045,7 @@ class Client
     /**
      * Fetch port forwarding settings
      *
-     * @return array containing port forwarding settings
+     * @return array  containing port forwarding settings
      */
     public function list_portforwarding()
     {
@@ -2023,7 +2055,7 @@ class Client
     /**
      * Fetch port configurations
      *
-     * @return array containing port configurations
+     * @return array  containing port configurations
      */
     public function list_portconf()
     {
@@ -2033,7 +2065,7 @@ class Client
     /**
      * Fetch VoIP extensions
      *
-     * @return array containing VoIP extensions
+     * @return array  containing VoIP extensions
      */
     public function list_extension()
     {
@@ -2043,7 +2075,7 @@ class Client
     /**
      * Fetch site settings
      *
-     * @return array containing site configuration settings
+     * @return array  containing site configuration settings
      */
     public function list_settings()
     {
@@ -2401,7 +2433,7 @@ class Client
     /**
      * Fetch dynamic DNS settings (using REST)
      *
-     * @return array containing dynamic DNS settings
+     * @return array  containing dynamic DNS settings
      */
     public function list_dynamicdns()
     {
@@ -3496,44 +3528,48 @@ class Client
             return false;
         }
 
-        $response = json_decode($this->exec_curl($path, $payload));
-        $this->catch_json_last_error();
-        $this->last_results_raw = $response;
-        if (isset($response->meta->rc)) {
-            if ($response->meta->rc === 'ok') {
-                $this->last_error_message = null;
-                if (is_array($response->data) && !$boolean) {
-                    return $response->data;
-                }
+        $this->last_results_raw = $this->exec_curl($path, $payload);
 
-                return true;
-            } elseif ($response->meta->rc === 'error') {
-                /**
-                 * we have an error:
-                 * set $this->set last_error_message if the returned error message is available
-                 */
-                if (isset($response->meta->msg)) {
-                    $this->last_error_message = $response->meta->msg;
-                    if ($this->debug) {
-                        trigger_error('Debug: Last error message: ' . $this->last_error_message);
+        if (is_string($this->last_results_raw)) {
+            $response = json_decode($this->last_results_raw);
+            $this->catch_json_last_error();
+
+            if (isset($response->meta->rc)) {
+                if ($response->meta->rc === 'ok') {
+                    $this->last_error_message = null;
+                    if (is_array($response->data) && !$boolean) {
+                        return $response->data;
+                    }
+
+                    return true;
+                } elseif ($response->meta->rc === 'error') {
+                    /**
+                     * we have an error:
+                     * set $this->set last_error_message if the returned error message is available
+                     */
+                    if (isset($response->meta->msg)) {
+                        $this->last_error_message = $response->meta->msg;
+                        if ($this->debug) {
+                            trigger_error('Debug: Last error message: ' . $this->last_error_message);
+                        }
                     }
                 }
             }
-        }
 
-        /**
-         * to deal with a response coming from the new v2 API
-         */
-        if (strpos($path, '/v2/api/') === 0) {
-            if (isset($response->errorCode)) {
-                if (isset($response->message)) {
-                    $this->last_error_message = $response->message;
-                    if ($this->debug) {
-                        trigger_error('Debug: Last error message: ' . $this->last_error_message);
+            /**
+             * to deal with a response coming from the new v2 API
+             */
+            if (strpos($path, '/v2/api/') === 0) {
+                if (isset($response->errorCode)) {
+                    if (isset($response->message)) {
+                        $this->last_error_message = $response->message;
+                        if ($this->debug) {
+                            trigger_error('Debug: Last error message: ' . $this->last_error_message);
+                        }
                     }
+                } else {
+                    return $response;
                 }
-            } else {
-                return $response;
             }
         }
 
@@ -3711,7 +3747,7 @@ class Client
      *
      * @param  string       $path    path for the request
      * @param  object|array $payload optional, payload to pass with the request
-     * @return bool|array            response returned by the controller API, false upon error
+     * @return bool|array|string     response returned by the controller API, false upon error
      */
     protected function exec_curl($path, $payload = null)
     {
@@ -3720,7 +3756,7 @@ class Client
         }
 
         if (!($ch = $this->get_curl_resource())) {
-            trigger_error('$ch as returned by get_curl_resource() is not a resource');
+            trigger_error('get_curl_resource() did not return a resource');
 
             return false;
         }
@@ -3876,13 +3912,14 @@ class Client
     /**
      * Create a new cURL resource and return a cURL handle
      *
-     * @return object|bool cURL handle upon success, false upon failure
+     * @return object|bool|resource cURL handle upon success, false upon failure
      */
     protected function get_curl_resource()
     {
         $ch = curl_init();
         if (is_object($ch) || is_resource($ch)) {
             $curl_options = [
+                CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS | CURLPROTO_HTTP,
                 CURLOPT_SSL_VERIFYPEER => $this->curl_ssl_verify_peer,
                 CURLOPT_SSL_VERIFYHOST => $this->curl_ssl_verify_host,
                 CURLOPT_CONNECTTIMEOUT => $this->connect_timeout,
