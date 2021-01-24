@@ -12,7 +12,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.65
+ * @version Release: 1.1.66
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -20,27 +20,27 @@ namespace UniFi_API;
 class Client
 {
     /**
-     * protected and private properties
+     * private and protected properties
      */
-    protected $baseurl               = 'https://127.0.0.1:8443';
-    protected $user                  = '';
-    protected $password              = '';
-    protected $site                  = 'default';
-    protected $version               = '6.0.43';
-    protected $debug                 = false;
-    protected $is_loggedin           = false;
-    protected $is_unifi_os           = false;
-    protected $exec_retries          = 0;
-    protected $class_version         = '1.1.65';
-    private $cookies                 = '';
-    private $headers                 = [];
-    private $request_method          = 'GET';
-    private $request_methods_allowed = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
-    private $connect_timeout         = 10;
-    private $last_results_raw        = null;
-    private $last_error_message      = null;
-    private $curl_ssl_verify_peer    = false;
-    private $curl_ssl_verify_host    = false;
+    private $class_version             = '1.1.66';
+    protected $baseurl                 = 'https://127.0.0.1:8443';
+    protected $user                    = '';
+    protected $password                = '';
+    protected $site                    = 'default';
+    protected $version                 = '6.0.43';
+    protected $debug                   = false;
+    protected $curl_ssl_verify_peer    = false;
+    protected $curl_ssl_verify_host    = false;
+    protected $is_loggedin             = false;
+    protected $is_unifi_os             = false;
+    protected $exec_retries            = 0;
+    protected $cookies                 = '';
+    protected $headers                 = [];
+    protected $request_method          = 'GET';
+    protected $request_methods_allowed = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    protected $connect_timeout         = 10;
+    protected $last_results_raw        = null;
+    protected $last_error_message      = null;
 
     /**
      * Construct an instance of the UniFi API client class
@@ -1812,10 +1812,9 @@ class Client
      */
     public function stat_full_status()
     {
-        $initial_fetch = $this->fetch_results_boolean('/status', null, false);
-        $mappings = $this->get_last_results_raw();
+        $this->fetch_results_boolean('/status', null, false);
 
-        return json_decode($mappings);
+        return json_decode($this->get_last_results_raw());
     }
 
     /**
@@ -1828,10 +1827,9 @@ class Client
      */
     public function list_device_name_mappings()
     {
-        $initial_fetch = $this->fetch_results_boolean('/dl/firmware/bundles.json', null, false);
-        $mappings = $this->get_last_results_raw();
+        $this->fetch_results_boolean('/dl/firmware/bundles.json', null, false);
 
-        return json_decode($mappings);
+        return json_decode($this->get_last_results_raw());
     }
 
     /**
@@ -1906,7 +1904,7 @@ class Client
      * @param  int    $minutes   minutes the voucher is valid after activation (expiration time)
      * @param  int    $count     number of vouchers to create, default value is 1
      * @param  int    $quota     single-use or multi-use vouchers, value '0' is for multi-use, '1' is for single-use,
-       *                         'n' is for multi-use n times
+     *                           'n' is for multi-use n times
      * @param  string $note      note text to add to voucher when printing
      * @param  int    $up        upload speed limit in kbps
      * @param  int    $down      download speed limit in kbps
@@ -3504,7 +3502,7 @@ class Client
     }
 
     /****************************************************************
-     * internal (private and protected) functions from here:
+     * private and protected functions from here:
      ****************************************************************/
 
     /**
@@ -3596,7 +3594,7 @@ class Client
      *
      * @return bool returns true upon success, false upon failure
      */
-    private function catch_json_last_error()
+    protected function catch_json_last_error()
     {
         if ($this->debug) {
             switch (json_last_error()) {
@@ -3658,7 +3656,7 @@ class Client
      * @param  string $baseurl the base URL to validate
      * @return bool            true if base URL is a valid URL, else returns false
      */
-    private function check_base_url($baseurl)
+    protected function check_base_url($baseurl)
     {
         if (!filter_var($baseurl, FILTER_VALIDATE_URL) || substr($baseurl, -1) === '/') {
             trigger_error('The URL provided is incomplete, invalid or ends with a / character!');
@@ -3675,7 +3673,7 @@ class Client
      * @param  string $site the (short) site name to check
      * @return bool         true if (short) site name is valid, else returns false
      */
-    private function check_site($site)
+    protected function check_site($site)
     {
         if ($this->debug && preg_match("/\s/", $site)) {
             trigger_error('The provided (short) site name may not contain any spaces');
@@ -3694,7 +3692,7 @@ class Client
      *
      * @return bool true when unificookie was updated, else returns false
      */
-    private function update_unificookie()
+    protected function update_unificookie()
     {
         if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION['unificookie']) && !empty($_SESSION['unificookie'])) {
             $this->cookies = $_SESSION['unificookie'];
@@ -3717,7 +3715,7 @@ class Client
      *
      * @return bool true upon success or false when unable to extract the CSRF token
      */
-    private function create_x_csrf_token_header()
+    protected function create_x_csrf_token_header()
     {
         if (!empty($this->cookies)) {
             $cookie_bits = explode('=', $this->cookies);
