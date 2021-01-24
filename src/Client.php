@@ -12,7 +12,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.66
+ * @version Release: 1.1.67
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -22,7 +22,7 @@ class Client
     /**
      * private and protected properties
      */
-    private $class_version             = '1.1.66';
+    private $class_version             = '1.1.67';
     protected $baseurl                 = 'https://127.0.0.1:8443';
     protected $user                    = '';
     protected $password                = '';
@@ -3071,7 +3071,7 @@ class Client
     }
 
     /**
-    * Toggle Element Adoption ON or OFF
+     * Toggle Element Adoption ON or OFF
      *
      * @param  bool $enable true enables Element Adoption, false disables Element Adoption
      * @return bool         true on success
@@ -3759,7 +3759,8 @@ class Client
             return false;
         }
 
-        $json_payload = '';
+        $this->headers = [];
+        $json_payload  = '';
 
         if ($this->is_unifi_os) {
             $url = $this->baseurl . '/proxy/network' . $path;
@@ -3777,12 +3778,11 @@ class Client
         /**
          * what we do when a payload is passed
          */
-        if (!is_null($payload)) {
+        if (!empty($payload)) {
             $json_payload                     = json_encode($payload, JSON_UNESCAPED_SLASHES);
-            $curl_options[CURLOPT_POST]       = true;
             $curl_options[CURLOPT_POSTFIELDS] = $json_payload;
 
-            $this->headers = [
+            $this->headers[] = [
                 'content-type: application/json',
                 'content-length: ' . strlen($json_payload)
             ];
