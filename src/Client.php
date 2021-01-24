@@ -12,7 +12,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.67
+ * @version Release: 1.1.68
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -22,7 +22,7 @@ class Client
     /**
      * private and protected properties
      */
-    private $class_version             = '1.1.67';
+    private $class_version             = '1.1.68';
     protected $baseurl                 = 'https://127.0.0.1:8443';
     protected $user                    = '';
     protected $password                = '';
@@ -3782,7 +3782,7 @@ class Client
             $json_payload                     = json_encode($payload, JSON_UNESCAPED_SLASHES);
             $curl_options[CURLOPT_POSTFIELDS] = $json_payload;
 
-            $this->headers[] = [
+            $this->headers = [
                 'content-type: application/json',
                 'content-length: ' . strlen($json_payload)
             ];
