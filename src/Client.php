@@ -12,7 +12,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.68
+ * @version Release: 1.1.69
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -22,7 +22,7 @@ class Client
     /**
      * private and protected properties
      */
-    private $class_version             = '1.1.68';
+    private $class_version             = '1.1.69';
     protected $baseurl                 = 'https://127.0.0.1:8443';
     protected $user                    = '';
     protected $password                = '';
@@ -116,7 +116,7 @@ class Client
     public function login()
     {
         /**
-         * if already logged in we skip the login process
+         * skip the login process if already logged in
          */
         if ($this->is_loggedin === true) {
             return true;
@@ -129,7 +129,7 @@ class Client
         }
 
         /**
-         * first we check whether we have a "regular" controller or one based on UniFi OS,
+         * check whether this is a "regular" controller or one based on UniFi OS,
          * prepare cURL and options
          */
         if (!($ch = $this->get_curl_resource())) {
@@ -156,14 +156,17 @@ class Client
         }
 
         /**
-         * we now proceed with the actual login
+         * prepare the actual login
          */
         $curl_options = [
             CURLOPT_NOBODY     => false,
             CURLOPT_POSTFIELDS => json_encode(['username' => $this->user, 'password' => $this->password]),
-            CURLOPT_HTTPHEADER => ['content-type: application/json'],
+            CURLOPT_HTTPHEADER => [
+                'content-type: application/json',
+                'Expect:'
+            ],
             CURLOPT_REFERER    => $this->baseurl . '/login',
-            CURLOPT_URL        => $this->baseurl . '/api/login'
+            CURLOPT_URL        => $this->baseurl . '/api/login',
         ];
 
         /**
@@ -197,43 +200,21 @@ class Client
         }
 
         /**
-         * based on the HTTP response code we either trigger an error or
-         * extract the cookie from the headers
+         * based on the HTTP response code trigger an error
          */
         if ($http_code === 400 || $http_code === 401) {
-            trigger_error("We received the following HTTP response status: $http_code. Probably a controller login failure");
+            trigger_error("HTTP response status received: $http_code. Probably a controller login failure");
 
             return $http_code;
         }
 
-        $response_header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
-        $response_headers     = substr($response, 0, $response_header_size);
-        $response_body        = trim(substr($response, $response_header_size));
-
         curl_close($ch);
 
         /**
-         * we are good to extract the cookies
+         * extract the cookies
          */
-        if ($http_code >= 200 && $http_code < 400 && !empty($response_body)) {
-            preg_match_all('|Set-Cookie: (.*);|Ui', $response_headers, $results);
-            if (array_key_exists(1, $results)) {
-                $this->cookies = implode(';', $results[1]);
-
-                /**
-                 * accept cookies from regular UniFi controllers or from UniFi OS
-                 */
-                if (strpos($this->cookies, 'unifises') !== false || strpos($this->cookies, 'TOKEN') !== false) {
-                    /**
-                     * update the cookie value in $_SESSION['unificookie'], if it exists
-                     */
-                    if (isset($_SESSION['unificookie'])) {
-                        $_SESSION['unificookie'] = $this->cookies;
-                    }
-
-                    return $this->is_loggedin = true;
-                }
-            }
+        if ($http_code >= 200 && $http_code < 400) {
+            return $this->is_loggedin;
         }
 
         return false;
@@ -261,7 +242,11 @@ class Client
         /**
          * constuct HTTP request headers as required
          */
-        $this->headers = ['content-length: 0'];
+        $this->headers = [
+            'content-length: 0',
+            'Expect:'
+        ];
+
         $logout_path   = '/logout';
         if ($this->is_unifi_os) {
             $logout_path = '/api/auth/logout';
@@ -312,7 +297,7 @@ class Client
         $payload = ['cmd' => 'authorize-guest', 'mac' => strtolower($mac), 'minutes' => intval($minutes)];
 
         /**
-         * if we have received values for up/down/megabytes/ap_mac we append them to the payload array to be submitted
+         * append received values for up/down/megabytes/ap_mac to the payload array to be submitted
          */
         if (!empty($up)) {
             $payload['up'] = intval($up);
@@ -423,7 +408,6 @@ class Client
 
         if (!empty($note)) {
             $new_user['note']  = $note;
-            $new_user['noted'] = true;
         }
 
         if (!empty($is_guest) && is_bool($is_guest)) {
@@ -449,8 +433,8 @@ class Client
      */
     public function set_sta_note($user_id, $note = null)
     {
-        $noted   = empty($note) ? false : true;
-        $payload = ['note' => $note, 'noted' => $noted];
+        //$noted   = empty($note) ? false : true;
+        $payload = ['note' => $note];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
     }
@@ -2318,7 +2302,7 @@ class Client
             '_id'               => $section_id
         ];
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/guest_access', $payload);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/guest_access/' . $section_id, $payload);
     }
 
     /**
@@ -2328,9 +2312,13 @@ class Client
      *                               object/array structured in the same manner as is returned by list_settings() for the "guest_access" section.
      * @return bool                  true on success
      */
-    public function set_guestlogin_settings_base($payload)
+    public function set_guestlogin_settings_base($payload, $section_id = '')
     {
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/guest_access', $payload);
+        if (!empty($section_id)) {
+            $section_id = '/' . $section_id;
+        }
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/guest_access' . $section_id, $payload);
     }
 
     /**
@@ -3088,6 +3076,32 @@ class Client
     }
 
     /**
+     * List device states
+     *
+     * NOTE:
+     * this function returns a partial implementation of the codes listed here
+     * https://help.ui.com/hc/en-us/articles/205231710-UniFi-UAP-Status-Meaning-Definitions
+     *
+     * @return array containing translations of UniFi device "state" values to humanized form
+     */
+    public function list_device_states()
+    {
+        $device_states = [
+            0  => 'offline',
+            1  => 'connected',
+            2  => 'pending adoption',
+            4  => 'updating',
+            5  => 'provisioning',
+            6  => 'unreachable',
+            7  => 'adopting',
+            9  => 'adoption error',
+            11 => 'isolated'
+        ];
+
+        return $device_states;
+    }
+
+    /**
      * Custom API request
      *
      * NOTE:
@@ -3352,10 +3366,6 @@ class Client
         return $this->class_version;
     }
 
-    /******************************************************************
-     * other getter/setter functions/methods from here, use with care!
-     ******************************************************************/
-
     /**
      * Set value for the private property $cookies
      *
@@ -3520,7 +3530,7 @@ class Client
     protected function fetch_results($path, $payload = null, $boolean = false, $login_required = true)
     {
         /**
-         * guard clause to check if we are logged in when needed
+         * guard clause to check if logged in when needed
          */
         if ($login_required && !$this->is_loggedin) {
             return false;
@@ -3542,7 +3552,7 @@ class Client
                     return true;
                 } elseif ($response->meta->rc === 'error') {
                     /**
-                     * we have an error:
+                     * an error occurred:
                      * set $this->set last_error_message if the returned error message is available
                      */
                     if (isset($response->meta->msg)) {
@@ -3599,7 +3609,7 @@ class Client
         if ($this->debug) {
             switch (json_last_error()) {
                 case JSON_ERROR_NONE:
-                    // JSON is valid, no error has occurred and we return true early
+                    // JSON is valid, no error has occurred and return true early
                     return true;
                 case JSON_ERROR_DEPTH:
                     $error = 'The maximum stack depth has been exceeded';
@@ -3637,7 +3647,7 @@ class Client
                     $error = 'Malformed UTF-16 characters, possibly incorrectly encoded';
                     break;
                 default:
-                    // we have an unknown error
+                    // an unknown error occurred
                     $error = 'Unknown JSON error occurred';
                     break;
             }
@@ -3685,9 +3695,6 @@ class Client
     }
 
     /**
-     */
-
-    /**
      * Update the unificookie if sessions are enabled
      *
      * @return bool true when unificookie was updated, else returns false
@@ -3698,7 +3705,7 @@ class Client
             $this->cookies = $_SESSION['unificookie'];
 
             /**
-             * if we have a JWT in our cookie we know we're dealing with a UniFi OS controller
+             * if the cookie contains a JWT this is a UniFi OS controller
              */
             if (strpos($this->cookies, 'TOKEN') !== false) {
                 $this->is_unifi_os = true;
@@ -3711,13 +3718,13 @@ class Client
     }
 
     /**
-     * Add a header containing the CSRF token from our Cookie string
+     * Add a cURL header containing the CSRF token from our Cookie string
      *
      * @return bool true upon success or false when unable to extract the CSRF token
      */
     protected function create_x_csrf_token_header()
     {
-        if (!empty($this->cookies)) {
+        if (!empty($this->cookies) && strpos($this->cookies, 'TOKEN') !== false) {
             $cookie_bits = explode('=', $this->cookies);
             if (!empty($cookie_bits) && array_key_exists(1, $cookie_bits)) {
                 $jwt = $cookie_bits[1];
@@ -3741,11 +3748,47 @@ class Client
     }
 
     /**
+     * Callback function for cURL to extract and store cookies as needed
+     *
+     * @param  object|resource $ch          the cURL instance
+     * @param  int             $header_line the response header line number
+     * @return int                          length of the header line
+     */
+    protected function response_header_callback($ch, $header_line) {
+        if (strpos($header_line, 'unifises') !== false || strpos($header_line, 'TOKEN') !== false) {
+            $cookie = trim(str_replace(['set-cookie: ', 'Set-Cookie: '], '', $header_line));
+
+            if (!empty($cookie)) {
+                $cookie_crumbs = explode(';', $cookie);
+                foreach ($cookie_crumbs as $cookie_crumb) {
+                    if (strpos($cookie_crumb, 'unifises') !== false) {
+                        $this->cookies     = $cookie_crumb;
+                        $this->is_loggedin = true;
+                        $this->is_unifi_os = false;
+
+                        break;
+                    }
+
+                    if (strpos($cookie_crumb, 'TOKEN') !== false) {
+                        $this->cookies     = $cookie_crumb;
+                        $this->is_loggedin = true;
+                        $this->is_unifi_os = true;
+
+                        break;
+                    }
+                }
+            }
+        }
+
+        return strlen($header_line);
+    }
+
+    /**
      * Execute the cURL request
      *
-     * @param  string       $path    path for the request
-     * @param  object|array $payload optional, payload to pass with the request
-     * @return bool|array|string     response returned by the controller API, false upon error
+     * @param  string            $path    path for the request
+     * @param  object|array      $payload optional, payload to pass with the request
+     * @return bool|array|string          response returned by the controller API, false upon error
      */
     protected function exec_curl($path, $payload = null)
     {
@@ -3760,7 +3803,6 @@ class Client
         }
 
         $this->headers = [];
-        $json_payload  = '';
 
         if ($this->is_unifi_os) {
             $url = $this->baseurl . '/proxy/network' . $path;
@@ -3772,23 +3814,27 @@ class Client
          * prepare cURL options
          */
         $curl_options = [
-            CURLOPT_URL => $url
+            CURLOPT_URL => $url,
         ];
 
         /**
-         * what we do when a payload is passed
+         * when a payload is passed
          */
+        $json_payload  = '';
         if (!empty($payload)) {
             $json_payload                     = json_encode($payload, JSON_UNESCAPED_SLASHES);
             $curl_options[CURLOPT_POSTFIELDS] = $json_payload;
 
+            /**
+             * add empty Expect header to prevent cURL from injecting an "Expect: 100-continue" header
+             */
             $this->headers = [
-                'content-type: application/json',
-                'content-length: ' . strlen($json_payload)
+                'content-type: application/json; charset=utf-8',
+                'Expect:'
             ];
 
             /**
-             * we shouldn't be using GET (the default request type) or DELETE when passing a payload,
+             * should not use GET (the default request type) or DELETE when passing a payload,
              * switch to POST instead
              */
             if ($this->request_method === 'GET' || $this->request_method === 'DELETE') {
@@ -3798,7 +3844,7 @@ class Client
 
         switch ($this->request_method) {
             case 'POST':
-                $curl_options[CURLOPT_CUSTOMREQUEST] = 'POST';
+                $curl_options[CURLOPT_POST] = true;
                 break;
             case 'DELETE':
                 $curl_options[CURLOPT_CUSTOMREQUEST] = 'DELETE';
@@ -3836,7 +3882,7 @@ class Client
 
         /**
          * an HTTP response code 401 (Unauthorized) indicates the Cookie/Token has expired in which case
-         * we need to login again.
+         * re-login is required
          */
         if ($http_code == 401) {
             if ($this->debug) {
@@ -3852,6 +3898,7 @@ class Client
                 }
 
                 $this->is_loggedin = false;
+                $this->cookies     = '';
                 $this->exec_retries++;
                 curl_close($ch);
 
@@ -3923,6 +3970,7 @@ class Client
                 CURLOPT_CONNECTTIMEOUT => $this->connect_timeout,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING       => '',
+                CURLOPT_HEADERFUNCTION => [$this, 'response_header_callback'],
             ];
 
             if ($this->debug) {
