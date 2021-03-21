@@ -3814,7 +3814,7 @@ class Client
          * prepare cURL options
          */
         $curl_options = [
-            CURLOPT_URL => $url,
+            CURLOPT_URL => $url
         ];
 
         /**
@@ -3829,7 +3829,7 @@ class Client
              * add empty Expect header to prevent cURL from injecting an "Expect: 100-continue" header
              */
             $this->headers = [
-                'content-type: application/json; charset=utf-8',
+                'content-type: application/json',
                 'Expect:'
             ];
 
