@@ -22,25 +22,25 @@ class Client
     /**
      * private and protected properties
      */
-    private $class_version          = '1.1.70';
-    protected $baseurl              = 'https://127.0.0.1:8443';
-    protected $user                 = '';
-    protected $password             = '';
-    protected $site                 = 'default';
-    protected $version              = '6.0.43';
-    protected $debug                = false;
-    protected $curl_ssl_verify_peer = false;
-    protected $curl_ssl_verify_host = false;
-    protected $is_loggedin          = false;
-    protected $is_unifi_os          = false;
-    protected $exec_retries         = 0;
-    protected $cookies              = '';
-    protected $headers              = [];
-    protected $method               = 'GET';
-    protected $methods_allowed      = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
-    protected $connect_timeout      = 10;
-    protected $last_results_raw     = null;
-    protected $last_error_message   = null;
+    private $class_version        = '1.1.70';
+    protected $baseurl            = 'https://127.0.0.1:8443';
+    protected $user               = '';
+    protected $password           = '';
+    protected $site               = 'default';
+    protected $version            = '6.0.43';
+    protected $debug              = false;
+    protected $ssl_verify_peer    = false;
+    protected $ssl_verify_host    = false;
+    protected $is_loggedin        = false;
+    protected $is_unifi_os        = false;
+    protected $exec_retries       = 0;
+    protected $cookies            = '';
+    protected $headers            = [];
+    protected $method             = 'GET';
+    protected $methods_allowed    = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    protected $connect_timeout    = 10;
+    protected $last_results_raw   = null;
+    protected $last_error_message = null;
 
     /**
      * Construct an instance of the UniFi API client class
@@ -80,8 +80,8 @@ class Client
         }
 
         if ((boolean) $ssl_verify === true) {
-            $this->curl_ssl_verify_peer = true;
-            $this->curl_ssl_verify_host = 2;
+            $this->ssl_verify_peer = true;
+            $this->ssl_verify_host = 2;
         }
     }
 
@@ -3409,11 +3409,11 @@ class Client
      *
      * https://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYPEER.html
      *
-     * @return bool value of private property $curl_ssl_verify_peer (cURL option CURLOPT_SSL_VERIFYPEER)
+     * @return bool value of private property $ssl_verify_peer (cURL option CURLOPT_SSL_VERIFYPEER)
      */
     public function get_ssl_verify_peer()
     {
-        return $this->curl_ssl_verify_peer;
+        return $this->ssl_verify_peer;
     }
 
     /**
@@ -3429,7 +3429,7 @@ class Client
             return false;
         }
 
-        $this->curl_ssl_verify_peer = $ssl_verify_peer;
+        $this->ssl_verify_peer = $ssl_verify_peer;
 
         return true;
     }
@@ -3439,11 +3439,11 @@ class Client
      *
      * https://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYHOST.html
      *
-     * @return bool value of private property $curl_ssl_verify_peer (cURL option CURLOPT_SSL_VERIFYHOST)
+     * @return bool value of private property $ssl_verify_peer (cURL option CURLOPT_SSL_VERIFYHOST)
      */
     public function get_ssl_verify_host()
     {
-        return $this->curl_ssl_verify_host;
+        return $this->ssl_verify_host;
     }
 
     /**
@@ -3459,7 +3459,7 @@ class Client
             return false;
         }
 
-        $this->curl_ssl_verify_host = $ssl_verify_host;
+        $this->ssl_verify_host = $ssl_verify_host;
 
         return true;
     }
@@ -3956,8 +3956,8 @@ class Client
         if (is_object($ch) || is_resource($ch)) {
             $curl_options = [
                 CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS | CURLPROTO_HTTP,
-                CURLOPT_SSL_VERIFYPEER => $this->curl_ssl_verify_peer,
-                CURLOPT_SSL_VERIFYHOST => $this->curl_ssl_verify_host,
+                CURLOPT_SSL_VERIFYPEER => $this->ssl_verify_peer,
+                CURLOPT_SSL_VERIFYHOST => $this->ssl_verify_host,
                 CURLOPT_CONNECTTIMEOUT => $this->connect_timeout,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING       => '',
