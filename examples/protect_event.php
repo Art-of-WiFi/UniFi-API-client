@@ -3,9 +3,9 @@
 /**
  * PHP API usage example
  *
- * contributed by: Art of WiFi
- * description:    example basic PHP script to list all site on the controller that are
- *                 available to the admin account defined in config.php
+ * contributed by: revoltek-daniel
+ * description:    example basic PHP script to list all events of the last to hours,
+ *                 saves thumbails and video files of the given events
  */
 
 /**
