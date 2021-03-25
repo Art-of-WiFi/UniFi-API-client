@@ -15,7 +15,7 @@ class ProtectClient extends Client {
      */
     public function getCameras()
     {
-        return $this->fetch_results('/api/cameras');
+        return $this->fetchResults('/api/cameras');
     }
 
     /**
@@ -26,7 +26,7 @@ class ProtectClient extends Client {
      */
     public function getCamera($cameraId)
     {
-        return $this->fetch_results('/api/cameras/' . $cameraId);
+        return $this->fetchResults('/api/cameras/' . $cameraId);
     }
 
     /**
@@ -41,6 +41,8 @@ class ProtectClient extends Client {
     }
 
     /**
+     * Download snapshot image to given path.
+     *
      * @param string $path Path where to save the file.
      * @param string $cameraId
      * @return bool
@@ -51,7 +53,7 @@ class ProtectClient extends Client {
     }
 
     /**
-     * Get protect events.
+     * Get events.
      *
      * @param int $start Start date as timestamp
      * @param int $end  End date as timestamp
@@ -66,7 +68,7 @@ class ProtectClient extends Client {
             $parameters .= '&limit=' . $limit;
         }
 
-        return $this->fetch_results('/api/events' . $parameters);
+        return $this->fetchResults('/api/events' . $parameters);
     }
 
     /**
@@ -104,26 +106,47 @@ class ProtectClient extends Client {
      * Generates thumbnail url for event.
      *
      * @param string $eventId Event Id
+     * @param int $height height in px, default 360px
+     * @param int $width  width in px, default 640px
+     *
      * @return string
      */
-    public function getEventThumbnailUrl($eventId)
+    public function getEventThumbnailUrl($eventId, $height = null, $width = null)
     {
-        return $this->baseurl . $this->unifi_os_endpoint . '/api/events/' . $eventId . '/thumbnail';
+        $parameters = '';
+        $separator = '?';
+        if ($height !== null) {
+            $parameters = $separator . 'h='. $height;
+            $separator = '&';
+        }
+
+        if ($width !== null) {
+            $parameters .= $separator . 'w='. $width;
+        }
+
+        return $this->baseurl . $this->unifi_os_endpoint . '/api/events/' . $eventId . '/thumbnail' . $parameters;
     }
 
     /**
+     * Save event thumbnail to given path.
+     *
      * @param string $path Path where to save the file.
      * @param string $eventId
+     * @param int $height height in px, default 360px
+     * @param int $width width in px, default 640px
+     *
      * @return bool
      */
-    public function downloadEventThumbnail($path, $eventId)
+    public function downloadEventThumbnail($path, $eventId, $height = null, $width = null)
     {
-        $url = $this->getEventThumbnailUrl($eventId);
+        $url = $this->getEventThumbnailUrl($eventId, $height, $width);
 
         return $this->downloadFile($url, $path);
     }
 
     /**
+     * Download a file from url and save to given path.
+     *
      * @param string $url
      * @param string $path
      * @return bool
@@ -228,17 +251,15 @@ class ProtectClient extends Client {
      *
      * @param  string       $path           request path
      * @param  object|array $payload        optional, PHP associative array or stdClass Object, payload to pass with the request
-     * @param  boolean      $boolean        optional, whether the method should return a boolean result, else return
-     *                                      the "data" array
-     * @param  boolean      $login_required optional, whether the method requires to be logged in or not
+     *
      * @return bool|array                   [description]
      */
-    protected function fetch_results($path, $payload = null, $boolean = false, $login_required = true)
+    protected function fetchResults($path, $payload = null)
     {
         /**
-         * guard clause to check if logged in when needed
+         * guard clause to check if logged in
          */
-        if ($login_required && !$this->is_loggedin) {
+        if (!$this->is_loggedin) {
             return false;
         }
 
