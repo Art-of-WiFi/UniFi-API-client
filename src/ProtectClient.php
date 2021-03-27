@@ -196,6 +196,7 @@ class ProtectClient extends Client {
 
         \curl_setopt($ch, \CURLOPT_URL, $url);
         \curl_setopt($ch, \CURLOPT_FILE, $fp);
+        \curl_setopt($ch, \CURLOPT_TIMEOUT, 60);
         $response = curl_exec($ch);
         if (\curl_errno($ch)) {
             \trigger_error('cURL error: ' . \curl_error($ch));
@@ -215,17 +216,11 @@ class ProtectClient extends Client {
             }
 
             if ($this->exec_retries === 0) {
-                /**
-                 * explicitly clear the expired Cookie/Token, update other properties and log out before logging in again
-                 */
-                if (isset($_SESSION['unificookie'])) {
-                    $_SESSION['unificookie'] = '';
-                }
-
                 $this->is_loggedin = false;
                 $this->cookies     = '';
                 $this->exec_retries++;
                 \curl_close($ch);
+                \fclose($fp);
 
                 /**
                  * then login again
