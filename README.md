@@ -292,6 +292,39 @@ Other functions, getters/setters:
 - set_ssl_verify_host()
 - set_ssl_verify_peer()
 
+## Protect Support
+This Library also provides some basic protect functions. To use this functions you have to use the ProtectClient Class
+
+```php
+/**
+ * load the class using the composer autoloader
+ */
+require_once 'vendor/autoload.php';
+
+/**
+ * initialize the Unifi Protect API class, log in to the controller and request the camera list
+ * (this example assumes you have already assigned the correct values to the variables used)
+ */
+$unifi_connection = new UniFi_API\ProtectClient($controller_user, $controller_password, $controller_url, $site_id, $controller_version, true);
+$login            = $unifi_connection->login();
+$results          = $unifi_connection->getCameras(); // returns a PHP array containing camera objects
+```
+
+Please refer to the `examples/protect_event.php` file for a more detailed example which can be used as a starting point for your own PHP code.
+
+## Protect functions/methods supported
+- getCameras()
+- getCamera()
+- getCurrentCameraSnapshotUrl()
+- downloadCurrentCameraSnapshot()
+- getEvents()
+- getVideoDownloadUrl()
+- downloadVideo()
+- getEventThumbnailUrl()
+- downloadEventThumbnail
+- getHeatmapUrl()
+- downloadHeatmapImage()
+
 
 ## Need help or have suggestions?
 
