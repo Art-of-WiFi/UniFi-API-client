@@ -103,6 +103,32 @@ class ProtectClient extends Client {
     }
 
     /**
+     * Get URL of the heatmap image of a specified event.
+     *
+     * @param string $eventId Id of the event
+     * @return string
+     */
+    public function getHeatmapUrl($eventId)
+    {
+        return $this->baseurl . $this->unifi_os_endpoint .  '/api/events/' . $eventId . '/heatmap';
+    }
+
+    /**
+     * Download heatmap image of an event.
+     *
+     * @param string $path
+     * @param string $eventId Id of the event
+     *
+     * @return bool
+     */
+    public function downloadHeatmapImage($path, $eventId)
+    {
+        $url = $this->getHeatmapUrl($eventId);
+
+        return $this->downloadFile($url, $path);
+    }
+
+    /**
      * Generates thumbnail url for event.
      *
      * @param string $eventId Event Id
