@@ -1,7 +1,16 @@
 <?php
 namespace UniFi_API;
 
-class ProtectClient extends Client {
+class ProtectClient extends Client
+{
+    const EVENT_TYPE_MOTION = 'motion';
+    const EVENT_TYPE_RING = 'ring';
+    const EVENT_TYPE_DISCONNECT = 'disconnect';
+    const EVENT_TYPE_RECORDINGOFF = 'recordingOff';
+    const EVENT_TYPE_UPDATE = 'update';
+    const EVENT_TYPE_OFFLINE = 'offline';
+    const EVENT_TYPE_OFF = 'off';
+
     /**
      * Protect endpoint
      * @var string
@@ -57,15 +66,20 @@ class ProtectClient extends Client {
      *
      * @param int $start Start date as timestamp
      * @param int $end  End date as timestamp
+     * @param array $types list of event types (use constants EVENT_TYPE_ ), default motion,ring
      * @param int $limit
      * @return array|bool
      */
-    public function getEvents($start, $end, $limit = null)
+    public function getEvents($start, $end, array $types = null, $limit = null)
     {
         $parameters = '?start=' . $start . '000'.  '&end=' . $end . '999';
 
         if ($limit !== null) {
             $parameters .= '&limit=' . $limit;
+        }
+
+        if ($types !== null) {
+            $parameters .= '&types=' .\implode(',', $types);
         }
 
         return $this->fetchResults('/api/events' . $parameters);
