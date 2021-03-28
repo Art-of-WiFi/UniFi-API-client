@@ -41,6 +41,7 @@ class Client
     protected $connect_timeout    = 10;
     protected $last_results_raw   = null;
     protected $last_error_message = null;
+    protected $unifi_os_endpoint  = '/proxy/network';
 
     /**
      * Construct an instance of the UniFi API client class
@@ -3802,7 +3803,7 @@ class Client
         $url = $this->baseurl . $path;
 
         if ($this->is_unifi_os) {
-            $url = $this->baseurl . '/proxy/network' . $path;
+            $url = $this->baseurl . $this->unifi_os_endpoint . $path;
         }
 
         $curl_options = [
