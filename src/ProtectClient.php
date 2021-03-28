@@ -10,6 +10,7 @@ class ProtectClient extends Client
     const EVENT_TYPE_UPDATE = 'update';
     const EVENT_TYPE_OFFLINE = 'offline';
     const EVENT_TYPE_OFF = 'off';
+    const EVENT_TYPE_PROVISION = 'provision';
 
     /**
      * Protect endpoint
@@ -66,7 +67,7 @@ class ProtectClient extends Client
      *
      * @param int $start Start date as timestamp
      * @param int $end  End date as timestamp
-     * @param array $types list of event types (use constants EVENT_TYPE_ ), default motion,ring
+     * @param array $types list of event types (use constants EVENT_TYPE_ )
      * @param int $limit
      * @return array|bool
      */
