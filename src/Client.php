@@ -2214,6 +2214,50 @@ class Client
     }
 
     /**
+     * Add new wlan group
+     * 
+     * @param string $name                  The name of the group
+     * @param bool   $load_balance_enabled  Whether to enable load balancing for clients per radio
+     * @param int    $max_clients           If load balance is enabled, this is the number of clients per radio
+     * @param string $pmf                   Protected management frames (disabled, optional, enabled)
+     * @param bool   $legacy_support        Legacy support for enabling 802.11g protection mechanism. 
+     * 
+     * @return bool
+     */
+    public function add_wlan_group(
+        $name,
+        $load_balance_enabled = false, 
+        $max_clients = 30, 
+        $pmf = 'optional', 
+        $legacy_support = false
+    ) {
+        $payload = [
+            'name' => $name,
+            'loadbalanace_enabled' => $load_balance_enabled,
+            'maxsta' => $max_clients,
+            'pmf_mode' => $pmf,
+            'b_supported' => $legacy_support
+        ];
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/wlangroup/', $payload);
+    }
+
+
+    /**
+     * Update wlan group
+     * 
+     * @param array|object  $payload        Paramaeters that will be updated
+     * @param string        $group_id       _id parameter gotten from list_wlan_groups
+     * 
+     * @return bool
+     */
+    public function update_wlan_group($payload, $group_id)
+    {
+        $this->method = 'PUT';
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/wlangroup/' . trim($group_id), $payload);
+    }
+
+    /**
      * Update access point radio settings
      *
      * NOTES:
