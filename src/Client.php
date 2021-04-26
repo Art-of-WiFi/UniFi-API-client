@@ -3095,6 +3095,7 @@ class Client
             6  => 'unreachable',
             7  => 'adopting',
             9  => 'adoption error',
+            10 => 'adoption failed',
             11 => 'isolated'
         ];
 
