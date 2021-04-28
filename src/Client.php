@@ -2078,6 +2078,34 @@ class Client
     }
 
     /**
+     * Adopt a device using custom SSH credentials
+     *
+     * @param  string $mac             device MAC address
+     * @param  string $ip              IP to use for SSH connection
+     * @param  string $username        SSH username
+     * @param  string $password        SSH password
+     * @param  string $url             inform URL to point the device to
+     * @param  int    $port            optional, SSH port
+     * @param  bool   $ssh_key_verify  optional, whether to verify device SSH key
+     * @return bool                    true on success
+     */
+    public function advanced_adopt_device($mac, $ip, $username, $password, $url, $port = 22, $ssh_key_verify = true)
+    {
+        $payload = [
+            'cmd' => 'adv-adopt',
+            'mac' => strtolower($mac),
+            'ip' => $ip,
+            'username' => $username,
+            'password' => $password,
+            'url' => $url,
+            'port' => $port,
+            'sshKeyVerify' => $ssh_key_verify
+        ];
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+    }
+
+    /**
      * Reboot a device
      *
      * @param  string $mac         device MAC address
