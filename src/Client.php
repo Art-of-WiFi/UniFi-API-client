@@ -33,6 +33,7 @@ class Client
     protected $ssl_verify_host    = false;
     protected $is_loggedin        = false;
     protected $is_unifi_os        = false;
+    protected $unifi_os_endpoint   = '/proxy/network';
     protected $exec_retries       = 0;
     protected $cookies            = '';
     protected $headers            = [];
@@ -3802,7 +3803,7 @@ class Client
         $url = $this->baseurl . $path;
 
         if ($this->is_unifi_os) {
-            $url = $this->baseurl . '/proxy/network' . $path;
+            $url = $this->baseurl . $this->unifi_os_endpoint. $path;
         }
 
         $curl_options = [
@@ -3980,4 +3981,5 @@ class Client
 
         return false;
     }
+
 }
