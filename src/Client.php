@@ -2951,7 +2951,7 @@ class Client
      *
      * @param  string $name               name for the new account
      * @param  string $x_password         password for the new account
-     * @param  int    $tunnel_type        must be one of the following values:
+     * @param  int    $tunnel_type        optional, must be one of the following values:
      *                                    1      Point-to-Point Tunneling Protocol (PPTP)
      *                                    2      Layer Two Forwarding (L2F)
      *                                    3      Layer Two Tunneling Protocol (L2TP)
@@ -2965,7 +2965,7 @@ class Client
      *                                    11     Bay Dial Virtual Services (DVS)
      *                                    12     IP-in-IP Tunneling
      *                                    13     Virtual LANs (VLAN)
-     * @param  int    $tunnel_medium_type must be one of the following values:
+     * @param  int    $tunnel_medium_type optional, must be one of the following values:
      *                                    1      IPv4 (IP version 4)
      *                                    2      IPv6 (IP version 6)
      *                                    3      NSAP
@@ -2984,20 +2984,26 @@ class Client
      * @param  int    $vlan               optional, VLAN to assign to the account
      * @return array                      containing a single object for the newly created account upon success, else returns false
      */
-    public function create_radius_account($name, $x_password, $tunnel_type, $tunnel_medium_type, $vlan = null)
+    public function create_radius_account($name, $x_password, $tunnel_type = null, $tunnel_medium_type = null, $vlan = null)
     {
         $tunnel_types        = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
         $tunnel_medium_types = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-        if (!in_array($tunnel_type, $tunnel_types) || !in_array($tunnel_medium_type, $tunnel_medium_types)) {
+        if ((!is_null($tunnel_type) && !in_array($tunnel_type, $tunnel_types)) || (!is_null($tunnel_medium_type) && !in_array($tunnel_medium_type, $tunnel_medium_types)) || ($tunnel_type ^ $tunnel_medium_type)) {
             return false;
         }
 
         $payload = [
             'name'               => $name,
-            'x_password'         => $x_password,
-            'tunnel_type'        => (int) $tunnel_type,
-            'tunnel_medium_type' => (int) $tunnel_medium_type
+            'x_password'         => $x_password
         ];
+
+        if (!is_null($tunnel_type)) {
+            $payload['tunnel_type'] = (int) $tunnel_type;
+        }
+
+        if (!is_null($tunnel_medium_type)) {
+            $payload['tunnel_medium_type'] = (int) $tunnel_medium_type;
+        }
 
         if (!is_null($vlan)) {
             $payload['vlan'] = (int) $vlan;
