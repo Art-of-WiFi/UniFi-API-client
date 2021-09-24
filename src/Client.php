@@ -38,7 +38,9 @@ class Client
     protected $headers            = [];
     protected $method             = 'GET';
     protected $methods_allowed    = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    protected $request_timeout    = 30;
     protected $connect_timeout    = 10;
+    protected $curl_options       = array();
     protected $last_results_raw   = null;
     protected $last_error_message = null;
 
@@ -83,6 +85,8 @@ class Client
             $this->ssl_verify_peer = true;
             $this->ssl_verify_host = 2;
         }
+
+        $this->curl_options = $this->build_curl_options();
     }
 
     /**
@@ -106,6 +110,36 @@ class Client
         if ($this->is_loggedin) {
             $this->logout();
         }
+    }
+
+    /**
+     * This functions builds the private variable $curl_options with the predefined values.
+     *
+     * @return array returns a curl_setopt_array() compatible $options array
+     */
+    protected function build_curl_options()
+    {
+        $curl_options = [
+            CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS | CURLPROTO_HTTP,
+            CURLOPT_SSL_VERIFYPEER => $this->ssl_verify_peer,
+            CURLOPT_SSL_VERIFYHOST => $this->ssl_verify_host,
+            CURLOPT_TIMEOUT        => $this->request_timeout,
+            CURLOPT_CONNECTTIMEOUT => $this->connect_timeout,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING       => '',
+            CURLOPT_HEADERFUNCTION => [$this, 'response_header_callback'],
+        ];
+
+        if ($this->debug) {
+            $curl_options[CURLOPT_VERBOSE] = true;
+        }
+
+        if (!empty($this->cookies)) {
+            $curl_options[CURLOPT_COOKIESESSION] = true;
+            $curl_options[CURLOPT_COOKIE]        = $this->cookies;
+        }
+
+        return $curl_options;
     }
 
     /**
@@ -137,19 +171,16 @@ class Client
         }
 
         $curl_options = [
-            CURLOPT_HEADER => true,
-            CURLOPT_POST   => true,
-            CURLOPT_NOBODY => true,
-            CURLOPT_URL    => $this->baseurl . '/',
+            CURLOPT_URL => $this->baseurl . '/',
         ];
 
-        curl_setopt_array($ch, $curl_options);
+        curl_setopt_array($ch, array_replace($this->curl_options, $curl_options));
 
         /**
          * execute the cURL request and get the HTTP response code
          */
         curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 
         if (curl_errno($ch)) {
             trigger_error('cURL error: ' . curl_error($ch));
@@ -159,7 +190,6 @@ class Client
          * prepare the actual login
          */
         $curl_options = [
-            CURLOPT_NOBODY     => false,
             CURLOPT_POSTFIELDS => json_encode(['username' => $this->user, 'password' => $this->password]),
             CURLOPT_HTTPHEADER => [
                 'content-type: application/json',
@@ -177,13 +207,13 @@ class Client
             $curl_options[CURLOPT_URL] = $this->baseurl . '/api/auth/login';
         }
 
-        curl_setopt_array($ch, $curl_options);
+        curl_setopt_array($ch, array_replace($this->curl_options, $curl_options));
 
         /**
          * execute the cURL request and get the HTTP response code
          */
         $response  = curl_exec($ch);
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 
         if (curl_errno($ch)) {
             trigger_error('cURL error: ' . curl_error($ch));
@@ -258,7 +288,7 @@ class Client
         $curl_options[CURLOPT_HTTPHEADER] = $this->headers;
         $curl_options[CURLOPT_URL]        = $this->baseurl . $logout_path;
 
-        curl_setopt_array($ch, $curl_options);
+        curl_setopt_array($ch, array_replace($this->curl_options, $curl_options));
 
         /**
          * execute the cURL request to logout
@@ -2951,7 +2981,7 @@ class Client
      *
      * @param  string $name               name for the new account
      * @param  string $x_password         password for the new account
-     * @param  int    $tunnel_type        optional, must be one of the following values:
+     * @param  int    $tunnel_type        must be one of the following values:
      *                                    1      Point-to-Point Tunneling Protocol (PPTP)
      *                                    2      Layer Two Forwarding (L2F)
      *                                    3      Layer Two Tunneling Protocol (L2TP)
@@ -2965,7 +2995,7 @@ class Client
      *                                    11     Bay Dial Virtual Services (DVS)
      *                                    12     IP-in-IP Tunneling
      *                                    13     Virtual LANs (VLAN)
-     * @param  int    $tunnel_medium_type optional, must be one of the following values:
+     * @param  int    $tunnel_medium_type must be one of the following values:
      *                                    1      IPv4 (IP version 4)
      *                                    2      IPv6 (IP version 6)
      *                                    3      NSAP
@@ -3498,6 +3528,26 @@ class Client
     }
 
     /**
+     * Set value for the private property $request_timeout
+     *
+     * @param int $timeout new value for $request_timeout in seconds
+     */
+    public function set_request_timeout($timeout)
+    {
+        $this->request_timeout = $timeout;
+    }
+
+    /**
+     * Get current value of the private property $request_timeout
+     *
+     * @return int current value if $request_timeout
+     */
+    public function get_request_timeout()
+    {
+        return $this->request_timeout;
+    }
+
+    /**
      * Set value for the private property $connect_timeout
      *
      * @param int $timeout new value for $connect_timeout in seconds
@@ -3863,7 +3913,7 @@ class Client
             $curl_options[CURLOPT_HTTPHEADER] = $this->headers;
         }
 
-        curl_setopt_array($ch, $curl_options);
+        curl_setopt_array($ch, array_replace($this->curl_options, $curl_options));
 
         /**
          * execute the cURL request
@@ -3876,7 +3926,7 @@ class Client
         /**
          * fetch the HTTP response code
          */
-        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $http_code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 
         /**
          * an HTTP response code 401 (Unauthorized) indicates the Cookie/Token has expired in which case
@@ -3959,31 +4009,9 @@ class Client
     protected function get_curl_resource()
     {
         $ch = curl_init();
-        if (is_object($ch) || is_resource($ch)) {
-            $curl_options = [
-                CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS | CURLPROTO_HTTP,
-                CURLOPT_SSL_VERIFYPEER => $this->ssl_verify_peer,
-                CURLOPT_SSL_VERIFYHOST => $this->ssl_verify_host,
-                CURLOPT_CONNECTTIMEOUT => $this->connect_timeout,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING       => '',
-                CURLOPT_HEADERFUNCTION => [$this, 'response_header_callback'],
-            ];
+        if ((!is_object($ch) && !is_resource($ch)) || empty($this->curl_options))
+            return false;
 
-            if ($this->debug) {
-                $curl_options[CURLOPT_VERBOSE] = true;
-            }
-
-            if (!empty($this->cookies)) {
-                $curl_options[CURLOPT_COOKIESESSION] = true;
-                $curl_options[CURLOPT_COOKIE]        = $this->cookies;
-            }
-
-            curl_setopt_array($ch, $curl_options);
-
-            return $ch;
-        }
-
-        return false;
+        return $ch;
     }
 }
