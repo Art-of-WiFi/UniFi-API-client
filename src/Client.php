@@ -1369,6 +1369,59 @@ class Client
     }
 
     /**
+     * Create (device) tag (using REST)
+     *
+     * NOTES: this endpoint was introduced with controller versions 5.5.X
+     *
+     * @param string $name required, the tag name to add
+     * @param array $devices_macs optional, array of the MAC addresses of one or multiple devices to tag with the new tag
+     *
+     * @return bool return true on success
+     */
+    public function create_tag($name, array $devices_macs = null)
+    {
+        $payload = ['name' => $name];
+        if ($devices_macs) $payload['member_table'] = $devices_macs;
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/tag', $payload);
+    }
+
+    /**
+     * Set tagged devices (using REST)
+     *
+     * NOTES: this endpoint was introduced with controller versions 5.5.X
+     *
+     * @param array $devices_macs required, array of the MAC addresses of one or multiple devices to tag
+     * @param string $tag_id required, the _id value of the tag to set
+     *
+     * @return bool return true on success
+     */
+    public function set_tagged_devices(array $devices_macs, $tag_id)
+    {
+        $this->request_type = 'PUT';
+
+        $payload = ['member_table' => $devices_macs];
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/tag/' . $tag_id, $payload);
+    }
+
+    /**
+     * Delete (device) tag (using REST)
+     *
+     * NOTES: this endpoint was introduced with controller versions 5.5.X
+     *
+     * @param string $tag_id required, the _id value of the tag to set
+     *
+     * @return bool return true on success
+     */
+    public function delete_tag($tag_id)
+    {
+        $this->request_type = 'DELETE';
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/tag/' . $tag_id);
+    }
+
+    /**
      * Fetch rogue/neighboring access points
      *
      * @param int $within optional, hours to go back to list discovered "rogue" access points (default = 24 hours)
