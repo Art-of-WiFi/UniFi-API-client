@@ -1,32 +1,42 @@
 ## UniFi Controller API client class
 
-A PHP class that provides access to Ubiquiti's [**UniFi Network Controller**](https://unifi-network.ui.com/) API, versions 4.X.X, 5.X.X and 6.0.X of the UniFi Network Controller software are supported (version 6.0.43 has been confirmed to work) as well as UniFi OS-based controllers (version 5.12.59 has been confirmed to work). This class is used by our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+A PHP class that provides access to Ubiquiti's [**UniFi Network Controller**](https://unifi-network.ui.com/) API,
+versions 4.X.X, 5.X.X and 6.X.X of the UniFi Network Controller software are supported (version 6.3.51 has been
+confirmed to work) as well as UniFi OS-based controllers (version 5.12.59 has been confirmed to work). This class is
+used by our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
-The package can be installed manually or by using composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
-
+The package can be installed manually or by using
+composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for easy inclusion in your projects.
 
 ## Requirements
 
-- a server with PHP, version 5.5.0 or higher, and the PHP cURL module installed (tested on Apache 2.4 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.2.24 and cURL 7.58.0)
-- direct network connectivity between this server and the host and port (normally TCP port 8443) where the UniFi Controller is running
+- a server with PHP, version 5.5.0 or higher, and the PHP cURL module installed (tested on Apache 2.4 with PHP Version
+  5.6.1 and cURL 7.42.1 and with PHP 7.2.24 and cURL 7.58.0)
+- direct network connectivity between this server and the host and port (normally TCP port 8443) where the UniFi
+  Controller is running
 - you must use **local accounts**, not UniFi Cloud accounts, to access the UniFi Controller API through this class
-
 
 ## UniFi OS Support
 
-Support for UniFi OS-based controllers (UniFi Dream Machine Pro or Cloud Key Gen2/Cloud Key Gen2 Plus with firmware version 2.0.24 or higher) has been added as of version 1.1.47. The class automatically detects UniFi OS devices and adjusts URLs and several functions/methods accordingly. If your own code applies strict validation of the URL that is passed to the constructor, please adapt your logic to allow URLs without a port suffix when dealing with a UniFi OS-based controller.
+Support for UniFi OS-based controllers (UniFi Dream Machine Pro or Cloud Key Gen2/Cloud Key Gen2 Plus with firmware
+version 2.0.24 or higher) has been added as of version 1.1.47. The class automatically detects UniFi OS devices and
+adjusts URLs and several functions/methods accordingly. If your own code applies strict validation of the URL that is
+passed to the constructor, please adapt your logic to allow URLs without a port suffix when dealing with a UniFi
+OS-based controller.
 
-Please test all methods you plan on using thoroughly before using the API Client with UniFi OS devices in a production environment.
-
+Please test all methods you plan on using thoroughly before using the API Client with UniFi OS devices in a production
+environment.
 
 ## Installation
 
-Use [Composer](#composer), [Git](#git) or simply [Download the Release](#download-the-release) to install the API client class.
-
+Use [Composer](#composer), [Git](#git) or simply [Download the Release](#download-the-release) to install the API client
+class.
 
 ### Composer
 
-The preferred installation method is through [composer](https://getcomposer.org). Follow these [installation instructions](https://getcomposer.org/doc/00-intro.md) if you do not already have composer installed.
+The preferred installation method is through [composer](https://getcomposer.org). Follow
+these [installation instructions](https://getcomposer.org/doc/00-intro.md) if you do not already have composer
+installed.
 
 Once composer is installed, simply execute this command from the shell in your project directory:
 
@@ -34,7 +44,7 @@ Once composer is installed, simply execute this command from the shell in your p
 composer require art-of-wifi/unifi-api-client
 ```
 
- Or manually add the package to your composer.json file:
+Or manually add the package to your composer.json file:
 
 ```javascript
 {
@@ -50,7 +60,6 @@ Finally, be sure to include the autoloader in your code:
 require_once 'vendor/autoload.php';
 ```
 
-
 ### Git
 
 Execute the following `git` command from the shell in your project directory:
@@ -65,15 +74,15 @@ When git is done cloning, include the file containing the class like so in your 
 require_once 'path/to/src/Client.php';
 ```
 
-
 ### Download the Release
 
-If you prefer not to use composer or git, simply [download the package](https://github.com/Art-of-WiFi/UniFi-API-client/archive/master.zip), uncompress the zip file, then include the file containing the class in your code like so:
+If you prefer not to use composer or git,
+simply [download the package](https://github.com/Art-of-WiFi/UniFi-API-client/archive/master.zip), uncompress the zip
+file, then include the file containing the class in your code like so:
 
 ```php
 require_once 'path/to/src/Client.php';
 ```
-
 
 ## Example usage
 
@@ -86,7 +95,7 @@ A basic example how to use the class:
 require_once 'vendor/autoload.php';
 
 /**
- * initialize the Unifi API connection class, log in to the controller and request the alarms collection
+ * initialize the UniFi API connection class, log in to the controller and request the alarms collection
  * (this example assumes you have already assigned the correct values to the variables used)
  */
 $unifi_connection = new UniFi_API\Client($controller_user, $controller_password, $controller_url, $site_id, $controller_version, true);
@@ -94,23 +103,28 @@ $login            = $unifi_connection->login();
 $results          = $unifi_connection->list_alarms(); // returns a PHP array containing alarm objects
 ```
 
-Please refer to the `examples/` directory for some more detailed examples which can be used as a starting point for your own PHP code.
-
+Please refer to the `examples/` directory for some more detailed examples which can be used as a starting point for your
+own PHP code.
 
 #### IMPORTANT NOTES:
 
-1. In the above example, `$site_id` is the short site "name" (usually 8 characters long) that is visible in the URL when managing the site in the UniFi Network Controller. For example with this URL:
+1. In the above example, `$site_id` is the short site "name" (usually 8 characters long) that is visible in the URL when
+   managing the site in the UniFi Network Controller. For example with this URL:
 
    `https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
 
    `jl3z2shm` is the short site "name" and the value to assign to $site_id.
 
-2. The last optional parameter that is passed to the constructor in the above example (`true`), enables validation of the controller's SSL certificate which is otherwise **disabled** by default. It is **highly recommended** to enable this feature in production environments where you have a valid SSL cert installed on the UniFi Controller that is associated with the FQDN in the `controller_url` parameter. This option was added with API client version 1.1.16.
-
+2. The last optional parameter that is passed to the constructor in the above example (`true`), enables validation of
+   the controller's SSL certificate which is otherwise **disabled** by default. It is **highly recommended** to enable
+   this feature in production environments where you have a valid SSL cert installed on the UniFi Controller that is
+   associated with the FQDN in the `controller_url` parameter. This option was added with API client version 1.1.16.
 
 ## Functions/methods supported
 
-The class currently supports the following functions/methods to GET/POST/PUT/DELETE data through the UniFi Controller API. Please refer to the comments in the source code for more details on the functions/methods and their respective parameters.
+The class currently supports the following functions/methods to GET/POST/PUT/DELETE data through the UniFi Controller
+API. Please refer to the comments in the source code for more details on the functions/methods and their respective
+parameters.
 
 - login()
 - logout()
@@ -292,29 +306,31 @@ Other functions, getters/setters:
 - set_ssl_verify_host()
 - set_ssl_verify_peer()
 
-
 ## Need help or have suggestions?
 
-There is still work to be done to add functionality and further improve the usability of this class, so all suggestions/comments are welcome. Please use the GitHub [issue list](https://github.com/Art-of-WiFi/UniFi-API-client/issues) or the Ubiquiti Community forums (https://community.ubnt.com/t5/UniFi-Wireless/PHP-class-to-access-the-UniFi-controller-API-updates-and/td-p/1512870) to share your suggestions and questions.
-
+There is still work to be done to add functionality and further improve the usability of this class, so all
+suggestions/comments are welcome. Please use the
+GitHub [issue list](https://github.com/Art-of-WiFi/UniFi-API-client/issues) or the Ubiquiti Community
+forums (https://community.ubnt.com/t5/UniFi-Wireless/PHP-class-to-access-the-UniFi-controller-API-updates-and/td-p/1512870)
+to share your suggestions and questions.
 
 ## Contribute
 
-If you would like to contribute code (improvements), please open an issue and include your code there or else create a pull request.
-
+If you would like to contribute code (improvements), please open an issue and include your code there or else create a
+pull request.
 
 ## Credits
 
 This class is based on the initial work by the following developers:
 
-- domwo: http://community.ubnt.com/t5/UniFi-Wireless/little-php-class-for-unifi-api/m-p/603051
+- domwo: https://community.ui.com/questions/little-php-class-for-unifi-api/933d3fb3-b401-4499-993a-f9af079a4a3a
 - fbagnol: https://github.com/fbagnol/class.unifi.php
 
 and the API as published by Ubiquiti:
 
-- https://dl.ui.com/unifi/6.0.41/unifi_sh_api
-
+- https://dl.ui.com/unifi/6.2.26/unifi_sh_api
 
 ## Important Disclaimer
 
-Many of the functions in this API client class are not officially supported by UBNT and as such, may not be supported in future versions of the UniFi Controller API.
+Many of the functions in this API client class are not officially supported by Ubiquiti and as such, may not be
+supported in future versions of the UniFi Controller API.

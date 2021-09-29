@@ -11,3 +11,6 @@
 
 # ignore XML files
 *.xml
+
+# ignore PHPStorm files
+.idea/*

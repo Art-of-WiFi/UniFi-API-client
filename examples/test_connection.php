@@ -15,8 +15,9 @@ require_once 'config.php';
 
 /**
  * Check whether the cURL module supports SSL
+ * http://www.php.net/manual/en/function.curl-version.php
  */
-if (!curl_version()['features'] & CURL_VERSION_SSL) {
+if (!(curl_version()['features'] & CURL_VERSION_SSL)) {
     print PHP_EOL . 'SSL is not supported with this cURL installation!' . PHP_EOL;
 }
 
@@ -25,9 +26,9 @@ if (!curl_version()['features'] & CURL_VERSION_SSL) {
  */
 $ch = curl_init();
 
-if (is_resource($ch)) {
+if (is_resource($ch) || is_object($ch)) {
     /**
-     * If we have a resource, we proceed and set the required cURL options
+     * If we have a resource or object (for PHP > 8.0), we proceed and set the required cURL options
      */
     curl_setopt($ch, CURLOPT_URL, $controllerurl);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
@@ -64,9 +65,13 @@ if (is_resource($ch)) {
         print PHP_EOL . 'cURL error: ' . curl_error($ch) . PHP_EOL;
     }
 
-    print PHP_EOL . '$results:' . PHP_EOL;
-    print_r($results);
-    print PHP_EOL;
+    print PHP_EOL . 'test result:' . PHP_EOL;
+    if ($results) {
+        print 'Controller connection success' . PHP_EOL;
+        die;
+    }
+
+    print 'Controller connection failed' . PHP_EOL;
 } else {
     print PHP_EOL . 'ERROR: cURL could not be initialized!' . PHP_EOL;
 }
