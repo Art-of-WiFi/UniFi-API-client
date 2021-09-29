@@ -3,19 +3,19 @@
  * PHP API usage example
  *
  * contributed by: @gahujipo
- * description: example to pull connected users and their details from the UniFi controller and output the results
- *              in JSON format
+ * description:    example to pull connected users and their details from the UniFi controller and output the results
+ *                 in JSON format
  */
 /**
  * using the composer autoloader
  */
-require_once('vendor/autoload.php');
+require_once 'vendor/autoload.php';
 
 /**
  * include the config file (place your credentials etc there if not already present)
  * see the config.template.php file for an example
  */
-require_once('config.php');
+require_once 'config.php';
 
 /**
  * the short name of the site which you wish to query

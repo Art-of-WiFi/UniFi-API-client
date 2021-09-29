@@ -3,19 +3,19 @@
  * PHP API usage example
  *
  * contributed by: Art of WiFi
- * description: example basic PHP script to pull stats for s epcific user/client device from the UniFi controller and output in json format
+ * description:    example basic PHP script to pull stats for s epcific user/client device from the UniFi controller and output in json format
  */
 
 /**
  * using the composer autoloader
  */
-require_once('vendor/autoload.php');
+require_once 'vendor/autoload.php';
 
 /**
  * include the config file (place your credentials etc. there if not already present)
  * see the config.template.php file for an example
  */
-require_once('config.php');
+require_once 'config.php';
 
 /**
  * the site to use

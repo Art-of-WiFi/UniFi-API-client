@@ -3,21 +3,21 @@
  * PHP API usage example
  *
  * contributed by: Art of WiFi
- * description: example basic PHP script to update the port settings of an AC-IW device
- *              FYI: the AC-IW device has three ports, one for the wired uplink and two with external connectors
- * note: requires controller version 5.5.X or higher (to be verified)
+ * description:    example basic PHP script to update the port settings of an AC-IW device
+ *                 FYI: the AC-IW device has three ports, one for the wired uplink and two with external connectors
+ * note:           requires controller version 5.5.X or higher (to be verified)
  */
 
 /**
  * using the composer autoloader
  */
-require_once('vendor/autoload.php');
+require_once 'vendor/autoload.php';
 
 /**
  * include the config file (place your credentials etc. there if not already present)
  * see the config.template.php file for an example
  */
-require_once('config.php');
+require_once 'config.php';
 
 /**
  * the site to use to log in to the controller

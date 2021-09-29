@@ -12,7 +12,7 @@ require 'vendor/autoload.php';
  * include the config file (place your credentials etc. there if not already present)
  * see the config.template.php file for an example
  */
-require_once('config.php');
+require_once 'config.php';
 
 /**
  * the site to use
@@ -55,6 +55,9 @@ $loginresults     = $unifi_connection->login();
 if ($loginresults) {
     $pdu_details = $unifi_connection->list_devices($pdu_mac);
 
+    /**
+     * change the model below from USPPDUP to UP1 when using a USP-Plug (thanks to @thesohoguy for contributing this)
+     */
     if (!empty($pdu_details) && property_exists($pdu_details[0], 'model') && $pdu_details[0]->model === 'USPPDUP' && property_exists($pdu_details[0], 'outlet_overrides')) {
         $device_id        = $pdu_details[0]->_id;
         $outlet_overrides = $pdu_details[0]->outlet_overrides;
