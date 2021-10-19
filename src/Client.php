@@ -22,26 +22,31 @@ class Client
 {
     /**
      * private and protected properties
+     *
+     * NOTE:
+     * do not modify the values here, instead user the constructor or the getter and setter functions/methods
      */
-    private   $class_version      = '1.1.71';
-    protected $baseurl            = 'https://127.0.0.1:8443';
-    protected $user               = '';
-    protected $password           = '';
-    protected $site               = 'default';
-    protected $version            = '6.0.43';
-    protected $debug              = false;
-    protected $ssl_verify_peer    = false;
-    protected $ssl_verify_host    = false;
-    protected $is_loggedin        = false;
-    protected $is_unifi_os        = false;
-    protected $exec_retries       = 0;
-    protected $cookies            = '';
-    protected $headers            = [];
-    protected $method             = 'GET';
-    protected $methods_allowed    = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
-    protected $connect_timeout    = 10;
-    protected $last_results_raw   = null;
-    protected $last_error_message = null;
+    const CLASS_VERSION             = '1.1.72';
+    protected $baseurl              = 'https://127.0.0.1:8443';
+    protected $user                 = '';
+    protected $password             = '';
+    protected $site                 = 'default';
+    protected $version              = '6.2.26';
+    protected $debug                = false;
+    protected $is_loggedin          = false;
+    protected $is_unifi_os          = false;
+    protected $exec_retries         = 0;
+    protected $cookies              = '';
+    protected $last_results_raw     = null;
+    protected $last_error_message   = null;
+    protected $curl_ssl_verify_peer = false;
+    protected $curl_ssl_verify_host = false;
+    protected $curl_http_version    = CURL_HTTP_VERSION_1_1;
+    protected $curl_headers         = [];
+    protected $curl_method          = 'GET';
+    protected $curl_methods_allowed = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    protected $curl_request_timeout = 30;
+    protected $curl_connect_timeout = 10;
 
     /**
      * Construct an instance of the UniFi API client class
@@ -81,8 +86,8 @@ class Client
         }
 
         if ((boolean)$ssl_verify === true) {
-            $this->ssl_verify_peer = true;
-            $this->ssl_verify_host = 2;
+            $this->curl_ssl_verify_peer = true;
+            $this->curl_ssl_verify_host = 2;
         }
     }
 
@@ -112,7 +117,7 @@ class Client
     /**
      * Login to the UniFi controller
      *
-     * @return bool returns true upon success
+     * @return bool|int returns true upon success, false or HTTP status upon error
      */
     public function login()
     {
@@ -129,8 +134,7 @@ class Client
         }
 
         /**
-         * check whether this is a "regular" controller or one based on UniFi OS,
-         * prepare cURL and options
+         * prepare cURL and options to check whether this is a "regular" controller or one based on UniFi OS
          */
         if (!($ch = $this->get_curl_handle())) {
             return false;
@@ -241,9 +245,9 @@ class Client
         ];
 
         /**
-         * constuct HTTP request headers as required
+         * construct the HTTP request headers as required
          */
-        $this->headers = [
+        $this->curl_headers = [
             'content-length: 0',
             'Expect:',
         ];
@@ -256,7 +260,7 @@ class Client
             $this->create_x_csrf_token_header();
         }
 
-        $curl_options[CURLOPT_HTTPHEADER] = $this->headers;
+        $curl_options[CURLOPT_HTTPHEADER] = $this->curl_headers;
         $curl_options[CURLOPT_URL]        = $this->baseurl . $logout_path;
 
         curl_setopt_array($ch, $curl_options);
@@ -1078,8 +1082,8 @@ class Client
             return false;
         }
 
-        $this->method = 'PUT';
-        $payload      = [
+        $this->curl_method = 'PUT';
+        $payload           = [
             '_id'         => $client_id,
             'use_fixedip' => $use_fixedip,
         ];
@@ -1138,8 +1142,8 @@ class Client
      */
     public function edit_usergroup($group_id, $site_id, $group_name, $group_dn = -1, $group_up = -1)
     {
-        $this->method = 'PUT';
-        $payload      = [
+        $this->curl_method = 'PUT';
+        $payload           = [
             '_id'               => $group_id,
             'name'              => $group_name,
             'qos_rate_max_down' => intval($group_dn),
@@ -1157,7 +1161,7 @@ class Client
      */
     public function delete_usergroup($group_id)
     {
-        $this->method = 'DELETE';
+        $this->curl_method = 'DELETE';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/usergroup/' . trim($group_id));
     }
 
@@ -1196,8 +1200,8 @@ class Client
      */
     public function edit_apgroup($group_id, $group_name, $device_macs)
     {
-        $this->method = 'PUT';
-        $payload      = [
+        $this->curl_method = 'PUT';
+        $payload           = [
             '_id'            => $group_id,
             'attr_no_delete' => false,
             'name'           => $group_name,
@@ -1214,7 +1218,7 @@ class Client
      */
     public function delete_apgroup($group_id)
     {
-        $this->method = 'DELETE';
+        $this->curl_method = 'DELETE';
         return $this->fetch_results_boolean('/v2/api/site/' . $this->site . '/apgroups/' . trim($group_id));
     }
 
@@ -1268,8 +1272,8 @@ class Client
             return false;
         }
 
-        $this->method = 'PUT';
-        $payload      = [
+        $this->curl_method = 'PUT';
+        $payload           = [
             '_id'           => $group_id,
             'name'          => $group_name,
             'group_type'    => $group_type,
@@ -1287,7 +1291,7 @@ class Client
      */
     public function delete_firewallgroup($group_id)
     {
-        $this->method = 'DELETE';
+        $this->curl_method = 'DELETE';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id));
     }
 
@@ -1489,7 +1493,7 @@ class Client
      */
     public function set_site_country($country_id, $payload)
     {
-        $this->method = 'PUT';
+        $this->curl_method = 'PUT';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/country/' . trim($country_id),
             $payload);
     }
@@ -1509,7 +1513,7 @@ class Client
      */
     public function set_site_locale($locale_id, $payload)
     {
-        $this->method = 'PUT';
+        $this->curl_method = 'PUT';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/locale/' . trim($locale_id),
             $payload);
     }
@@ -1526,7 +1530,7 @@ class Client
      */
     public function set_site_snmp($snmp_id, $payload)
     {
-        $this->method = 'PUT';
+        $this->curl_method = 'PUT';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/snmp/' . trim($snmp_id), $payload);
     }
 
@@ -1542,7 +1546,7 @@ class Client
      */
     public function set_site_mgmt($mgmt_id, $payload)
     {
-        $this->method = 'PUT';
+        $this->curl_method = 'PUT';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/mgmt/' . trim($mgmt_id), $payload);
     }
 
@@ -1559,7 +1563,7 @@ class Client
      */
     public function set_site_guest_access($guest_access_id, $payload)
     {
-        $this->method = 'PUT';
+        $this->curl_method = 'PUT';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/guest_access/' . trim($guest_access_id),
             $payload);
     }
@@ -1576,7 +1580,7 @@ class Client
      */
     public function set_site_ntp($ntp_id, $payload)
     {
-        $this->method = 'PUT';
+        $this->curl_method = 'PUT';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/ntp/' . trim($ntp_id), $payload);
     }
 
@@ -1593,7 +1597,7 @@ class Client
      */
     public function set_site_connectivity($connectivity_id, $payload)
     {
-        $this->method = 'PUT';
+        $this->curl_method = 'PUT';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/connectivity/' . trim($connectivity_id),
             $payload);
     }
@@ -2144,8 +2148,8 @@ class Client
             return false;
         }
 
-        $this->method = 'PUT';
-        $payload      = ['disabled' => $disable];
+        $this->curl_method = 'PUT';
+        $payload           = ['disabled' => $disable];
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/device/' . trim($ap_id), $payload);
     }
 
@@ -2167,8 +2171,8 @@ class Client
             return false;
         }
 
-        $this->method = 'PUT';
-        $payload      = ['led_override' => $override_mode];
+        $this->curl_method = 'PUT';
+        $payload           = ['led_override' => $override_mode];
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/device/' . trim($device_id), $payload);
     }
 
@@ -2453,7 +2457,7 @@ class Client
      */
     public function set_dynamicdns($dynamicdns_id, $payload)
     {
-        $this->method = 'PUT';
+        $this->curl_method = 'PUT';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/dynamicdns/' . trim($dynamicdns_id),
             $payload);
     }
@@ -2494,7 +2498,7 @@ class Client
      */
     public function set_networksettings_base($network_id, $payload)
     {
-        $this->method = 'PUT';
+        $this->curl_method = 'PUT';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id),
             $payload);
     }
@@ -2507,7 +2511,7 @@ class Client
      */
     public function delete_network($network_id)
     {
-        $this->method = 'DELETE';
+        $this->curl_method = 'DELETE';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id));
     }
 
@@ -2607,7 +2611,7 @@ class Client
      */
     public function set_wlansettings_base($wlan_id, $payload)
     {
-        $this->method = 'PUT';
+        $this->curl_method = 'PUT';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id), $payload);
     }
 
@@ -2658,7 +2662,7 @@ class Client
      */
     public function delete_wlan($wlan_id)
     {
-        $this->method = 'DELETE';
+        $this->curl_method = 'DELETE';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id));
     }
 
@@ -2914,7 +2918,7 @@ class Client
      */
     public function set_device_settings_base($device_id, $payload)
     {
-        $this->method = 'PUT';
+        $this->curl_method = 'PUT';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/device/' . trim($device_id), $payload);
     }
 
@@ -3027,7 +3031,7 @@ class Client
      */
     public function set_radius_account_base($account_id, $payload)
     {
-        $this->method = 'PUT';
+        $this->curl_method = 'PUT';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/account/' . trim($account_id), $payload);
     }
 
@@ -3042,7 +3046,7 @@ class Client
      */
     public function delete_radius_account($account_id)
     {
-        $this->method = 'DELETE';
+        $this->curl_method = 'DELETE';
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/account/' . trim($account_id));
     }
 
@@ -3123,7 +3127,7 @@ class Client
      */
     public function custom_api_request($path, $method = 'GET', $payload = null, $return = 'array')
     {
-        if (!in_array($method, $this->methods_allowed)) {
+        if (!in_array($method, $this->curl_methods_allowed)) {
             return false;
         }
 
@@ -3131,7 +3135,7 @@ class Client
             return false;
         }
 
-        $this->method = $method;
+        $this->curl_method = $method;
 
         if ($return === 'array') {
             return $this->fetch_results($path, $payload);
@@ -3369,7 +3373,7 @@ class Client
      */
     public function get_class_version()
     {
-        return $this->class_version;
+        return self::CLASS_VERSION;
     }
 
     /**
@@ -3387,25 +3391,25 @@ class Client
      *
      * @return string request type
      */
-    public function get_method()
+    public function get_curl_method()
     {
-        return $this->method;
+        return $this->curl_method;
     }
 
     /**
      * Set request method
      *
-     * @param string $method a valid HTTP request method
+     * @param string $curl_method a valid HTTP request method
      * @return bool whether request was successful or not
      */
-    public function set_method($method)
+    public function set_curl_method($curl_method)
     {
 
-        if (!in_array($method, $this->methods_allowed)) {
+        if (!in_array($curl_method, $this->curl_methods_allowed)) {
             return false;
         }
 
-        $this->method = $method;
+        $this->curl_method = $curl_method;
 
         return true;
     }
@@ -3417,9 +3421,9 @@ class Client
      *
      * @return bool value of private property $ssl_verify_peer (cURL option CURLOPT_SSL_VERIFYPEER)
      */
-    public function get_ssl_verify_peer()
+    public function get_curl_ssl_verify_peer()
     {
-        return $this->ssl_verify_peer;
+        return $this->curl_ssl_verify_peer;
     }
 
     /**
@@ -3427,15 +3431,15 @@ class Client
      *
      * https://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYPEER.html
      *
-     * @param int|bool $ssl_verify_peer should be 0/false or 1/true
+     * @param int|bool $curl_ssl_verify_peer should be 0/false or 1/true
      */
-    public function set_ssl_verify_peer($ssl_verify_peer)
+    public function set_curl_ssl_verify_peer($curl_ssl_verify_peer)
     {
-        if (!in_array($ssl_verify_peer, [0, false, 1, true])) {
+        if (!in_array($curl_ssl_verify_peer, [0, false, 1, true])) {
             return false;
         }
 
-        $this->ssl_verify_peer = $ssl_verify_peer;
+        $this->curl_ssl_verify_peer = $curl_ssl_verify_peer;
 
         return true;
     }
@@ -3447,9 +3451,9 @@ class Client
      *
      * @return bool value of private property $ssl_verify_peer (cURL option CURLOPT_SSL_VERIFYHOST)
      */
-    public function get_ssl_verify_host()
+    public function get_curl_ssl_verify_host()
     {
-        return $this->ssl_verify_host;
+        return $this->curl_ssl_verify_host;
     }
 
     /**
@@ -3457,15 +3461,15 @@ class Client
      *
      * https://curl.haxx.se/libcurl/c/CURLOPT_SSL_VERIFYHOST.html
      *
-     * @param int|bool $ssl_verify_host should be 0/false or 2
+     * @param int|bool $curl_ssl_verify_host should be 0/false or 2
      */
-    public function set_ssl_verify_host($ssl_verify_host)
+    public function set_curl_ssl_verify_host($curl_ssl_verify_host)
     {
-        if (!in_array($ssl_verify_host, [0, false, 2])) {
+        if (!in_array($curl_ssl_verify_host, [0, false, 2])) {
             return false;
         }
 
-        $this->ssl_verify_host = $ssl_verify_host;
+        $this->curl_ssl_verify_host = $curl_ssl_verify_host;
 
         return true;
     }
@@ -3504,17 +3508,64 @@ class Client
      */
     public function set_connection_timeout($timeout)
     {
-        $this->connect_timeout = $timeout;
+        $this->curl_connect_timeout = $timeout;
     }
 
     /**
      * Get current value of the private property $connect_timeout
      *
-     * @return int current value if $connect_timeout
+     * @return int current value of $connect_timeout
      */
     public function get_connection_timeout()
     {
-        return $this->connect_timeout;
+        return $this->curl_connect_timeout;
+    }
+
+    /**
+     * Set value for the private property $request_timeout
+     *
+     * @param int $timeout new value for $request_timeout in seconds
+     */
+    public function set_curl_request_timeout($timeout)
+    {
+        $this->curl_request_timeout = $timeout;
+    }
+
+    /**
+     * Get current value of the private property $request_timeout
+     *
+     * @return int current value of $request_timeout
+     */
+    public function get_curl_request_timeout()
+    {
+        return $this->curl_request_timeout;
+    }
+
+    /**
+     * Set value for the private property $curl_http_version
+     *
+     * NOTES:
+     * - as of cURL version 7.62.0 the default value is CURL_HTTP_VERSION_2TLS which may cause issues
+     * - the default value used in this class is CURL_HTTP_VERSION_1_1
+     * - https://curl.se/libcurl/c/CURLOPT_HTTP_VERSION.html
+     *
+     * @param int $http_version new value for $curl_http_version, can be CURL_HTTP_VERSION_1_1 int(2)
+     *                          or CURL_HTTP_VERSION_2TLS int(4)
+     */
+    public function set_curl_http_version($http_version)
+    {
+        $this->curl_http_version = $http_version;
+    }
+
+    /**
+     * Get current value of the private property $curl_http_version
+     *
+     * @return int current value of $request_timeout, can be CURL_HTTP_VERSION_1_1 int(2) or
+     *             CURL_HTTP_VERSION_2TLS int(4)
+     */
+    public function get_curl_http_version()
+    {
+        return $this->curl_http_version;
     }
 
     /****************************************************************
@@ -3746,7 +3797,7 @@ class Client
                 return;
             }
 
-            $this->headers[] = 'x-csrf-token: ' . json_decode(base64_decode($jwt_components[1]))->csrfToken;
+            $this->curl_headers[] = 'x-csrf-token: ' . json_decode(base64_decode($jwt_components[1]))->csrfToken;
         }
     }
 
@@ -3796,8 +3847,8 @@ class Client
      */
     protected function exec_curl($path, $payload = null)
     {
-        if (!in_array($this->method, $this->methods_allowed)) {
-            trigger_error('an invalid HTTP request type was used: ' . $this->method);
+        if (!in_array($this->curl_method, $this->curl_methods_allowed)) {
+            trigger_error('an invalid HTTP request type was used: ' . $this->curl_method);
             return false;
         }
 
@@ -3806,8 +3857,8 @@ class Client
             return false;
         }
 
-        $this->headers = [];
-        $url           = $this->baseurl . $path;
+        $this->curl_headers = [];
+        $url                = $this->baseurl . $path;
 
         if ($this->is_unifi_os) {
             $url = $this->baseurl . '/proxy/network' . $path;
@@ -3828,7 +3879,7 @@ class Client
             /**
              * add empty Expect header to prevent cURL from injecting an "Expect: 100-continue" header
              */
-            $this->headers = [
+            $this->curl_headers = [
                 'content-type: application/json',
                 'Expect:',
             ];
@@ -3837,12 +3888,12 @@ class Client
              * should not use GET (the default request type) or DELETE when passing a payload,
              * switch to POST instead
              */
-            if ($this->method === 'GET' || $this->method === 'DELETE') {
-                $this->method = 'POST';
+            if ($this->curl_method === 'GET' || $this->curl_method === 'DELETE') {
+                $this->curl_method = 'POST';
             }
         }
 
-        switch ($this->method) {
+        switch ($this->curl_method) {
             case 'POST':
                 $curl_options[CURLOPT_POST] = true;
                 break;
@@ -3857,12 +3908,12 @@ class Client
                 break;
         }
 
-        if ($this->is_unifi_os && $this->method !== 'GET') {
+        if ($this->is_unifi_os && $this->curl_method !== 'GET') {
             $this->create_x_csrf_token_header();
         }
 
-        if (count($this->headers) > 0) {
-            $curl_options[CURLOPT_HTTPHEADER] = $this->headers;
+        if (count($this->curl_headers) > 0) {
+            $curl_options[CURLOPT_HTTPHEADER] = $this->curl_headers;
         }
 
         curl_setopt_array($ch, $curl_options);
@@ -3948,7 +3999,7 @@ class Client
         /**
          * set method back to default value, just in case
          */
-        $this->method = 'GET';
+        $this->curl_method = 'GET';
         return $response;
     }
 
@@ -3963,9 +4014,11 @@ class Client
         if (is_object($ch) || is_resource($ch)) {
             $curl_options = [
                 CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS,
-                CURLOPT_SSL_VERIFYPEER => $this->ssl_verify_peer,
-                CURLOPT_SSL_VERIFYHOST => $this->ssl_verify_host,
-                CURLOPT_CONNECTTIMEOUT => $this->connect_timeout,
+                CURLOPT_HTTP_VERSION   => $this->curl_http_version,
+                CURLOPT_SSL_VERIFYPEER => $this->curl_ssl_verify_peer,
+                CURLOPT_SSL_VERIFYHOST => $this->curl_ssl_verify_host,
+                CURLOPT_CONNECTTIMEOUT => $this->curl_connect_timeout,
+                CURLOPT_TIMEOUT        => $this->curl_request_timeout,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_ENCODING       => '',
                 CURLOPT_HEADERFUNCTION => [$this, 'response_header_callback'],
