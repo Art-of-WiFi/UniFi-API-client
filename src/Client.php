@@ -1102,6 +1102,28 @@ class Client
     }
 
     /**
+     * Update client name (using REST)
+     *
+     * @param string $client_id   _id value for the client
+     * @param bool   $name of the client
+     * @return array|false returns an array containing a single object with attributes of the updated client on success
+     */
+    public function edit_client_name($client_id, $name)
+    {
+        if (empty($name)) {
+            return false;
+        }
+
+        $this->curl_method = 'PUT';
+        $payload           = [
+            '_id'         => $client_id,
+            'name'        => $name,
+        ];
+
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/user/' . trim($client_id), $payload);
+    }
+
+    /**
      * Fetch user groups
      *
      * @return array returns an array of user group objects
