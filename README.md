@@ -170,6 +170,7 @@ more details on the functions/methods and their respective parameters.
 - disable_ap()
 - edit_apgroup() (supported with controller versions 6.0.X and higher)
 - edit_client_fixedip()
+- edit_client_name()
 - edit_firewallgroup()
 - edit_usergroup()
 - extend_guest_validity()
