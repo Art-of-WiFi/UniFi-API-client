@@ -1009,7 +1009,7 @@ class Client
      * @param bool $showconfigured optional, if enabled, fetch all configured clients, then <historyhours> is ignored
      * @return array returns an array of client device objects
      */
-    public function stat_allusers($historyhours = 8760)
+    public function stat_allusers($historyhours = 8760, $showconfigured = null)
     {
         $payload = ['type' => 'all', 'conn' => 'all'];
         if (!isset($showconfigured))
