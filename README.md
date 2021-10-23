@@ -184,6 +184,7 @@ more details on each of the functions/methods and their respective parameters.
 - list_aps() (deprecated but still available as alias)
 - list_backups()
 - list_clients()
+- list_configured_clients()
 - list_country_codes()
 - list_current_channels()
 - list_dashboard()
