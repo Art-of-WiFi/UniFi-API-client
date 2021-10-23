@@ -1050,7 +1050,7 @@ class Client
      */
     public function list_configured_clients()
     {
-        return $this->fetch_results('/api/s/' . $this->site . '/stat/alluser', $payload);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/alluser');
     }
 
     /**
