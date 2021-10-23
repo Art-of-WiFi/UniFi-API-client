@@ -1044,6 +1044,16 @@ class Client
     }
 
     /**
+     * Search for client devices that are configured
+     *
+     * @return array returns an array of client device objects
+     */
+    public function list_configured_clients()
+    {
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/alluser', $payload);
+    }
+
+    /**
      * Fetch details for a single client device
      *
      * @param string $client_mac optional, client device MAC address
