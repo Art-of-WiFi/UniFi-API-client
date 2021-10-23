@@ -1006,11 +1006,15 @@ class Client
      *   the returned stats per client are all-time totals, irrespective of the value of <historyhours>
      *
      * @param int $historyhours optional, hours to go back (default is 8760 hours or 1 year)
+     * @param bool $showconfigured optional, if enabled, fetch all configured clients, then <historyhours> is ignored
      * @return array returns an array of client device objects
      */
     public function stat_allusers($historyhours = 8760)
     {
-        $payload = ['type' => 'all', 'conn' => 'all', 'within' => intval($historyhours)];
+        $payload = ['type' => 'all', 'conn' => 'all'];
+        if (!isset($showconfigured))
+            $payload['within'] = intval($historyhours);
+        
         return $this->fetch_results('/api/s/' . $this->site . '/stat/alluser', $payload);
     }
 
@@ -1041,16 +1045,6 @@ class Client
     public function list_clients($client_mac = null)
     {
         return $this->fetch_results('/api/s/' . $this->site . '/stat/sta/' . strtolower(trim($client_mac)));
-    }
-
-    /**
-     * Search for client devices that are configured
-     *
-     * @return array returns an array of client device objects
-     */
-    public function list_configured_clients()
-    {
-        return $this->fetch_results('/api/s/' . $this->site . '/stat/alluser');
     }
 
     /**
