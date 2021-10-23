@@ -24,7 +24,7 @@ class Client
      * private and protected properties
      *
      * NOTE:
-     * do not modify the values here, instead user the constructor or the getter and setter functions/methods
+     * do not modify the values here, instead use the constructor or the getter and setter functions/methods
      */
     const CLASS_VERSION             = '1.1.73';
     protected $baseurl              = 'https://127.0.0.1:8443';
@@ -60,7 +60,7 @@ class Client
      * @param string $version    optional, the version number of the controller
      * @param bool   $ssl_verify optional, whether to validate the controller's SSL certificate or not, a value of true
      *                           is recommended for production environments to prevent potential MitM attacks, default
-     *                           value (false) disables validation of the controller certificate
+     *                           value (false) disables validation of the controller's SSL certificate
      */
     public function __construct($user, $password, $baseurl = '', $site = '', $version = '', $ssl_verify = false)
     {
@@ -1057,23 +1057,23 @@ class Client
     /**
      * Assign client device to another group
      *
-     * @param string $user_id  id of the user device to be modified
-     * @param string $group_id id of the user group to assign user to
+     * @param string $client_id  _id value of the client device to be modified
+     * @param string $group_id   _id value of the user group to assign client device to
      * @return bool returns true upon success
      */
-    public function set_usergroup($user_id, $group_id)
+    public function set_usergroup($client_id, $group_id)
     {
         $payload = ['usergroup_id' => $group_id];
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/upd/user/' . trim($client_id), $payload);
     }
 
     /**
-     * Update client fixedip (using REST)
+     * Update client device fixed IP address (using REST)
      *
-     * @param string $client_id   _id value for the client
-     * @param bool   $use_fixedip determines whether use_fixedip is true or false
+     * @param string $client_id   _id value for the client device
+     * @param bool   $use_fixedip determines whether to enable the fixed IP address or not
      * @param string $network_id  optional, _id value for the network where the ip belongs to
-     * @param string $fixed_ip    optional, IP address, value of client's fixed_ip field
+     * @param string $fixed_ip    optional, IP address, value of client device's fixed_ip field
      * @return array|false returns an array containing a single object with attributes of the updated client on success
      */
     public function edit_client_fixedip($client_id, $use_fixedip, $network_id = null, $fixed_ip = null)
@@ -1102,10 +1102,10 @@ class Client
     }
 
     /**
-     * Update client name (using REST)
+     * Update client device name (using REST)
      *
-     * @param string $client_id   _id value for the client
-     * @param bool   $name of the client
+     * @param string $client_id  _id value for the client device
+     * @param string $name       name of the client
      * @return array|false returns an array containing a single object with attributes of the updated client on success
      */
     public function edit_client_name($client_id, $name)
@@ -1116,8 +1116,8 @@ class Client
 
         $this->curl_method = 'PUT';
         $payload           = [
-            '_id'         => $client_id,
-            'name'        => $name,
+            '_id'  => $client_id,
+            'name' => $name,
         ];
 
         return $this->fetch_results('/api/s/' . $this->site . '/rest/user/' . trim($client_id), $payload);
@@ -1825,7 +1825,7 @@ class Client
     /**
      * Fetch self
      *
-     * @return array containing information about the logged in user
+     * @return array containing information about the logged-in user
      */
     public function list_self()
     {
@@ -3948,7 +3948,7 @@ class Client
         }
 
         /**
-         * fetch the HTTP response code
+         * get the HTTP response code
          */
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
@@ -4027,7 +4027,7 @@ class Client
     /**
      * Create and return a new cURL handle
      *
-     * @return object|bool|resource cURL handle (object or resource) upon success, false upon failure
+     * @return object|resource|bool cURL handle (object or resource) upon success, false upon failure
      */
     protected function get_curl_handle()
     {

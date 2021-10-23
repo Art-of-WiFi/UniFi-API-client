@@ -133,7 +133,7 @@ own PHP code.
 
 The class currently supports the following functions/methods to GET/POST/PUT/DELETE data
 through the UniFi Controller API. Please refer to the comments in the source code for
-more details on the functions/methods and their respective parameters.
+more details on each of the functions/methods and their respective parameters.
 
 - login()
 - logout()

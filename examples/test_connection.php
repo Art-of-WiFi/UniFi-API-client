@@ -29,24 +29,25 @@ $ch = curl_init();
 if (is_resource($ch) || is_object($ch)) {
     /**
      * If we have a resource or object (for PHP > 8.0), we proceed and set the required cURL options
-     */
-    curl_setopt($ch, CURLOPT_URL, $controllerurl);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-
-    /**
-     * This cURL option can have a value of 0-6
+     *
+     * NOTES:
+     * The cURL option CURLOPT_SSLVERSION can have a value of 0-6
      * see this URL for more details:
      * http://php.net/manual/en/function.curl-setopt.php
      * 0 is the default value and is used by the PHP API client class
      */
-    curl_setopt($ch, CURLOPT_SSLVERSION, 0);
+    $curl_options = [
+        CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS,
+        CURLOPT_URL            => $controllerurl,
+        CURLOPT_CUSTOMREQUEST  => 'GET',
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_VERBOSE        => true,
+        CURLOPT_SSLVERSION     => 0,
+        CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+    ];
 
-    /**
-     * Be more verbose
-     */
-    curl_setopt($ch, CURLOPT_VERBOSE, true);
+    curl_setopt_array($ch, $curl_options);
 
     /**
      * $results contains the output as returned by the cURL request,
