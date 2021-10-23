@@ -26,7 +26,7 @@ class Client
      * NOTE:
      * do not modify the values here, instead user the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION             = '1.1.72';
+    const CLASS_VERSION             = '1.1.73';
     protected $baseurl              = 'https://127.0.0.1:8443';
     protected $user                 = '';
     protected $password             = '';
@@ -85,7 +85,7 @@ class Client
             $this->version = trim($version);
         }
 
-        if ((boolean)$ssl_verify === true) {
+        if ((bool) $ssl_verify === true) {
             $this->curl_ssl_verify_peer = true;
             $this->curl_ssl_verify_host = 2;
         }
@@ -1740,7 +1740,7 @@ class Client
     }
 
     /**
-     * Fetch wlan_groups
+     * Fetch WLAN groups
      *
      * @return array containing known wlan_groups
      */
@@ -1973,7 +1973,7 @@ class Client
 
         $payload = ['type' => $type];
 
-        if (is_array($cat_filter) && $type == 'by_app') {
+        if (is_array($cat_filter) && $type === 'by_app') {
             $payload['cats'] = $cat_filter;
         }
 
@@ -2528,7 +2528,7 @@ class Client
     }
 
     /**
-     * Create a wlan
+     * Create a WLAN
      *
      * @param string  $name             SSID
      * @param string  $x_passphrase     new pre-shared key, minimal length is 8 characters, maximum length is 63,
@@ -2541,8 +2541,9 @@ class Client
      * @param string  $security         optional, security type (open, wep, wpapsk, wpaeap)
      * @param string  $wpa_mode         optional, wpa mode (wpa, wpa2, ..)
      * @param string  $wpa_enc          optional, encryption (auto, ccmp)
-     * @param boolean $vlan_enabled     optional, enable/disable vlan for this wlan
-     * @param int     $vlan             optional, vlan id
+     * @param boolean $vlan_enabled     optional, enable/disable VLAN for this wlan (is ignored as of 1.1.73)
+     * @param string  $vlan_id          optional, "_id" value  of the VLAN to assign to this WLAN, can be found using
+     *                                  list_networkconf()
      * @param boolean $uapsd_enabled    optional, enable/disable Unscheduled Automatic Power Save Delivery
      * @param boolean $schedule_enabled optional, enable/disable wlan schedule
      * @param array   $schedule         optional, schedule rules
@@ -2561,35 +2562,34 @@ class Client
         $security = 'open',
         $wpa_mode = 'wpa2',
         $wpa_enc = 'ccmp',
-        $vlan_enabled = false,
-        $vlan = null,
+        $vlan_enabled = null,
+        $vlan_id = null,
         $uapsd_enabled = false,
         $schedule_enabled = false,
         $schedule = [],
         $ap_group_ids = null
     ) {
         $payload = [
-            'name'             => $name,
-            'usergroup_id'     => $usergroup_id,
-            'wlangroup_id'     => $wlangroup_id,
+            'name'             => trim($name),
+            'usergroup_id'     => trim($usergroup_id),
+            'wlangroup_id'     => trim($wlangroup_id),
             'enabled'          => $enabled,
             'hide_ssid'        => $hide_ssid,
             'is_guest'         => $is_guest,
-            'security'         => $security,
-            'wpa_mode'         => $wpa_mode,
-            'wpa_enc'          => $wpa_enc,
-            'vlan_enabled'     => $vlan_enabled,
+            'security'         => trim($security),
+            'wpa_mode'         => trim($wpa_mode),
+            'wpa_enc'          => trim($wpa_enc),
             'uapsd_enabled'    => $uapsd_enabled,
             'schedule_enabled' => $schedule_enabled,
             'schedule'         => $schedule,
         ];
 
-        if (!empty($vlan) && $vlan_enabled) {
-            $payload['vlan'] = $vlan;
+        if (!empty($vlan_id)) {
+            $payload['networkconf_id'] = $vlan_id;
         }
 
         if (!empty($x_passphrase) && $security !== 'open') {
-            $payload['x_passphrase'] = $x_passphrase;
+            $payload['x_passphrase'] = trim($x_passphrase);
         }
 
         if (!empty($ap_group_ids) && is_array($ap_group_ids)) {
@@ -2604,9 +2604,8 @@ class Client
      *
      * @param string       $wlan_id the "_id" value for the WLAN which can be found with the list_wlanconf() function
      * @param object|array $payload stdClass object or associative array containing the configuration to apply to the
-     *                              wlan, must be a
-     *                              (partial) object/array structured in the same manner as is returned by
-     *                              list_wlanconf() for the wlan.
+     *                              wlan, must be a (partial) object/array structured in the same manner as is returned
+     *                              by list_wlanconf() for the wlan.
      * @return bool true on success
      */
     public function set_wlansettings_base($wlan_id, $payload)
@@ -2690,7 +2689,7 @@ class Client
 
         $macs    = array_map('strtolower', $macs);
         $payload = [
-            'mac_filter_enabled' => (bool)$mac_filter_enabled,
+            'mac_filter_enabled' => (bool) $mac_filter_enabled,
             'mac_filter_policy'  => $mac_filter_policy,
             'mac_filter_list'    => $macs,
         ];
@@ -3003,15 +3002,15 @@ class Client
         ];
 
         if (!is_null($tunnel_type)) {
-            $payload['tunnel_type'] = (int)$tunnel_type;
+            $payload['tunnel_type'] = (int) $tunnel_type;
         }
 
         if (!is_null($tunnel_medium_type)) {
-            $payload['tunnel_medium_type'] = (int)$tunnel_medium_type;
+            $payload['tunnel_medium_type'] = (int) $tunnel_medium_type;
         }
 
         if (!is_null($vlan)) {
-            $payload['vlan'] = (int)$vlan;
+            $payload['vlan'] = (int) $vlan;
         }
 
         return $this->fetch_results('/api/s/' . $this->site . '/rest/account', $payload);
@@ -3935,12 +3934,12 @@ class Client
          * an HTTP response code 401 (Unauthorized) indicates the Cookie/Token has expired in which case
          * re-login is required
          */
-        if ($http_code == 401) {
+        if ($http_code === 401) {
             if ($this->debug) {
                 error_log(__FUNCTION__ . ': needed to reconnect to UniFi controller');
             }
 
-            if ($this->exec_retries == 0) {
+            if ($this->exec_retries === 0) {
                 /**
                  * explicitly clear the expired Cookie/Token, update other properties and log out before logging in again
                  */
