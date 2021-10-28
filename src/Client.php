@@ -1625,6 +1625,42 @@ class Client
     }
 
     /**
+     * Update site network optimization
+     *
+     * @param string       $network_optimization_id _id value of the network_optimization section
+     * @param object|array $payload         stdClass object or associative array containing the configuration to apply
+     *                                      to the site, must be a (partial) object/array structured in the same manner
+     *                                      as is returned by list_settings() for the section with the "network_optimization"
+     *                                      key. Do not include the _id property, it is assigned by the controller and
+     *                                      returned upon success.
+     * @return bool true on success
+     */
+    public function set_site_network_optimization($network_optimization_id, $payload)
+    {
+        $this->curl_method = 'PUT';
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/ntp/' . trim($network_optimization_id),
+            $payload);
+    }
+
+    /**
+     * Update site rsyslogd
+     *
+     * @param string       $rsyslogd_id _id value of the rsyslogd section
+     * @param object|array $payload         stdClass object or associative array containing the configuration to apply
+     *                                      to the site, must be a (partial) object/array structured in the same manner
+     *                                      as is returned by list_settings() for the section with the "rsyslogd"
+     *                                      key. Do not include the _id property, it is assigned by the controller and
+     *                                      returned upon success.
+     * @return bool true on success
+     */
+    public function set_site_rsyslogd($rsyslogd_id, $payload)
+    {
+        $this->curl_method = 'PUT';
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/rsyslogd/' . trim($rsyslogd_id),
+            $payload);
+    }
+
+    /**
      * Fetch admins
      *
      * @return array containing administrator objects for selected site
