@@ -236,6 +236,8 @@ more details on each of the functions/methods and their respective parameters.
 - set_networksettings_base()
 - set_radius_account_base()
 - set_site_connectivity()
+- set_site_network_optimization()
+- set_site_rsyslogd()
 - set_site_country()
 - set_site_guest_access()
 - set_site_locale()
