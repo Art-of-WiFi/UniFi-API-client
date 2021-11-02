@@ -2585,11 +2585,12 @@ class Client
         $wpa_mode = 'wpa2',
         $wpa_enc = 'ccmp',
         $vlan_enabled = null,
-        $vlan_id = null,
+        $networkconf_id = null,
         $uapsd_enabled = false,
         $schedule_enabled = false,
         $schedule = [],
-        $ap_group_ids = null
+        $ap_group_ids = null,
+        $vlan = null
     ) {
         $payload = [
             'name'             => trim($name),
@@ -2601,13 +2602,15 @@ class Client
             'security'         => trim($security),
             'wpa_mode'         => trim($wpa_mode),
             'wpa_enc'          => trim($wpa_enc),
+            'vlan_enabled'     => $vlan_enabled,
+            'vlan'             => $vlan,
             'uapsd_enabled'    => $uapsd_enabled,
             'schedule_enabled' => $schedule_enabled,
             'schedule'         => $schedule,
         ];
 
-        if (!empty($vlan_id)) {
-            $payload['networkconf_id'] = $vlan_id;
+        if (!empty($networkconf_id)) {
+            $payload['networkconf_id'] = $networkconf_id;
         }
 
         if (!empty($x_passphrase) && $security !== 'open') {
