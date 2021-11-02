@@ -1627,7 +1627,7 @@ class Client
     /**
      * Update site network optimization
      *
-     * @param string       $network_optimization_id _id value of the network_optimization section
+     * @param string       $optimization_id _id value of the network_optimization section
      * @param object|array $payload         stdClass object or associative array containing the configuration to apply
      *                                      to the site, must be a (partial) object/array structured in the same manner
      *                                      as is returned by list_settings() for the section with the "network_optimization"
@@ -1635,10 +1635,10 @@ class Client
      *                                      returned upon success.
      * @return bool true on success
      */
-    public function set_site_network_optimization($network_optimization_id, $payload)
+    public function set_site_network_optimization($optimization_id, $payload)
     {
         $this->curl_method = 'PUT';
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/ntp/' . trim($network_optimization_id),
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/ntp/' . trim($optimization_id),
             $payload);
     }
 
