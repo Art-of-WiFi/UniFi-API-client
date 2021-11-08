@@ -26,14 +26,14 @@ class Client
      * NOTE:
      * do not modify the values here, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION             = '1.1.73';
+    const CLASS_VERSION = '1.1.74';
     protected $baseurl              = 'https://127.0.0.1:8443';
     protected $user                 = '';
     protected $password             = '';
     protected $site                 = 'default';
     protected $version              = '6.2.26';
     protected $debug                = false;
-    protected $is_loggedin          = false;
+    protected $is_logged_in         = false;
     protected $is_unifi_os          = false;
     protected $exec_retries         = 0;
     protected $cookies              = '';
@@ -109,7 +109,7 @@ class Client
         /**
          * logout, if needed
          */
-        if ($this->is_loggedin) {
+        if ($this->is_logged_in) {
             $this->logout();
         }
     }
@@ -124,12 +124,11 @@ class Client
         /**
          * skip the login process if already logged in
          */
-        if ($this->is_loggedin === true) {
-            return true;
+        if ($this->update_unificookie()) {
+            $this->is_logged_in = true;
         }
 
-        if ($this->update_unificookie()) {
-            $this->is_loggedin = true;
+        if ($this->is_logged_in === true) {
             return true;
         }
 
@@ -218,8 +217,8 @@ class Client
          * check the HTTP response code
          */
         if ($http_code >= 200 && $http_code < 400) {
-            $this->is_loggedin = true;
-            return $this->is_loggedin;
+            $this->is_logged_in = true;
+            return $this->is_logged_in;
         }
 
         return false;
@@ -277,8 +276,8 @@ class Client
 
         curl_close($ch);
 
-        $this->is_loggedin = false;
-        $this->cookies     = '';
+        $this->is_logged_in = false;
+        $this->cookies      = '';
         return true;
     }
 
@@ -1422,7 +1421,7 @@ class Client
      * NOTES:
      * this is an experimental function, please do not use unless you know exactly what you're doing
      *
-     * @return bool|array|string URL from where the backup file can be downloaded once generated, false upon failure
+     * @return array|bool URL from where the backup file can be downloaded once generated, false upon failure
      */
     public function generate_backup()
     {
@@ -1526,7 +1525,7 @@ class Client
      * @param string       $locale_id _id value of the locale section
      * @param object|array $payload   stdClass object or associative array containing the configuration to apply to the
      *                                site, must be a (partial) object/array structured in the same manner as is
-     *                                returned by list_settings() for section with the the "locale" key. Valid
+     *                                returned by list_settings() for section with the "locale" key. Valid
      *                                timezones can be obtained in Javascript as explained here:
      *                                https://stackoverflow.com/questions/38399465/how-to-get-list-of-all-timezones-in-javascript
      *                                or in PHP using timezone_identifiers_list(). Do not include the _id property, it
@@ -1710,13 +1709,13 @@ class Client
      *
      * @param string $admin_id       _id value of the admin user to assign, can be obtained using the
      *                               list_all_admins() method/function
-     * @param bool   $readonly       optional, whether or not the new admin has readonly
+     * @param bool   $readonly       optional, whether the new admin has readonly
      *                               permissions, default value is false which gives the new admin
      *                               Administrator permissions
-     * @param bool   $device_adopt   optional, whether or not the new admin has permissions to
+     * @param bool   $device_adopt   optional, whether the new admin has permissions to
      *                               adopt devices, default value is false. With versions < 5.9.X this only applies
      *                               when readonly is true.
-     * @param bool   $device_restart optional, whether or not the new admin has permissions to
+     * @param bool   $device_restart optional, whether the new admin has permissions to
      *                               restart devices, default value is false. With versions < 5.9.X this only applies
      *                               when readonly is true.
      * @return bool true on success
@@ -3176,7 +3175,7 @@ class Client
      * Fetch access points and other devices under management of the controller (USW and/or USG devices)
      *
      * NOTE:
-     * changed function/method name to fit it's purpose
+     * changed function/method name to fit its purpose
      *
      * @param string $device_mac optional, the MAC address of a single device for which the call must be made
      * @return array containing known device objects (or a single device when using the <device_mac> parameter)
@@ -3611,7 +3610,7 @@ class Client
         /**
          * guard clause to check if logged in when needed
          */
-        if ($login_required && !$this->is_loggedin) {
+        if ($login_required && !$this->is_logged_in) {
             return false;
         }
 
@@ -3838,17 +3837,17 @@ class Client
                 $cookie_crumbs = explode(';', $cookie);
                 foreach ($cookie_crumbs as $cookie_crumb) {
                     if (strpos($cookie_crumb, 'unifises') !== false) {
-                        $this->cookies     = $cookie_crumb;
-                        $this->is_loggedin = true;
-                        $this->is_unifi_os = false;
+                        $this->cookies      = $cookie_crumb;
+                        $this->is_logged_in = true;
+                        $this->is_unifi_os  = false;
 
                         break;
                     }
 
                     if (strpos($cookie_crumb, 'TOKEN') !== false) {
-                        $this->cookies     = $cookie_crumb;
-                        $this->is_loggedin = true;
-                        $this->is_unifi_os = true;
+                        $this->cookies      = $cookie_crumb;
+                        $this->is_logged_in = true;
+                        $this->is_unifi_os  = true;
 
                         break;
                     }
@@ -3864,7 +3863,7 @@ class Client
      *
      * @param string       $path    path for the request
      * @param object|array $payload optional, payload to pass with the request
-     * @return bool|array|string response returned by the controller API, false upon error
+     * @return bool|string response returned by the controller API, false upon error
      */
     protected function exec_curl($path, $payload = null)
     {
@@ -3969,8 +3968,8 @@ class Client
                     $_SESSION['unificookie'] = '';
                 }
 
-                $this->is_loggedin = false;
-                $this->cookies     = '';
+                $this->is_logged_in = false;
+                $this->cookies      = '';
                 $this->exec_retries++;
                 curl_close($ch);
 
@@ -3982,7 +3981,7 @@ class Client
                 /**
                  * when re-login was successful, simply execute the same cURL request again
                  */
-                if ($this->is_loggedin) {
+                if ($this->is_logged_in) {
                     if ($this->debug) {
                         error_log(__FUNCTION__ . ': re-logged in, calling exec_curl again');
                     }

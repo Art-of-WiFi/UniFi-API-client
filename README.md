@@ -2,8 +2,7 @@
 
 A PHP class that provides access to Ubiquiti's [**UniFi Network Controller**](https://unifi-network.ui.com/) API.
 
-UniFi Network Controller software versions 4.X.X, 5.X.X and 6.X.X are supported 
-(version 6.4.54 has been confirmed to work) as well as UniFi OS-based controllers . 
+UniFi Network Controller software versions 4.X.X, 5.X.X and 6.X.X are supported  as well as UniFi OS-based controllers (version 6.5.50 has been confirmed to work). 
 This class is used by our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 The package can be installed manually or by using
@@ -16,11 +15,10 @@ easy inclusion in your projects.
   - PHP version 5.5.0 or higher
   - PHP json and PHP cURL modules
   - tested on Apache 2.4 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.2.24 and cURL 7.58.0
-- direct network connectivity between this server and the host and port (normally TCP
-port 8443 or port 443 for 
+- direct network connectivity between this server and the host and port (normally TCP port 8443 or port 443 for 
   UniFi OS) where the UniFi Controller is running
-- you must use **accounts with local access**, not pure UniFi Cloud accounts, 
-to access the UniFi Controller API through this class
+- you must use **accounts with local access**, not pure UniFi Cloud accounts, to access the UniFi Controller API through 
+  this class
 
 ## UniFi OS Support
 
@@ -86,7 +84,7 @@ require_once 'path/to/src/Client.php';
 ### Download the Release
 
 If you prefer not to use composer or git,
-simply [download the package](https://github.com/Art-of-WiFi/UniFi-API-client/archive/master.zip), uncompress the zip
+simply [download the package](https://github.com/Art-of-WiFi/UniFi-API-client/archive/master.zip), unpack the zip
 file, then include the file containing the class in your code like so:
 
 ```php
@@ -128,6 +126,11 @@ own PHP code.
    the controller's SSL certificate which is otherwise **disabled** by default. It is **highly recommended** to enable
    this feature in production environments where you have a valid SSL cert installed on the UniFi Controller that is
    associated with the FQDN in the `controller_url` parameter. This option was added with API client version 1.1.16.
+
+3. Using an administrator account (`$controller_user` in the above example) with **read-only** permissions can limit 
+   visibility on certain collection/object properties. See this [issue](https://github.com/Art-of-WiFi/UniFi-API-client/issues/129)
+   and this [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/94) for an example where the WPA2 password
+   isn't accessible for **read-only** administrator accounts.
 
 ## Functions/methods supported
 
