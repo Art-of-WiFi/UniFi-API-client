@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.71
+ * @version Release: 1.1.75
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -26,7 +26,7 @@ class Client
      * NOTE:
      * do not modify the values here, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION = '1.1.74';
+    const CLASS_VERSION = '1.1.75';
     protected $baseurl              = 'https://127.0.0.1:8443';
     protected $user                 = '';
     protected $password             = '';
@@ -100,14 +100,14 @@ class Client
     public function __destruct()
     {
         /**
-         * if $_SESSION['unificookie'] is set, do not logout here
+         * if $_SESSION['unificookie'] is set, do not log out here
          */
         if (isset($_SESSION['unificookie'])) {
             return;
         }
 
         /**
-         * logout, if needed
+         * log out, if needed
          */
         if ($this->is_logged_in) {
             $this->logout();
@@ -247,7 +247,6 @@ class Client
          * construct the HTTP request headers as required
          */
         $this->curl_headers = [
-            'content-length: 0',
             'Expect:',
         ];
 
@@ -799,7 +798,7 @@ class Client
      * - this function/method is only supported on controller versions 5.5.* and later
      * - make sure that the retention policy for 5 minutes stats is set to the correct value in
      *   the controller settings
-     * - requires a USG
+     * - requires a UniFi gateway
      *
      * @param int   $start   optional, Unix timestamp in milliseconds
      * @param int   $end     optional, Unix timestamp in milliseconds
@@ -823,7 +822,7 @@ class Client
      *
      * NOTES:
      * - defaults to the past 7*24 hours
-     * - requires a USG
+     * - requires a UniFi gateway
      *
      * @param int   $start   optional, Unix timestamp in milliseconds
      * @param int   $end     optional, Unix timestamp in milliseconds
@@ -847,7 +846,7 @@ class Client
      *
      * NOTES:
      * - defaults to the past 52 weeks (52*7*24 hours)
-     * - requires a USG
+     * - requires a UniFi gateway
      *
      * @param int   $start   optional, Unix timestamp in milliseconds
      * @param int   $end     optional, Unix timestamp in milliseconds
@@ -871,7 +870,7 @@ class Client
      *
      * NOTES:
      * - defaults to the past 52 weeks (52*7*24 hours)
-     * - requires a USG
+     * - requires a UniFi gateway
      *
      * @param int   $start   optional, Unix timestamp in milliseconds
      * @param int   $end     optional, Unix timestamp in milliseconds
@@ -895,7 +894,7 @@ class Client
      *
      * NOTES:
      * - defaults to the past 24 hours
-     * - requires a USG
+     * - requires a UniFi gateway
      *
      * @param int $start optional, Unix timestamp in milliseconds
      * @param int $end   optional, Unix timestamp in milliseconds
@@ -909,13 +908,12 @@ class Client
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/archive.speedtest', $payload);
     }
 
-
     /**
      * Fetch IPS/IDS events
      *
      * NOTES:
      * - defaults to the past 24 hours
-     * - requires a USG
+     * - requires a UniFi gateway
      * - supported in UniFi controller versions 5.9.X and higher
      *
      * @param int $start optional, Unix timestamp in milliseconds
@@ -1039,13 +1037,17 @@ class Client
      */
     public function list_clients($client_mac = null)
     {
-        return $this->fetch_results('/api/s/' . $this->site . '/stat/sta/' . strtolower(trim($client_mac)));
+        if (is_string($client_mac)) {
+            $client_mac = strtolower(trim($client_mac));
+        }
+
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/sta/' . $client_mac);
     }
 
     /**
      * Fetch details for a single client device
      *
-     * @param string $client_mac optional, client device MAC address
+     * @param string $client_mac client device MAC address
      * @return array returns an object with the client device information
      */
     public function stat_client($client_mac)
@@ -1378,7 +1380,11 @@ class Client
      */
     public function list_devices($device_mac = null)
     {
-        return $this->fetch_results('/api/s/' . $this->site . '/stat/device/' . strtolower(trim($device_mac)));
+        if (is_string($device_mac)) {
+            $device_mac = strtolower(trim($device_mac));
+        }
+
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/device/' . $device_mac);
     }
 
     /**
@@ -1866,7 +1872,7 @@ class Client
     public function create_hotspotop($name, $x_password, $note = null)
     {
         $payload = ['name' => $name, 'x_password' => $x_password];
-        if (!isset($note)) {
+        if (is_string($note)) {
             $payload['note'] = trim($note);
         }
 
@@ -1914,7 +1920,7 @@ class Client
             'quota'  => intval($quota),
         ];
 
-        if (!is_null($note)) {
+        if (is_string($note)) {
             $payload['note'] = trim($note);
         }
 
@@ -2649,7 +2655,7 @@ class Client
         $payload                 = [];
         $payload['x_passphrase'] = trim($x_passphrase);
 
-        if (!empty($name)) {
+        if (is_string($name)) {
             $payload['name'] = trim($name);
         }
 
@@ -3172,7 +3178,7 @@ class Client
      ****************************************************************/
 
     /**
-     * Fetch access points and other devices under management of the controller (USW and/or USG devices)
+     * Fetch access points and other devices under management of the controller (USW, USG, and/or UnIfi OS consoles)
      *
      * NOTE:
      * changed function/method name to fit its purpose

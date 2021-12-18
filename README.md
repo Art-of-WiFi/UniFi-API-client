@@ -2,7 +2,7 @@
 
 A PHP class that provides access to Ubiquiti's [**UniFi Network Controller**](https://unifi-network.ui.com/) API.
 
-UniFi Network Controller software versions 4.X.X, 5.X.X and 6.X.X are supported  as well as UniFi OS-based controllers (version 6.5.50 has been confirmed to work). 
+UniFi Network Controller software versions 4.X.X, 5.X.X and 6.X.X are supported  as well as UniFi OS-based controllers (version 6.5.55 has been confirmed to work). 
 This class is used by our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 The package can be installed manually or by using
@@ -12,9 +12,9 @@ easy inclusion in your projects.
 ## Requirements
 
 - a server with:
-  - PHP version 5.5.0 or higher
+  - PHP 5.5.0 or higher 
   - PHP json and PHP cURL modules
-  - tested on Apache 2.4 with PHP Version 5.6.1 and cURL 7.42.1 and with PHP 7.2.24 and cURL 7.58.0
+  - tested on Apache 2.4 with PHP 5.6.1 and cURL 7.42.1 and with PHP 7.4.9 and cURL 7.68.0
 - direct network connectivity between this server and the host and port (normally TCP port 8443 or port 443 for 
   UniFi OS) where the UniFi Controller is running
 - you must use **accounts with local access**, not pure UniFi Cloud accounts, to access the UniFi Controller API through 
@@ -22,7 +22,7 @@ easy inclusion in your projects.
 
 ## UniFi OS Support
 
-Support for UniFi OS-based controllers (UniFi Dream Machine, UniFi Dream Machine Pro 
+Support for UniFi OS-based controllers (UniFi Dream Router, UniFi Dream Machine, UniFi Dream Machine Pro 
 or Cloud Key Gen2/Cloud Key Gen2 Plus with firmware version 2.0.24 or higher) has 
 been added as of version 1.1.47. The class automatically detects UniFi OS devices and
 adjusts URLs and several functions/methods accordingly. If your own code implements strict
@@ -347,7 +347,7 @@ This class is based on the initial work by the following developers:
 
 and the API as published by Ubiquiti:
 
-- https://dl.ui.com/unifi/6.2.26/unifi_sh_api
+- https://dl.ui.com/unifi/6.5.55/unifi_sh_api
 
 ## Important Disclaimer
 
