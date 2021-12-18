@@ -1039,7 +1039,10 @@ class Client
      */
     public function list_clients($client_mac = null)
     {
-        return $this->fetch_results('/api/s/' . $this->site . '/stat/sta/' . strtolower(trim($client_mac)));
+        if ($client_mac != null) {
+            $client_mac = strtolower(trim($client_mac));
+        }
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/sta/' . $client_mac);
     }
 
     /**
