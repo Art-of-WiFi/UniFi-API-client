@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.75
+ * @version Release: 1.1.76
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -26,7 +26,7 @@ class Client
      * NOTE:
      * do not modify the values here, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION = '1.1.75';
+    const CLASS_VERSION = '1.1.76';
     protected $baseurl              = 'https://127.0.0.1:8443';
     protected $user                 = '';
     protected $password             = '';
@@ -41,7 +41,7 @@ class Client
     protected $last_error_message   = null;
     protected $curl_ssl_verify_peer = false;
     protected $curl_ssl_verify_host = false;
-    protected $curl_http_version    = CURL_HTTP_VERSION_1_1;
+    protected $curl_http_version    = CURL_HTTP_VERSION_NONE;
     protected $curl_headers         = [];
     protected $curl_method          = 'GET';
     protected $curl_methods_allowed = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
@@ -141,8 +141,6 @@ class Client
 
         $curl_options = [
             CURLOPT_HEADER => true,
-            CURLOPT_POST   => true,
-            CURLOPT_NOBODY => true,
             CURLOPT_URL    => $this->baseurl . '/',
         ];
 
@@ -162,7 +160,7 @@ class Client
          * prepare the actual login
          */
         $curl_options = [
-            CURLOPT_NOBODY     => false,
+            CURLOPT_POST       => true,
             CURLOPT_POSTFIELDS => json_encode(['username' => $this->user, 'password' => $this->password]),
             CURLOPT_HTTPHEADER => [
                 'content-type: application/json',
@@ -1032,8 +1030,8 @@ class Client
      *
      * @param string $client_mac optional, the MAC address of a single online client device for which the call must be
      *                           made
-     * @return array returns an array of online client device objects, or in case of a single device request, returns a
-     *               single client device object
+     * @return array|false returns an array of online client device objects, or in case of a single device request, returns a
+     *                    single client device object, false upon error
      */
     public function list_clients($client_mac = null)
     {
@@ -1376,7 +1374,8 @@ class Client
      * Fetch UniFi devices
      *
      * @param string $device_mac optional, the MAC address of a single UniFi device for which the call must be made
-     * @return array containing known UniFi device objects (or a single device when using the <device_mac> parameter)
+     * @return array|false an array containing known UniFi device objects (or a single device when using the <device_mac>
+     *                     parameter), false upon error
      */
     public function list_devices($device_mac = null)
     {
@@ -3571,12 +3570,12 @@ class Client
      * Set value for the private property $curl_http_version
      *
      * NOTES:
-     * - as of cURL version 7.62.0 the default value is CURL_HTTP_VERSION_2TLS which may cause issues
-     * - the default value used in this class is CURL_HTTP_VERSION_1_1
-     * - https://curl.se/libcurl/c/CURLOPT_HTTP_VERSION.html
+     * - as of cURL version 7.62.0 the default value is CURL_HTTP_VERSION_2TLS which may cause issues,
+     *   this method allows to set the value to CURL_HTTP_VERSION_1_1 when needed
      *
-     * @param int $http_version new value for $curl_http_version, can be CURL_HTTP_VERSION_1_1 int(2)
-     *                          or CURL_HTTP_VERSION_2TLS int(4)
+     * @param int $http_version new value for $curl_http_version, CURL_HTTP_VERSION_1_1 int(2) or
+     *                          CURL_HTTP_VERSION_2TLS int(4) are recommended
+     * @see https://curl.se/libcurl/c/CURLOPT_HTTP_VERSION.html
      */
     public function set_curl_http_version($http_version)
     {
@@ -3588,6 +3587,7 @@ class Client
      *
      * @return int current value of $request_timeout, can be CURL_HTTP_VERSION_1_1 int(2) or
      *             CURL_HTTP_VERSION_2TLS int(4)
+     * @see https://curl.se/libcurl/c/CURLOPT_HTTP_VERSION.html
      */
     public function get_curl_http_version()
     {
