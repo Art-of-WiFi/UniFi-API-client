@@ -1638,7 +1638,7 @@ class Client
     public function set_site_network_optimization($optimization_id, $payload)
     {
         $this->curl_method = 'PUT';
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/ntp/' . trim($optimization_id),
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/network_optimization/' . trim($optimization_id),
             $payload);
     }
 
