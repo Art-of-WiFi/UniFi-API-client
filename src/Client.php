@@ -3018,7 +3018,8 @@ class Client
     {
         $tunnel_types        = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
         $tunnel_medium_types = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-        if ((!is_null($tunnel_type) && !in_array($tunnel_type, $tunnel_types)) || (!is_null($tunnel_medium_type) && !in_array($tunnel_medium_type, $tunnel_medium_types)) || ($tunnel_type ^ $tunnel_medium_type)) {
+        
+        if ((!is_null($tunnel_type) && !in_array($tunnel_type, $tunnel_types)) || (!is_null($tunnel_medium_type) && !in_array($tunnel_medium_type, $tunnel_medium_types))) {
             return false;
         }
 
