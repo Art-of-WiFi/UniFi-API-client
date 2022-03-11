@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.77
+ * @version Release: 1.1.78
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -26,7 +26,7 @@ class Client
      * NOTE:
      * do not modify the values here, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION = '1.1.77';
+    const CLASS_VERSION             = '1.1.78';
     protected $baseurl              = 'https://127.0.0.1:8443';
     protected $user                 = '';
     protected $password             = '';
@@ -3043,9 +3043,9 @@ class Client
      */
     public function create_radius_account($name, $x_password, $tunnel_type = null, $tunnel_medium_type = null, $vlan = null)
     {
-        $tunnel_types        = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-        $tunnel_medium_types = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-        if ((!is_null($tunnel_type) && !in_array($tunnel_type, $tunnel_types)) || (!is_null($tunnel_medium_type) && !in_array($tunnel_medium_type, $tunnel_medium_types)) || ($tunnel_type ^ $tunnel_medium_type)) {
+        $tunnel_type_values        = [null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+        $tunnel_medium_type_values = [null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        if (!in_array($tunnel_type, $tunnel_type_values) || !in_array($tunnel_medium_type, $tunnel_medium_type_values) || ($tunnel_type xor $tunnel_medium_type)) {
             return false;
         }
 
