@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.76
+ * @version Release: 1.1.77
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -26,7 +26,7 @@ class Client
      * NOTE:
      * do not modify the values here, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION = '1.1.76';
+    const CLASS_VERSION = '1.1.77';
     protected $baseurl              = 'https://127.0.0.1:8443';
     protected $user                 = '';
     protected $password             = '';
@@ -140,7 +140,6 @@ class Client
         }
 
         $curl_options = [
-            CURLOPT_HEADER => true,
             CURLOPT_URL    => $this->baseurl . '/',
         ];
 
@@ -483,6 +482,9 @@ class Client
     /**
      * Fetch hourly site stats
      *
+     * TODO: add support for optional attrib parameter
+     *       airtime_avg
+     *
      * NOTES:
      * - defaults to the past 7*24 hours
      * - "bytes" are no longer returned with controller version 4.9.1 and later
@@ -598,6 +600,26 @@ class Client
     /**
      * Fetch hourly stats for a single access point or all access points
      *
+     * TODO: optionally add ["top_filter_by" => "tx_retries"] to payload
+     *       add optional parameter for attribs to support:
+     *       wifi_tx_attempts
+     *       tx_retries
+     *       wifi_tx_dropped
+     *       sta_assoc_failures
+     *       sta_wpa_auth_failures
+     *       mac_filter_rejections
+     *       sta_dhcp_failures
+     *       sta_assoc_min
+     *       sta_assoc_max
+     *       sta_connect_time_min
+     *       sta_connect_time_max
+     *       sta_connect_time_total
+     *       user-wlan-num_sta_connected
+     *       user-wlan-num_sta_disconnected
+     *       user-wlan-sta_assoc_samples
+     *       user-wlan-sta_track_samples
+     *       wlan-num_sta
+     *
      * NOTES:
      * - defaults to the past 7*24 hours
      * - make sure that the retention policy for hourly stats is set to the correct value in
@@ -679,6 +701,7 @@ class Client
     /**
      * Fetch 5 minutes stats for a single user/client device
      *
+     *
      * NOTES:
      * - defaults to the past 12 hours
      * - only supported with UniFi controller versions 5.8.X and higher
@@ -692,7 +715,8 @@ class Client
      * @param int    $end     optional, Unix timestamp in milliseconds
      * @param array  $attribs array containing attributes (strings) to be returned, valid values are:
      *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets default is ['rx_bytes', 'tx_bytes']
+     *                        tx_packets, satisfaction, wifi_tx_attempts
+     *                        default value is ['rx_bytes', 'tx_bytes']
      * @return array returns an array of 5-minute stats objects
      */
     public function stat_5minutes_user($mac, $start = null, $end = null, $attribs = null)
@@ -720,7 +744,8 @@ class Client
      * @param int    $end     optional, Unix timestamp in milliseconds
      * @param array  $attribs array containing attributes (strings) to be returned, valid values are:
      *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets default is ['rx_bytes', 'tx_bytes']
+     *                        tx_packets, satisfaction, wifi_tx_attempts
+     *                        default value is ['rx_bytes', 'tx_bytes']
      * @return array returns an array of hourly stats objects
      */
     public function stat_hourly_user($mac, $start = null, $end = null, array $attribs = null)
@@ -748,7 +773,8 @@ class Client
      * @param int    $end     optional, Unix timestamp in milliseconds
      * @param array  $attribs array containing attributes (strings) to be returned, valid values are:
      *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets default is ['rx_bytes', 'tx_bytes']
+     *                        tx_packets, satisfaction, wifi_tx_attempts
+     *                        default value is ['rx_bytes', 'tx_bytes']
      * @return array returns an array of daily stats objects
      */
     public function stat_daily_user($mac, $start = null, $end = null, $attribs = null)
@@ -776,7 +802,8 @@ class Client
      * @param int    $end     optional, Unix timestamp in milliseconds
      * @param array  $attribs array containing attributes (strings) to be returned, valid values are:
      *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets default is ['rx_bytes', 'tx_bytes']
+     *                        tx_packets, satisfaction, wifi_tx_attempts
+     *                        default value is ['rx_bytes', 'tx_bytes']
      * @return array returns an array of monthly stats objects
      */
     public function stat_monthly_user($mac, $start = null, $end = null, $attribs = null)
@@ -3036,7 +3063,7 @@ class Client
         }
 
         if (!is_null($vlan)) {
-            $payload['vlan'] = (int) $vlan;
+            $payload['vlan'] = (string) $vlan;
         }
 
         return $this->fetch_results('/api/s/' . $this->site . '/rest/account', $payload);
@@ -3337,7 +3364,7 @@ class Client
      *
      * @param boolean $return_json true returns the results in "pretty printed" json format,
      *                             false returns PHP stdClass Object format (default)
-     * @return object|string the raw results as returned by the controller API
+     * @return false|string|null the raw results as returned by the controller API
      */
     public function get_last_results_raw($return_json = false)
     {
