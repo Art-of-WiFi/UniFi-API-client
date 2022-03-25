@@ -2577,6 +2577,7 @@ class Client
      */
     public function list_wlanconf($wlan_id = null)
     {
+        if (is_null($wlan_id)) {$wlan_id = '';}
         return $this->fetch_results('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id));
     }
 
