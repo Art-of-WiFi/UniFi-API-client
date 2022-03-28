@@ -2,8 +2,9 @@
 
 A PHP class that provides access to Ubiquiti's [**UniFi Network Controller**](https://unifi-network.ui.com/) API.
 
-UniFi Network Controller software versions 4.X.X, 5.X.X and 6.X.X are supported  as well as UniFi OS-based controllers (version 6.5.55 has been confirmed to work). 
-This class is used by our API browser tool which can be found [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
+UniFi Network Controller software versions 4.X.X, 5.X.X, 6.X.X, and 7.X.X (version 7.0.23 has been confirmed to work)
+are supported as well as UniFi OS-based controllers. This class is used by our API browser tool which can be found
+[here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 The package can be installed manually or by using
 composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for
@@ -15,20 +16,23 @@ easy inclusion in your projects.
   - PHP 5.5.0 or higher 
   - PHP json and PHP cURL modules
   - tested on Apache 2.4 with PHP 5.6.1 and cURL 7.42.1 and with PHP 7.4.9 and cURL 7.68.0
-- direct network connectivity between this server and the host and port (normally TCP port 8443 or port 443 for 
+- direct network connectivity between this server and the host and port (usually TCP port 8443 or port 443 for 
   UniFi OS) where the UniFi Controller is running
-- you must use **accounts with local access**, not pure UniFi Cloud accounts, to access the UniFi Controller API through 
-  this class
+- you must use **accounts with local access**, not UniFi Cloud accounts, to access the UniFi Controller API 
+  through this class
 
 ## UniFi OS Support
 
-Support for UniFi OS-based controllers (UniFi Dream Router, UniFi Dream Machine, UniFi Dream Machine Pro 
-or Cloud Key Gen2/Cloud Key Gen2 Plus with firmware version 2.0.24 or higher) has 
-been added as of version 1.1.47. The class automatically detects UniFi OS devices and
-adjusts URLs and several functions/methods accordingly. If your own code implements strict
-validation of the URL that is passed to the constructor, please adapt your logic to 
-allow URLs without a port suffix or with port 443 when dealing with a UniFi OS-based
-controller.
+Support for UniFi OS-based controllers has been added as of version 1.1.47:
+- UniFi Dream Router (UDR)
+- UniFi Dream Machine (UDM)
+- UniFi Dream Machine Pro (UDM PRO)
+- Cloud Key Gen2 (UCK G2), firmware version 2.0.24 or higher
+- Cloud Key Gen2 Plus (UCK G2 Plus), firmware version 2.0.24 or higher
+
+The class automatically detects UniFi OS-based controllers and adjusts URLs and several functions/methods accordingly.
+If your own code implements strict validation of the URL that is passed to the constructor, please adapt your
+logic to allow URLs without a port suffix or with port 443 when working with a UniFi OS-based controller.
 
 Please test all methods you plan on using thoroughly before using the API Client with
 UniFi OS devices in a production environment.
@@ -128,9 +132,10 @@ own PHP code.
    associated with the FQDN in the `controller_url` parameter. This option was added with API client version 1.1.16.
 
 3. Using an administrator account (`$controller_user` in the above example) with **read-only** permissions can limit 
-   visibility on certain collection/object properties. See this [issue](https://github.com/Art-of-WiFi/UniFi-API-client/issues/129)
-   and this [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/94) for an example where the WPA2 password
-   isn't accessible for **read-only** administrator accounts.
+   visibility on certain collection/object properties. See this
+   [issue](https://github.com/Art-of-WiFi/UniFi-API-client/issues/129) and this 
+   [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/94) for an example where the WPA2 password isn't
+   visible for **read-only** administrator accounts.
 
 ## Functions/methods supported
 
@@ -347,7 +352,7 @@ This class is based on the initial work by the following developers:
 
 and the API as published by Ubiquiti:
 
-- https://dl.ui.com/unifi/6.5.55/unifi_sh_api
+- https://dl.ui.com/unifi/7.0.23/unifi_sh_api
 
 ## Important Disclaimer
 
