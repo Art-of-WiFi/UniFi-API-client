@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.71
+ * @version Release: 1.1.79
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -26,22 +26,22 @@ class Client
      * NOTE:
      * do not modify the values here, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION             = '1.1.73';
+    const CLASS_VERSION             = '1.1.79';
     protected $baseurl              = 'https://127.0.0.1:8443';
     protected $user                 = '';
     protected $password             = '';
     protected $site                 = 'default';
     protected $version              = '6.2.26';
     protected $debug                = false;
-    protected $is_loggedin          = false;
+    protected $is_logged_in         = false;
     protected $is_unifi_os          = false;
     protected $exec_retries         = 0;
     protected $cookies              = '';
     protected $last_results_raw     = null;
-    protected $last_error_message   = null;
+    protected $last_error_message   = '';
     protected $curl_ssl_verify_peer = false;
     protected $curl_ssl_verify_host = false;
-    protected $curl_http_version    = CURL_HTTP_VERSION_1_1;
+    protected $curl_http_version    = CURL_HTTP_VERSION_NONE;
     protected $curl_headers         = [];
     protected $curl_method          = 'GET';
     protected $curl_methods_allowed = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
@@ -100,16 +100,16 @@ class Client
     public function __destruct()
     {
         /**
-         * if $_SESSION['unificookie'] is set, do not logout here
+         * if $_SESSION['unificookie'] is set, do not log out here
          */
         if (isset($_SESSION['unificookie'])) {
             return;
         }
 
         /**
-         * logout, if needed
+         * log out, if needed
          */
-        if ($this->is_loggedin) {
+        if ($this->is_logged_in) {
             $this->logout();
         }
     }
@@ -124,12 +124,11 @@ class Client
         /**
          * skip the login process if already logged in
          */
-        if ($this->is_loggedin === true) {
-            return true;
+        if ($this->update_unificookie()) {
+            $this->is_logged_in = true;
         }
 
-        if ($this->update_unificookie()) {
-            $this->is_loggedin = true;
+        if ($this->is_logged_in === true) {
             return true;
         }
 
@@ -141,9 +140,6 @@ class Client
         }
 
         $curl_options = [
-            CURLOPT_HEADER => true,
-            CURLOPT_POST   => true,
-            CURLOPT_NOBODY => true,
             CURLOPT_URL    => $this->baseurl . '/',
         ];
 
@@ -163,7 +159,7 @@ class Client
          * prepare the actual login
          */
         $curl_options = [
-            CURLOPT_NOBODY     => false,
+            CURLOPT_POST       => true,
             CURLOPT_POSTFIELDS => json_encode(['username' => $this->user, 'password' => $this->password]),
             CURLOPT_HTTPHEADER => [
                 'content-type: application/json',
@@ -218,8 +214,8 @@ class Client
          * check the HTTP response code
          */
         if ($http_code >= 200 && $http_code < 400) {
-            $this->is_loggedin = true;
-            return $this->is_loggedin;
+            $this->is_logged_in = true;
+            return $this->is_logged_in;
         }
 
         return false;
@@ -248,7 +244,6 @@ class Client
          * construct the HTTP request headers as required
          */
         $this->curl_headers = [
-            'content-length: 0',
             'Expect:',
         ];
 
@@ -277,8 +272,8 @@ class Client
 
         curl_close($ch);
 
-        $this->is_loggedin = false;
-        $this->cookies     = '';
+        $this->is_logged_in = false;
+        $this->cookies      = '';
         return true;
     }
 
@@ -433,7 +428,7 @@ class Client
      *                        the existing note for the client-device is removed and "noted" attribute set to false
      * @return bool returns true upon success
      */
-    public function set_sta_note($user_id, $note = null)
+    public function set_sta_note($user_id, $note = '')
     {
         $payload = ['note' => $note];
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
@@ -447,7 +442,7 @@ class Client
      *                        the existing name for the client device is removed
      * @return bool returns true upon success
      */
-    public function set_sta_name($user_id, $name = null)
+    public function set_sta_name($user_id, $name = '')
     {
         $payload = ['name' => $name];
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/upd/user/' . trim($user_id), $payload);
@@ -486,6 +481,9 @@ class Client
 
     /**
      * Fetch hourly site stats
+     *
+     * TODO: add support for optional attrib parameter
+     *       airtime_avg
      *
      * NOTES:
      * - defaults to the past 7*24 hours
@@ -602,6 +600,26 @@ class Client
     /**
      * Fetch hourly stats for a single access point or all access points
      *
+     * TODO: optionally add ["top_filter_by" => "tx_retries"] to payload
+     *       add optional parameter for attribs to support:
+     *       wifi_tx_attempts
+     *       tx_retries
+     *       wifi_tx_dropped
+     *       sta_assoc_failures
+     *       sta_wpa_auth_failures
+     *       mac_filter_rejections
+     *       sta_dhcp_failures
+     *       sta_assoc_min
+     *       sta_assoc_max
+     *       sta_connect_time_min
+     *       sta_connect_time_max
+     *       sta_connect_time_total
+     *       user-wlan-num_sta_connected
+     *       user-wlan-num_sta_disconnected
+     *       user-wlan-sta_assoc_samples
+     *       user-wlan-sta_track_samples
+     *       wlan-num_sta
+     *
      * NOTES:
      * - defaults to the past 7*24 hours
      * - make sure that the retention policy for hourly stats is set to the correct value in
@@ -683,6 +701,7 @@ class Client
     /**
      * Fetch 5 minutes stats for a single user/client device
      *
+     *
      * NOTES:
      * - defaults to the past 12 hours
      * - only supported with UniFi controller versions 5.8.X and higher
@@ -696,7 +715,8 @@ class Client
      * @param int    $end     optional, Unix timestamp in milliseconds
      * @param array  $attribs array containing attributes (strings) to be returned, valid values are:
      *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets default is ['rx_bytes', 'tx_bytes']
+     *                        tx_packets, satisfaction, wifi_tx_attempts
+     *                        default value is ['rx_bytes', 'tx_bytes']
      * @return array returns an array of 5-minute stats objects
      */
     public function stat_5minutes_user($mac, $start = null, $end = null, $attribs = null)
@@ -724,7 +744,8 @@ class Client
      * @param int    $end     optional, Unix timestamp in milliseconds
      * @param array  $attribs array containing attributes (strings) to be returned, valid values are:
      *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets default is ['rx_bytes', 'tx_bytes']
+     *                        tx_packets, satisfaction, wifi_tx_attempts
+     *                        default value is ['rx_bytes', 'tx_bytes']
      * @return array returns an array of hourly stats objects
      */
     public function stat_hourly_user($mac, $start = null, $end = null, array $attribs = null)
@@ -752,7 +773,8 @@ class Client
      * @param int    $end     optional, Unix timestamp in milliseconds
      * @param array  $attribs array containing attributes (strings) to be returned, valid values are:
      *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets default is ['rx_bytes', 'tx_bytes']
+     *                        tx_packets, satisfaction, wifi_tx_attempts
+     *                        default value is ['rx_bytes', 'tx_bytes']
      * @return array returns an array of daily stats objects
      */
     public function stat_daily_user($mac, $start = null, $end = null, $attribs = null)
@@ -780,7 +802,8 @@ class Client
      * @param int    $end     optional, Unix timestamp in milliseconds
      * @param array  $attribs array containing attributes (strings) to be returned, valid values are:
      *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets default is ['rx_bytes', 'tx_bytes']
+     *                        tx_packets, satisfaction, wifi_tx_attempts
+     *                        default value is ['rx_bytes', 'tx_bytes']
      * @return array returns an array of monthly stats objects
      */
     public function stat_monthly_user($mac, $start = null, $end = null, $attribs = null)
@@ -800,7 +823,7 @@ class Client
      * - this function/method is only supported on controller versions 5.5.* and later
      * - make sure that the retention policy for 5 minutes stats is set to the correct value in
      *   the controller settings
-     * - requires a USG
+     * - requires a UniFi gateway
      *
      * @param int   $start   optional, Unix timestamp in milliseconds
      * @param int   $end     optional, Unix timestamp in milliseconds
@@ -824,7 +847,7 @@ class Client
      *
      * NOTES:
      * - defaults to the past 7*24 hours
-     * - requires a USG
+     * - requires a UniFi gateway
      *
      * @param int   $start   optional, Unix timestamp in milliseconds
      * @param int   $end     optional, Unix timestamp in milliseconds
@@ -848,7 +871,7 @@ class Client
      *
      * NOTES:
      * - defaults to the past 52 weeks (52*7*24 hours)
-     * - requires a USG
+     * - requires a UniFi gateway
      *
      * @param int   $start   optional, Unix timestamp in milliseconds
      * @param int   $end     optional, Unix timestamp in milliseconds
@@ -872,7 +895,7 @@ class Client
      *
      * NOTES:
      * - defaults to the past 52 weeks (52*7*24 hours)
-     * - requires a USG
+     * - requires a UniFi gateway
      *
      * @param int   $start   optional, Unix timestamp in milliseconds
      * @param int   $end     optional, Unix timestamp in milliseconds
@@ -896,7 +919,7 @@ class Client
      *
      * NOTES:
      * - defaults to the past 24 hours
-     * - requires a USG
+     * - requires a UniFi gateway
      *
      * @param int $start optional, Unix timestamp in milliseconds
      * @param int $end   optional, Unix timestamp in milliseconds
@@ -910,13 +933,12 @@ class Client
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/archive.speedtest', $payload);
     }
 
-
     /**
      * Fetch IPS/IDS events
      *
      * NOTES:
      * - defaults to the past 24 hours
-     * - requires a USG
+     * - requires a UniFi gateway
      * - supported in UniFi controller versions 5.9.X and higher
      *
      * @param int $start optional, Unix timestamp in milliseconds
@@ -1039,18 +1061,22 @@ class Client
      *
      * @param string $client_mac optional, the MAC address of a single online client device for which the call must be
      *                           made
-     * @return array returns an array of online client device objects, or in case of a single device request, returns a
-     *               single client device object
+     * @return array|false returns an array of online client device objects, or in case of a single device request, returns a
+     *                    single client device object, false upon error
      */
     public function list_clients($client_mac = null)
     {
-        return $this->fetch_results('/api/s/' . $this->site . '/stat/sta/' . strtolower(trim($client_mac)));
+        if (is_string($client_mac)) {
+            $client_mac = strtolower(trim($client_mac));
+        }
+
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/sta/' . $client_mac);
     }
 
     /**
      * Fetch details for a single client device
      *
-     * @param string $client_mac optional, client device MAC address
+     * @param string $client_mac client device MAC address
      * @return array returns an object with the client device information
      */
     public function stat_client($client_mac)
@@ -1379,11 +1405,16 @@ class Client
      * Fetch UniFi devices
      *
      * @param string $device_mac optional, the MAC address of a single UniFi device for which the call must be made
-     * @return array containing known UniFi device objects (or a single device when using the <device_mac> parameter)
+     * @return array|false an array containing known UniFi device objects (or a single device when using the <device_mac>
+     *                     parameter), false upon error
      */
     public function list_devices($device_mac = null)
     {
-        return $this->fetch_results('/api/s/' . $this->site . '/stat/device/' . strtolower(trim($device_mac)));
+        if (is_string($device_mac)) {
+            $device_mac = strtolower(trim($device_mac));
+        }
+
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/device/' . $device_mac);
     }
 
     /**
@@ -1426,7 +1457,7 @@ class Client
      * NOTES:
      * this is an experimental function, please do not use unless you know exactly what you're doing
      *
-     * @return bool|array|string URL from where the backup file can be downloaded once generated, false upon failure
+     * @return array|bool URL from where the backup file can be downloaded once generated, false upon failure
      */
     public function generate_backup()
     {
@@ -1530,7 +1561,7 @@ class Client
      * @param string       $locale_id _id value of the locale section
      * @param object|array $payload   stdClass object or associative array containing the configuration to apply to the
      *                                site, must be a (partial) object/array structured in the same manner as is
-     *                                returned by list_settings() for section with the the "locale" key. Valid
+     *                                returned by list_settings() for section with the "locale" key. Valid
      *                                timezones can be obtained in Javascript as explained here:
      *                                https://stackoverflow.com/questions/38399465/how-to-get-list-of-all-timezones-in-javascript
      *                                or in PHP using timezone_identifiers_list(). Do not include the _id property, it
@@ -1679,7 +1710,8 @@ class Client
         $device_adopt = false,
         $device_restart = false
     ) {
-        $email_valid = filter_var(trim($email), FILTER_VALIDATE_EMAIL);
+        $email       = trim($email);
+        $email_valid = filter_var($email, FILTER_VALIDATE_EMAIL);
         if (!$email_valid) {
             trigger_error('The email address provided is invalid!');
             return false;
@@ -1687,7 +1719,7 @@ class Client
 
         $payload = [
             'name'        => trim($name),
-            'email'       => trim($email),
+            'email'       => $email,
             'for_sso'     => $enable_sso,
             'cmd'         => 'invite-admin',
             'role'        => 'admin',
@@ -1714,13 +1746,13 @@ class Client
      *
      * @param string $admin_id       _id value of the admin user to assign, can be obtained using the
      *                               list_all_admins() method/function
-     * @param bool   $readonly       optional, whether or not the new admin has readonly
+     * @param bool   $readonly       optional, whether the new admin has readonly
      *                               permissions, default value is false which gives the new admin
      *                               Administrator permissions
-     * @param bool   $device_adopt   optional, whether or not the new admin has permissions to
+     * @param bool   $device_adopt   optional, whether the new admin has permissions to
      *                               adopt devices, default value is false. With versions < 5.9.X this only applies
      *                               when readonly is true.
-     * @param bool   $device_restart optional, whether or not the new admin has permissions to
+     * @param bool   $device_restart optional, whether the new admin has permissions to
      *                               restart devices, default value is false. With versions < 5.9.X this only applies
      *                               when readonly is true.
      * @return bool true on success
@@ -1868,10 +1900,10 @@ class Client
      * @param string $note       optional, note to attach to the hotspot operator
      * @return bool true upon success
      */
-    public function create_hotspotop($name, $x_password, $note = null)
+    public function create_hotspotop($name, $x_password, $note = '')
     {
         $payload = ['name' => $name, 'x_password' => $x_password];
-        if (!isset($note)) {
+        if (!empty($note)) {
             $payload['note'] = trim($note);
         }
 
@@ -1907,7 +1939,7 @@ class Client
         $minutes,
         $count = 1,
         $quota = 0,
-        $note = null,
+        $note = '',
         $up = null,
         $down = null,
         $megabytes = null
@@ -1919,7 +1951,7 @@ class Client
             'quota'  => intval($quota),
         ];
 
-        if (!is_null($note)) {
+        if (!empty($note)) {
             $payload['note'] = trim($note);
         }
 
@@ -2548,7 +2580,7 @@ class Client
      * @return array containing wireless networks and their settings, or an array containing a single wireless network
      *               when using the <wlan_id> parameter
      */
-    public function list_wlanconf($wlan_id = null)
+    public function list_wlanconf($wlan_id = '')
     {
         return $this->fetch_results('/api/s/' . $this->site . '/rest/wlanconf/' . trim($wlan_id));
     }
@@ -2649,7 +2681,7 @@ class Client
      * @param string $name         optional, SSID
      * @return bool true on success
      */
-    public function set_wlansettings($wlan_id, $x_passphrase, $name = null)
+    public function set_wlansettings($wlan_id, $x_passphrase, $name = '')
     {
         $payload                 = [];
         $payload['x_passphrase'] = trim($x_passphrase);
@@ -2777,7 +2809,7 @@ class Client
      *                         by default all alarms are archived
      * @return bool true on success
      */
-    public function archive_alarm($alarm_id = null)
+    public function archive_alarm($alarm_id = '')
     {
         $payload = ['cmd' => 'archive-all-alarms'];
         if (!empty($alarm_id)) {
@@ -3016,9 +3048,9 @@ class Client
      */
     public function create_radius_account($name, $x_password, $tunnel_type = null, $tunnel_medium_type = null, $vlan = null)
     {
-        $tunnel_types        = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
-        $tunnel_medium_types = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
-        if ((!is_null($tunnel_type) && !in_array($tunnel_type, $tunnel_types)) || (!is_null($tunnel_medium_type) && !in_array($tunnel_medium_type, $tunnel_medium_types)) || ($tunnel_type ^ $tunnel_medium_type)) {
+        $tunnel_type_values        = [null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+        $tunnel_medium_type_values = [null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
+        if (!in_array($tunnel_type, $tunnel_type_values) || !in_array($tunnel_medium_type, $tunnel_medium_type_values) || ($tunnel_type xor $tunnel_medium_type)) {
             return false;
         }
 
@@ -3036,7 +3068,7 @@ class Client
         }
 
         if (!is_null($vlan)) {
-            $payload['vlan'] = (int) $vlan;
+            $payload['vlan'] = (string) $vlan;
         }
 
         return $this->fetch_results('/api/s/' . $this->site . '/rest/account', $payload);
@@ -3177,10 +3209,10 @@ class Client
      ****************************************************************/
 
     /**
-     * Fetch access points and other devices under management of the controller (USW and/or USG devices)
+     * Fetch access points and other devices under management of the controller (USW, USG, and/or UnIfi OS consoles)
      *
      * NOTE:
-     * changed function/method name to fit it's purpose
+     * changed function/method name to fit its purpose
      *
      * @param string $device_mac optional, the MAC address of a single device for which the call must be made
      * @return array containing known device objects (or a single device when using the <device_mac> parameter)
@@ -3337,7 +3369,7 @@ class Client
      *
      * @param boolean $return_json true returns the results in "pretty printed" json format,
      *                             false returns PHP stdClass Object format (default)
-     * @return object|string the raw results as returned by the controller API
+     * @return false|string|object|null the raw results as returned by the controller API
      */
     public function get_last_results_raw($return_json = false)
     {
@@ -3355,16 +3387,12 @@ class Client
     /**
      * Get last error message
      *
-     * @return object|bool the error message of the last method called in PHP stdClass Object format, returns false if
-     *                     unavailable
+     * @return string the error message of the last method called in PHP stdClass Object format, an empty string when
+     *                none available
      */
     public function get_last_error_message()
     {
-        if (!is_null($this->last_error_message)) {
-            return $this->last_error_message;
-        }
-
-        return false;
+        return $this->last_error_message;
     }
 
     /**
@@ -3570,12 +3598,12 @@ class Client
      * Set value for the private property $curl_http_version
      *
      * NOTES:
-     * - as of cURL version 7.62.0 the default value is CURL_HTTP_VERSION_2TLS which may cause issues
-     * - the default value used in this class is CURL_HTTP_VERSION_1_1
-     * - https://curl.se/libcurl/c/CURLOPT_HTTP_VERSION.html
+     * - as of cURL version 7.62.0 the default value is CURL_HTTP_VERSION_2TLS which may cause issues,
+     *   this method allows to set the value to CURL_HTTP_VERSION_1_1 when needed
      *
-     * @param int $http_version new value for $curl_http_version, can be CURL_HTTP_VERSION_1_1 int(2)
-     *                          or CURL_HTTP_VERSION_2TLS int(4)
+     * @param int $http_version new value for $curl_http_version, CURL_HTTP_VERSION_1_1 int(2) or
+     *                          CURL_HTTP_VERSION_2TLS int(4) are recommended
+     * @see https://curl.se/libcurl/c/CURLOPT_HTTP_VERSION.html
      */
     public function set_curl_http_version($http_version)
     {
@@ -3587,6 +3615,7 @@ class Client
      *
      * @return int current value of $request_timeout, can be CURL_HTTP_VERSION_1_1 int(2) or
      *             CURL_HTTP_VERSION_2TLS int(4)
+     * @see https://curl.se/libcurl/c/CURLOPT_HTTP_VERSION.html
      */
     public function get_curl_http_version()
     {
@@ -3615,7 +3644,7 @@ class Client
         /**
          * guard clause to check if logged in when needed
          */
-        if ($login_required && !$this->is_loggedin) {
+        if ($login_required && !$this->is_logged_in) {
             return false;
         }
 
@@ -3627,7 +3656,7 @@ class Client
 
             if (isset($response->meta->rc)) {
                 if ($response->meta->rc === 'ok') {
-                    $this->last_error_message = null;
+                    $this->last_error_message = '';
                     if (is_array($response->data) && !$boolean) {
                         return $response->data;
                     }
@@ -3842,17 +3871,17 @@ class Client
                 $cookie_crumbs = explode(';', $cookie);
                 foreach ($cookie_crumbs as $cookie_crumb) {
                     if (strpos($cookie_crumb, 'unifises') !== false) {
-                        $this->cookies     = $cookie_crumb;
-                        $this->is_loggedin = true;
-                        $this->is_unifi_os = false;
+                        $this->cookies      = $cookie_crumb;
+                        $this->is_logged_in = true;
+                        $this->is_unifi_os  = false;
 
                         break;
                     }
 
                     if (strpos($cookie_crumb, 'TOKEN') !== false) {
-                        $this->cookies     = $cookie_crumb;
-                        $this->is_loggedin = true;
-                        $this->is_unifi_os = true;
+                        $this->cookies      = $cookie_crumb;
+                        $this->is_logged_in = true;
+                        $this->is_unifi_os  = true;
 
                         break;
                     }
@@ -3868,7 +3897,7 @@ class Client
      *
      * @param string       $path    path for the request
      * @param object|array $payload optional, payload to pass with the request
-     * @return bool|array|string response returned by the controller API, false upon error
+     * @return bool|string response returned by the controller API, false upon error
      */
     protected function exec_curl($path, $payload = null)
     {
@@ -3973,8 +4002,8 @@ class Client
                     $_SESSION['unificookie'] = '';
                 }
 
-                $this->is_loggedin = false;
-                $this->cookies     = '';
+                $this->is_logged_in = false;
+                $this->cookies      = '';
                 $this->exec_retries++;
                 curl_close($ch);
 
@@ -3986,7 +4015,7 @@ class Client
                 /**
                  * when re-login was successful, simply execute the same cURL request again
                  */
-                if ($this->is_loggedin) {
+                if ($this->is_logged_in) {
                     if ($this->debug) {
                         error_log(__FUNCTION__ . ': re-logged in, calling exec_curl again');
                     }
