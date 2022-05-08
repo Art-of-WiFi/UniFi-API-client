@@ -31,6 +31,7 @@ class Client
     protected $user                 = '';
     protected $password             = '';
     protected $site                 = 'default';
+    protected $is_hotspot           = false;
     protected $version              = '6.2.26';
     protected $debug                = false;
     protected $is_logged_in         = false;
@@ -61,8 +62,17 @@ class Client
      * @param bool   $ssl_verify optional, whether to validate the controller's SSL certificate or not, a value of true
      *                           is recommended for production environments to prevent potential MitM attacks, default
      *                           value (false) disables validation of the controller's SSL certificate
+     * @param bool   $is_hotspot optional, if $user is Hotspot manager's operator set to true
      */
-    public function __construct($user, $password, $baseurl = '', $site = '', $version = '', $ssl_verify = false)
+    public function __construct(
+        $user, 
+        $password, 
+        $baseurl = '', 
+        $site = '', 
+        $version = '',
+        $ssl_verify = false,
+        $is_hotspot = false
+        )
     {
         if (!extension_loaded('curl')) {
             trigger_error('The PHP curl extension is not loaded. Please correct this before proceeding!');
@@ -70,6 +80,8 @@ class Client
 
         $this->user     = trim($user);
         $this->password = trim($password);
+
+        $this->is_hotspot = (bool) $is_hotspot;
 
         if (!empty($baseurl)) {
             $this->check_base_url($baseurl);
@@ -175,6 +187,14 @@ class Client
         if ($http_code === 200) {
             $this->is_unifi_os         = true;
             $curl_options[CURLOPT_URL] = $this->baseurl . '/api/auth/login';
+        }
+
+        /**
+         * add 'site_name' and 'for_hotspot' parameters when $is_hotspot value is true 
+         */
+        if ($this->is_hotspot) {
+            $curl_options[CURLOPT_POSTFIELDS] = json_encode(['username' => $this->user, 'password' => $this->password,
+                                                             'site_name' => $this->site, 'for_hotspot' => true]);
         }
 
         curl_setopt_array($ch, $curl_options);
