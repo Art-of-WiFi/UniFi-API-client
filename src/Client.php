@@ -2588,7 +2588,8 @@ class Client
      * @param string  $x_passphrase     new pre-shared key, minimal length is 8 characters, maximum length is 63,
      *                                  assign a value of null when security = 'open'
      * @param string  $usergroup_id     user group id that can be found using the list_usergroups() function
-     * @param string  $wlangroup_id     wlan group id that can be found using the list_wlan_groups() function
+     * @param string  $wlangroup_id     optional, wlan group id that can be found using the list_wlan_groups() 
+     *                                  function - required for UniFi controller versions earlier than 6.X
      * @param boolean $enabled          optional, enable/disable wlan
      * @param boolean $hide_ssid        optional, hide/unhide wlan SSID
      * @param boolean $is_guest         optional, apply guest policies or not
@@ -2609,7 +2610,7 @@ class Client
         $name,
         $x_passphrase,
         $usergroup_id,
-        $wlangroup_id,
+        $wlangroup_id = null,
         $enabled = true,
         $hide_ssid = false,
         $is_guest = false,
@@ -2626,7 +2627,6 @@ class Client
         $payload = [
             'name'             => trim($name),
             'usergroup_id'     => trim($usergroup_id),
-            'wlangroup_id'     => trim($wlangroup_id),
             'enabled'          => $enabled,
             'hide_ssid'        => $hide_ssid,
             'is_guest'         => $is_guest,
@@ -2642,6 +2642,10 @@ class Client
             $payload['networkconf_id'] = $vlan_id;
         }
 
+        if (!empty($wlangroup_id)) {
+            $payload['wlangroup_id'] = trim($wlangroup_id);
+        }
+
         if (!empty($x_passphrase) && $security !== 'open') {
             $payload['x_passphrase'] = trim($x_passphrase);
         }
@@ -2650,7 +2654,7 @@ class Client
             $payload['ap_group_ids'] = $ap_group_ids;
         }
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/add/wlanconf', $payload);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/wlanconf', $payload);
     }
 
     /**
