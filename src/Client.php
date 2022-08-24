@@ -2649,6 +2649,10 @@ class Client
         if (!empty($x_passphrase) && $security !== 'open') {
             $payload['x_passphrase'] = trim($x_passphrase);
         }
+        
+        if (gettype($ap_group_ids) == "string") {
+            $ap_group_ids = [$ap_group_ids];
+        }
 
         if (!empty($ap_group_ids) && is_array($ap_group_ids)) {
             $payload['ap_group_ids'] = $ap_group_ids;
