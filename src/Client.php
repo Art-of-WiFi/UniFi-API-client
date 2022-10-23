@@ -3673,6 +3673,26 @@ class Client
             }
 
             /**
+             * to deal with response from unifi os access controller
+             */
+            if (isset($response->code) && isset($response->msg)) {
+                if ($response->code === 1 && $response->msg === "success") {
+                    $this->last_error_message = '';
+                    if (is_array($response->data) && !$boolean) {
+                        return $response->data;
+                    }
+
+                    return true;
+                }
+                else {
+                    $this->last_error_message = $response->msg;
+                    if ($this->debug) {
+                        trigger_error('Debug: Last error message: ' . $this->last_error_message);
+                    }
+                }
+            }
+
+            /**
              * to deal with a response coming from the new v2 API
              */
             if (strpos($path, '/v2/api/') === 0) {
@@ -3910,7 +3930,10 @@ class Client
         $this->curl_headers = [];
         $url                = $this->baseurl . $path;
 
-        if ($this->is_unifi_os) {
+        /**
+         * if path contains /proxy, we are trying to access another controller and should not try to mess with the path
+         */
+        if ($this->is_unifi_os && strpos($path, '/proxy') === false) {
             $url = $this->baseurl . '/proxy/network' . $path;
         }
 
