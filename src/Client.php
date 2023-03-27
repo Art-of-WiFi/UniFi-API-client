@@ -1398,6 +1398,16 @@ class Client
     }
 
     /**
+     * List of site devices with a basic subset of fields (e.g., mac, state, adopted, disabled, type, model, name)
+     *
+     * @return array|false an array containing known UniFi device objects), false upon error
+     */
+    public function list_devices_basic()
+    {
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/device-basic');
+    }
+
+    /**
      * Fetch UniFi devices
      *
      * @param string $device_mac optional, the MAC address of a single UniFi device for which the call must be made
