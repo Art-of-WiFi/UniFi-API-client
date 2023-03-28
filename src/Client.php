@@ -1409,23 +1409,14 @@ class Client
     /**
      * Fetch UniFi devices
      *
-     * @param array $device_macs optional, array containing the MAC addresses (strings) of the devices to filter by
+     * @param array|string $device_macs optional, array containing the MAC addresses (strings) of the devices to filter by,
+     *                                  may also be a string containing a single MAC address
      * @return array|false an array containing known UniFi device objects (optionally filtered by the <device_macs>
      *                     parameter), false upon error
      */
     public function list_devices($device_macs = [])
     {
-        // Backward-compatibility with previous versions of this library
-        if (is_string($device_macs)) {
-            trigger_error(
-                'MAC addresses should be passed as an array of strings of the devices to filter by',
-                E_USER_DEPRECATED
-            );
-
-            $device_macs = [strtolower(trim($device_macs))];
-        }
-
-        $payload = ['macs' => $device_macs];
+        $payload = ['macs' => (array) $device_macs];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/device', $payload);
     }
