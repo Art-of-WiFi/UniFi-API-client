@@ -3241,7 +3241,7 @@ class Client
             E_USER_DEPRECATED
         );
 
-        return $this->list_devices([$device_mac]);
+        return $this->list_devices($device_mac);
     }
 
     /**
