@@ -53,7 +53,7 @@ $unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $
 $set_debug_mode   = $unifi_connection->set_debug($debug);
 $loginresults     = $unifi_connection->login();
 if ($loginresults) {
-    $pdu_details = $unifi_connection->list_devices([$pdu_mac]);
+    $pdu_details = $unifi_connection->list_devices($pdu_mac);
 
     /**
      * change the model below from USPPDUP to UP1 when using a USP-Plug (thanks to @thesohoguy for contributing this)

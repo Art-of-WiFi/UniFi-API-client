@@ -63,7 +63,7 @@ $new_ports_config = [
 $unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion, false);
 $set_debug_mode   = $unifi_connection->set_debug(false);
 $loginresults     = $unifi_connection->login();
-$data             = $unifi_connection->list_devices([$device_mac]);
+$data             = $unifi_connection->list_devices($device_mac);
 $device_id        = $data[0]->device_id;
 $update_device    = $unifi_connection->set_device_settings_base($device_id, $new_ports_config);
 
