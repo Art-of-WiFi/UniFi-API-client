@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.79
+ * @version Release: 1.1.80
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -26,7 +26,7 @@ class Client
      * NOTE:
      * do not modify the values here, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION             = '1.1.79';
+    const CLASS_VERSION             = '1.1.80';
     protected $baseurl              = 'https://127.0.0.1:8443';
     protected $user                 = '';
     protected $password             = '';
@@ -424,8 +424,7 @@ class Client
      * Add/modify/remove a client-device note
      *
      * @param string $user_id id of the client-device to be modified
-     * @param string $note    optional, note to be applied to the client-device, when empty or not set,
-     *                        the existing note for the client-device is removed and "noted" attribute set to false
+     * @param string $note    optional, note to be applied to the client-device
      * @return bool returns true upon success
      */
     public function set_sta_note($user_id, $note = '')
@@ -1448,10 +1447,9 @@ class Client
     }
 
     /**
-     * Generate backup
+     * Generate a backup
      *
-     * NOTES:
-     * this is an experimental function, please do not use unless you know exactly what you're doing
+     * NOTES: this is an experimental function, please do not use unless you know exactly what you're doing
      *
      * @return array|bool URL from where the backup file can be downloaded once generated, false upon failure
      */
@@ -1469,6 +1467,20 @@ class Client
     public function list_backups()
     {
         $payload = ['cmd' => 'list-backups'];
+        return $this->fetch_results('/api/s/' . $this->site . '/cmd/backup', $payload);
+    }
+
+    /**
+     * Generate a backup/export of the current site
+     *
+     * NOTES: this is an experimental function, please do not use unless you know exactly what you're doing
+     *
+     * @return array|bool URL from where the backup/export file can be downloaded once generated, false upon failure
+     */
+    public function generate_backup_site()
+    {
+        $payload = ['cmd' => 'export-site'];
+
         return $this->fetch_results('/api/s/' . $this->site . '/cmd/backup', $payload);
     }
 
