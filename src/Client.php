@@ -2617,14 +2617,15 @@ class Client
      * @param string  $security         optional, security type (open, wep, wpapsk, wpaeap)
      * @param string  $wpa_mode         optional, wpa mode (wpa, wpa2, ..)
      * @param string  $wpa_enc          optional, encryption (auto, ccmp)
-     * @param boolean $vlan_enabled     optional, enable/disable VLAN for this wlan (is ignored as of 1.1.73)
-     * @param string  $vlan_id          optional, "_id" value  of the VLAN to assign to this WLAN, can be found using
-     *                                  list_networkconf()
+     * @param boolean $vlan_enabled     optional, enable/disable VLAN for this wlan, only for for UniFi controller
+     *                                  version 5
+     * @param string  $networkconf_id   optional, "_id" value  of the VLAN to assign to this WLAN, can be found using
+     *                                  list_networkconf(), only for for UniFi controller version 6
      * @param boolean $uapsd_enabled    optional, enable/disable Unscheduled Automatic Power Save Delivery
      * @param boolean $schedule_enabled optional, enable/disable wlan schedule
      * @param array   $schedule         optional, schedule rules
-     * @param array   $ap_group_ids     optional, array of ap group ids, required for UniFi controller versions 6.0.X
-     *                                  and higher
+     * @param array   $ap_group_ids     optional, array of ap group ids, required for UniFi controller version 6
+     * @param int     $vlan             optional, vlan id, only used for for UniFi controller version 5
      * @return bool true on success
      */
     public function create_wlan(
@@ -2639,11 +2640,12 @@ class Client
         $wpa_mode = 'wpa2',
         $wpa_enc = 'ccmp',
         $vlan_enabled = null,
-        $vlan_id = null,
+        $networkconf_id = null,
         $uapsd_enabled = false,
         $schedule_enabled = false,
         $schedule = [],
-        $ap_group_ids = null
+        $ap_group_ids = null,
+        $vlan = null
     ) {
         $payload = [
             'name'             => trim($name),
@@ -2655,13 +2657,15 @@ class Client
             'security'         => trim($security),
             'wpa_mode'         => trim($wpa_mode),
             'wpa_enc'          => trim($wpa_enc),
+            'vlan_enabled'     => $vlan_enabled,
+            'vlan'             => $vlan,
             'uapsd_enabled'    => $uapsd_enabled,
             'schedule_enabled' => $schedule_enabled,
             'schedule'         => $schedule,
         ];
 
-        if (!empty($vlan_id)) {
-            $payload['networkconf_id'] = $vlan_id;
+        if (!empty($networkconf_id)) {
+            $payload['networkconf_id'] = $networkconf_id;
         }
 
         if (!empty($x_passphrase) && $security !== 'open') {
