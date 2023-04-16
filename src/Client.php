@@ -2625,6 +2625,7 @@ class Client
      * @param array   $schedule         optional, schedule rules
      * @param array   $ap_group_ids     optional, array of ap group ids, required for UniFi controller versions 6.0.X
      *                                  and higher
+     * @param array   $payload          optional, array of additional parameters (wlan_bands, wpa3_support, etc.)
      * @return bool true on success
      */
     public function create_wlan(
@@ -2643,9 +2644,10 @@ class Client
         $uapsd_enabled = false,
         $schedule_enabled = false,
         $schedule = [],
-        $ap_group_ids = null
+        $ap_group_ids = null,
+        array $payload = []
     ) {
-        $payload = [
+        $payload = \array_merge($payload, [
             'name'             => trim($name),
             'usergroup_id'     => trim($usergroup_id),
             'wlangroup_id'     => trim($wlangroup_id),
@@ -2658,7 +2660,7 @@ class Client
             'uapsd_enabled'    => $uapsd_enabled,
             'schedule_enabled' => $schedule_enabled,
             'schedule'         => $schedule,
-        ];
+        ]);
 
         if (!empty($vlan_id)) {
             $payload['networkconf_id'] = $vlan_id;
