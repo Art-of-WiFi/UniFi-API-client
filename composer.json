@@ -31,5 +31,10 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^5.7"
+    },
+    "scripts": {
+        "test" : [
+            "vendor/bin/phpunit --testdox"
+        ]
     }
 }
