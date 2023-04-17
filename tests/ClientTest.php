@@ -9,7 +9,7 @@ class ClientTest extends TestCase
 {
     private $client;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->client = new Client('unifi', 'unifi');
     }
@@ -29,9 +29,8 @@ class ClientTest extends TestCase
 
         // whitespace (debug mode)
         $this->client->set_debug(true);
-        $this->expectException(\PHPUnit_Framework_Error_Notice::class);
-        $this->expectExceptionCode(E_USER_NOTICE);
-        $this->expectExceptionMessage('The provided (short) site name may not contain any spaces');
+        $this->expectNotice();
+        $this->expectNoticeMessage('The provided (short) site name may not contain any spaces');
         $this->client->set_site('   foobar ');
     }
 }
