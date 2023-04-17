@@ -34,7 +34,10 @@
     },
     "scripts": {
         "test" : [
-            "vendor/bin/phpunit --testdox"
+            "vendor/bin/phpunit --testdox --testsuite \"Unit tests\""
+        ],
+        "integration-test" : [
+            "vendor/bin/phpunit --testdox --testsuite \"Integration tests\""
         ]
     }
 }

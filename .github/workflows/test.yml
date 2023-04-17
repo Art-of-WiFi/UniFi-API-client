@@ -9,8 +9,24 @@ jobs:
 
     strategy:
       matrix:
+        unifi-version: [ stable-5, stable-6, v7.0, v7.1, v7.2, v7.3 ]
         php-version: [ 7.2, 7.3, 7.4, "8.0", 8.1, 8.2 ]
+        mongo-version: [ 3.6 ]
         os: [ ubuntu-latest ]
+
+    services:
+      mongo:
+        image: mongo:${{ matrix.mongo-version }}
+        ports:
+          - "27017:27017/tcp"
+      unifi:
+        image: jacobalberty/unifi:${{ matrix.unifi-version }}
+        env:
+          DB_URI: mongodb://mongo/unifi
+          STATDB_URI: mongodb://mongo/unifi_stat
+          DB_NAME: unifi
+        ports:
+          - "8443:8443/tcp"
 
     steps:
       - name: Checkout
@@ -39,3 +55,7 @@ jobs:
       - name: Unit tests
         run: |
           composer run-script test
+
+      - name: Integration tests
+        run: |
+          composer run-script integration-test   
