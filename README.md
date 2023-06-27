@@ -2,7 +2,7 @@
 
 A PHP class that provides access to Ubiquiti's [**UniFi Network Controller**](https://unifi-network.ui.com/) API.
 
-UniFi Network Controller software versions 4.X.X, 5.X.X, 6.X.X, and 7.X.X (version 7.0.23 has been confirmed to work)
+UniFi Network Controller software versions 4.X.X, 5.X.X, 6.X.X, and 7.X.X (version 7.2.93 has been confirmed to work)
 are supported as well as UniFi OS-based controllers. This class is used by our API browser tool which can be found
 [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
@@ -27,8 +27,9 @@ Support for UniFi OS-based controllers has been added as of version 1.1.47:
 - UniFi Dream Router (UDR)
 - UniFi Dream Machine (UDM)
 - UniFi Dream Machine Pro (UDM PRO)
-- Cloud Key Gen2 (UCK G2), firmware version 2.0.24 or higher
-- Cloud Key Gen2 Plus (UCK G2 Plus), firmware version 2.0.24 or higher
+- UniFi Cloud Key Gen2 (UCK G2), firmware version 2.0.24 or higher
+- UniFi Cloud Key Gen2 Plus (UCK G2 Plus), firmware version 2.0.24 or higher
+- UniFi Cloud Console, details [here](https://help.ui.com/hc/en-us/articles/4415364143511)
 
 The class automatically detects UniFi OS-based controllers and adjusts URLs and several functions/methods accordingly.
 If your own code implements strict validation of the URL that is passed to the constructor, please adapt your
@@ -183,6 +184,8 @@ more details on each of the functions/methods and their respective parameters.
 - edit_usergroup()
 - extend_guest_validity()
 - forget_sta() (supported on controller version 5.9.X and higher)
+- generate_backup()
+- generate_backup_site()
 - invite_admin()
 - led_override()
 - list_admins()
@@ -352,7 +355,7 @@ This class is based on the initial work by the following developers:
 
 and the API as published by Ubiquiti:
 
-- https://dl.ui.com/unifi/7.0.23/unifi_sh_api
+- https://dl.ui.com/unifi/7.0.25/unifi_sh_api
 
 ## Important Disclaimer
 
