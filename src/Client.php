@@ -119,7 +119,7 @@ class Client
      *
      * @return bool|int returns true upon success, false or HTTP status upon error
      */
-    public function login()
+    public function login($token_2fa = null)
     {
         /**
          * skip the login process if already logged in
@@ -155,12 +155,21 @@ class Client
             trigger_error('cURL error: ' . curl_error($ch));
         }
 
+        $fields = [
+            'username' => $this->user,
+            'password' => $this->password,
+        ];
+
+        if ($token_2fa !== null) {
+            $field['ubic_2fa_token'] = $token_2fa;
+        }
+        
         /**
          * prepare the actual login
          */
         $curl_options = [
             CURLOPT_POST       => true,
-            CURLOPT_POSTFIELDS => json_encode(['username' => $this->user, 'password' => $this->password]),
+            CURLOPT_POSTFIELDS => json_encode($fields),
             CURLOPT_HTTPHEADER => [
                 'content-type: application/json',
                 'Expect:',
