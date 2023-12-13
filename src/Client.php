@@ -1464,7 +1464,7 @@ class Client
      */
     public function set_tagged_devices(array $devices_macs, $tag_id)
     {
-        $this->request_type = 'PUT';
+        $this->curl_method = 'PUT';
 
         $payload = ['member_table' => $devices_macs];
 
@@ -1482,7 +1482,7 @@ class Client
      */
     public function delete_tag($tag_id)
     {
-        $this->request_type = 'DELETE';
+        $this->curl_method = 'DELETE';
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/tag/' . $tag_id);
     }
