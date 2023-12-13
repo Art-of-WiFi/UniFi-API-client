@@ -8,6 +8,9 @@
  * usage:          If the file is called via a web URL, it should be called like: update_switch_poe-mode.php?poe_mode=off
  *                 If the file is called via the command line, it should be called like: php update_switch_poe-mode.php off
  *                 The values can be "off" or "auto"
+ *
+ * IMPORTANT INFORMATION:
+ * This example no longer works with controller versions 7.1.X and higher. You now need to work with port profiles to enable POE on a switch port.
  */
 
 /**
