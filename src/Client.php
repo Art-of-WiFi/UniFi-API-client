@@ -1435,6 +1435,21 @@ class Client
     }
 
     /**
+     * Get (device) tag (using REST)
+     *
+     * NOTES: this endpoint was introduced with controller versions 5.5.X
+     *
+     * @param string $tag_id required, _id value of the tag to retreive
+     * @return array containing matching tag objects
+     */
+    public function get_tag($tag_id)
+    {
+        $this->curl_method = 'GET';
+
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/tag/' . $tag_id);
+    }
+
+    /**
      * Create (device) tag (using REST)
      *
      * NOTES: this endpoint was introduced with controller versions 5.5.X
