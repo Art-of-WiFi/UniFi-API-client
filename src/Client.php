@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.81
+ * @version Release: 1.1.82
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -25,7 +25,7 @@ class Client
      *
      * NOTE: do **not** modify the values here, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION             = '1.1.81';
+    const CLASS_VERSION             = '1.1.82';
     protected $baseurl              = 'https://127.0.0.1:8443';
     protected $user                 = '';
     protected $password             = '';
@@ -1408,17 +1408,16 @@ class Client
     /**
      * Fetch UniFi devices
      *
-     * @param array|string $device_mac optional, the MAC address of a single UniFi device for which the call must be made
-     * @return array|false an array containing known UniFi device objects (or a single device when using the <device_mac>
+     * @param array|string $device_macs optional, array containing the MAC addresses (lowercase strings) of the devices
+     *                                  to filter by, may also be a (lowercase) string containing a single MAC address
+     * @return array|false an array containing known UniFi device objects (optionally filtered by the <device_macs>
      *                     parameter), false upon error
      */
-    public function list_devices($device_mac = null)
+    public function list_devices($device_macs = [])
     {
-        if (is_string($device_mac)) {
-            $device_mac = strtolower(trim($device_mac));
-        }
+        $payload = ['macs' => (array) $device_macs];
 
-        return $this->fetch_results('/api/s/' . $this->site . '/stat/device/' . $device_mac);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/device', $payload);
     }
 
     /**
