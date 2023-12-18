@@ -18,8 +18,7 @@ easy inclusion in your projects.
   - tested on Apache 2.4 with PHP 5.6.1 and cURL 7.42.1 and with PHP 7.4.9 and cURL 7.68.0
 - direct network connectivity between this server and the host and port (usually TCP port 8443 or port 443 for 
   UniFi OS) where the UniFi Controller is running
-- you must use **accounts with local access**, not UniFi Cloud accounts, to access the UniFi Controller API 
-  through this class
+- you must use **accounts with local access** to access the UniFi Controller API through this class, do not use UniFi Cloud accounts and do not enable 2FA on the accounts that you use with this class
 
 ## UniFi OS Support
 
