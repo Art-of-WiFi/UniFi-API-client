@@ -31,9 +31,16 @@ $mac = '<enter MAC address of your AP here>';
 /**
  * initialize the UniFi API connection class and log in to the controller to do our thing
  */
-$unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion); // initialize the class instance
-$set_debug_mode   = $unifi_connection->set_debug($debug);
-$loginresults     = $unifi_connection->login();
+$unifi_connection = new UniFi_API\Client(
+    $controlleruser,
+    $controllerpassword,
+    $controllerurl,
+    $site_id,
+    $controllerversion
+);
+
+$set_debug_mode = $unifi_connection->set_debug($debug);
+$loginresults   = $unifi_connection->login();
 
 /**
  * using the new method/function

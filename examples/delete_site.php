@@ -31,9 +31,16 @@ $site_to_delete = '<_id value of the site>';
 /**
  * initialize the UniFi API connection class and log in to the controller and do our thing
  */
-$unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
-$loginresults     = $unifi_connection->login();
-$results          = $unifi_connection->delete_site($site_to_delete);
+$unifi_connection = new UniFi_API\Client(
+    $controlleruser,
+    $controllerpassword,
+    $controllerurl,
+    $site_id,
+    $controllerversion
+);
+
+$loginresults = $unifi_connection->login();
+$results      = $unifi_connection->delete_site($site_to_delete);
 
 /**
  * provide feedback in json format

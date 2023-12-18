@@ -25,19 +25,26 @@ $debug   = false;
 /**
  * initialize the UniFi API connection class and log in to the controller and do our thing
  */
-$unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion, true);
-$set_debug_mode   = $unifi_connection->set_debug($debug);
-$loginresults     = $unifi_connection->login();
-$site_settings    = $unifi_connection->list_settings();
+$unifi_connection = new UniFi_API\Client(
+    $controlleruser,
+    $controllerpassword,
+    $controllerurl,
+    $site_id,
+    $controllerversion
+);
 
-$super_mgmt_settings = [];
+$set_debug_mode = $unifi_connection->set_debug($debug);
+$loginresults   = $unifi_connection->login();
+$site_settings  = $unifi_connection->list_settings();
+
+$super_mgmt_settings    = [];
 $super_mgmt_settings_id = '';
 
 if (!empty($site_settings)) {
-    foreach($site_settings as $section) {
+    foreach ($site_settings as $section) {
         echo 'section key: ' . $section->key . PHP_EOL;
         if ($section->key === 'super_mgmt') {
-            $super_mgmt_settings = $section;
+            $super_mgmt_settings    = $section;
             $super_mgmt_settings_id = $section->_id;
         }
     }

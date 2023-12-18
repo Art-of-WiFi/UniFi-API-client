@@ -28,7 +28,14 @@ $ap_mac  = '<enter MAC address of Access Point to check>';
  * initialize the UniFi API connection class and log in to the controller and do our thing
  * spectrum_scan_state()
  */
-$unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
+$unifi_connection = new UniFi_API\Client(
+    $controlleruser,
+    $controllerpassword,
+    $controllerurl,
+    $site_id,
+    $controllerversion
+);
+
 $set_debug_mode   = $unifi_connection->set_debug($debug);
 $loginresults     = $unifi_connection->login();
 $data             = $unifi_connection->spectrum_scan_state($ap_mac);

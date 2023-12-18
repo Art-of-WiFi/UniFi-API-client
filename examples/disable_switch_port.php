@@ -46,7 +46,14 @@ $port_conf_id = '<enter _id value of desired port configuration>';
 /**
  * initialize the UniFi API connection class and log in to the controller and do our thing
  */
-$unifi_connection   = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion, false);
+$unifi_connection = new UniFi_API\Client(
+    $controlleruser,
+    $controllerpassword,
+    $controllerurl,
+    $site_id,
+    $controllerversion
+);
+
 $set_debug_mode     = $unifi_connection->set_debug($debug);
 $loginresults       = $unifi_connection->login();
 $data               = $unifi_connection->list_devices($device_mac);

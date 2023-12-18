@@ -38,12 +38,19 @@ $attribs = ['rx_bytes', 'tx_bytes'];
 /**
  * initialize the UniFi API connection class and log in to the controller and do our thing
  */
-$unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion, true);
-$set_debug_mode   = $unifi_connection->set_debug(false);
-$loginresults     = $unifi_connection->login();
+$unifi_connection = new UniFi_API\Client(
+    $controlleruser,
+    $controllerpassword,
+    $controllerurl,
+    $site_id,
+    $controllerversion
+);
+
+$set_debug_mode = $unifi_connection->set_debug(false);
+$loginresults   = $unifi_connection->login();
 //$data             = $unifi_connection->stat_5minutes_user($mac, null, null, $attribs);
 //$data             = $unifi_connection->stat_hourly_user($mac, null, null, $attribs);
-$data             = $unifi_connection->stat_daily_user($mac, null, null, $attribs);
+$data = $unifi_connection->stat_daily_user($mac, null, null, $attribs);
 
 /**
  * provide feedback in json format

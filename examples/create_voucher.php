@@ -35,9 +35,16 @@ $site_id = '<enter your site id here>';
 /**
  * initialize the UniFi API connection class and log in to the controller
  */
-$unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
-$set_debug_mode   = $unifi_connection->set_debug($debug);
-$loginresults     = $unifi_connection->login();
+$unifi_connection = new UniFi_API\Client(
+    $controlleruser,
+    $controllerpassword,
+    $controllerurl,
+    $site_id,
+    $controllerversion
+);
+
+$set_debug_mode = $unifi_connection->set_debug($debug);
+$loginresults   = $unifi_connection->login();
 
 /**
  * then we create the required number of vouchers with the requested expiration value

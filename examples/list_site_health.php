@@ -26,14 +26,20 @@ $site_id = '<enter your site id here>';
 /**
  * initialize the UniFi API connection class and log in to the controller and pull the requested data
  */
+$unifi_connection = new UniFi_API\Client(
+    $controlleruser,
+    $controllerpassword,
+    $controllerurl,
+    $site_id,
+    $controllerversion
+);
 
-$unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
-$set_debug_mode   = $unifi_connection->set_debug($debug);
-$loginresults     = $unifi_connection->login();
-$result           = $unifi_connection->list_health();
+$set_debug_mode = $unifi_connection->set_debug($debug);
+$loginresults   = $unifi_connection->login();
+$result         = $unifi_connection->list_health();
 
 /**
  * output the results in correct json formatting
  */
 header('Content-Type: application/json');
-echo (json_encode($result, JSON_PRETTY_PRINT));
+echo(json_encode($result, JSON_PRETTY_PRINT));

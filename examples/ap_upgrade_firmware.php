@@ -24,8 +24,15 @@ $device_mac = '<enter MAC address of device to update>';
  * initialize the UniFi API connection class, log in to the controller
  * (this example assumes you have already assigned the correct values in config.php to the variables used)
  */
-$unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion, false);
-$login            = $unifi_connection->login();
+$unifi_connection = new UniFi_API\Client(
+    $controlleruser,
+    $controllerpassword,
+    $controllerurl,
+    $site_id,
+    $controllerversion
+);
+
+$login = $unifi_connection->login();
 
 /**
  * Run the actual upgrade

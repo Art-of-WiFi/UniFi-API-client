@@ -42,20 +42,21 @@ $lanports = [6];
 /**
  * This is the function that reads out the current port configuration and changes the value for the poe_mode for the ports defined in $lanports
  */
-function update_ports($running_config, $ports, $poe_mode){
+function update_ports($running_config, $ports, $poe_mode)
+{
     /**
      * Update already non-default ports
      */
     $running_config_count = count($running_config);
-    for($i = 0; $i < $running_config_count; $i++){
-        if(in_array($running_config[$i]->port_idx, $ports)){
+    for ($i = 0; $i < $running_config_count; $i++) {
+        if (in_array($running_config[$i]->port_idx, $ports)) {
             $running_config[$i]->poe_mode = $poe_mode;
             unset($ports[array_search($running_config[$i]->port_idx, $ports)]);
         }
     }
 
     $add_conf = [];
-    foreach($ports as $port){
+    foreach ($ports as $port) {
         $add_conf[] = [
             'port_idx' => $port,
             'poe_mode' => $poe_mode
@@ -65,12 +66,19 @@ function update_ports($running_config, $ports, $poe_mode){
     return array_merge($running_config, $add_conf);
 }
 
-$unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion, false);
-$set_debug_mode   = $unifi_connection->set_debug(false);
-$loginresults     = $unifi_connection->login();
-$data             = $unifi_connection->list_devices($device_mac);
-$device_id        = $data[0]->device_id;
-$current_conf     = $data[0]->port_overrides;
+$unifi_connection = new UniFi_API\Client(
+    $controlleruser,
+    $controllerpassword,
+    $controllerurl,
+    $site_id,
+    $controllerversion
+);
+
+$set_debug_mode = $unifi_connection->set_debug(false);
+$loginresults   = $unifi_connection->login();
+$data           = $unifi_connection->list_devices($device_mac);
+$device_id      = $data[0]->device_id;
+$current_conf   = $data[0]->port_overrides;
 
 /**
  * This reads in the values provided via URL or in the command line, if nothing is set than it will poe_mode will be set to "auto"

@@ -25,10 +25,17 @@ $site_id = '<enter your site id here>';
 /**
  * initialize the UniFi API connection class and log in to the controller and pull the requested data
  */
-$unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
-$set_debug_mode   = $unifi_connection->set_debug($debug);
-$loginresults     = $unifi_connection->login();
-$clients_array    = $unifi_connection->list_clients();
+$unifi_connection = new UniFi_API\Client(
+    $controlleruser,
+    $controllerpassword,
+    $controllerurl,
+    $site_id,
+    $controllerversion
+);
+
+$set_debug_mode = $unifi_connection->set_debug($debug);
+$loginresults   = $unifi_connection->login();
+$clients_array  = $unifi_connection->list_clients();
 
 /**
  * output the results in JSON format

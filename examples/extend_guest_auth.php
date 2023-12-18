@@ -23,9 +23,16 @@ require_once 'config.php';
 $site_id   = "default";
 $site_name = "*enter your site name*";
 
-$unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
-$set_debug_mode   = $unifi_connection->set_debug($debug);
-$loginresults     = $unifi_connection->login();
+$unifi_connection = new UniFi_API\Client(
+    $controlleruser,
+    $controllerpassword,
+    $controllerurl,
+    $site_id,
+    $controllerversion
+);
+
+$set_debug_mode = $unifi_connection->set_debug($debug);
+$loginresults   = $unifi_connection->login();
 
 if ($loginresults === 400) {
     print "UniFi controller login failure, please check your credentials in config.php.\n";
@@ -36,7 +43,8 @@ if ($loginresults === 400) {
      * loop thru all known guests
      */
     foreach ($guestlist as $guest) {
-        print "<pre>" . $guest->_id . " (" . $guest->mac . "), valid until " . date(DATE_ATOM, $guest->end) . " (" . $guest->end . ")</pre>";
+        print "<pre>" . $guest->_id . " (" . $guest->mac . "), valid until " .
+              date(DATE_ATOM, $guest->end) . " (" . $guest->end . ")</pre>";
 
         /**
          * just a sample: only extend validity of guests which have end date after 2017-04-02

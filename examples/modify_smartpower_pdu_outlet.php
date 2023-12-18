@@ -49,39 +49,52 @@ $new_cycle_enabled = false;
 /**
  * initialize the UniFi API connection class and log in to the controller and do our thing
  */
-$unifi_connection = new UniFi_API\Client($controlleruser, $controllerpassword, $controllerurl, $site_id, $controllerversion);
-$set_debug_mode   = $unifi_connection->set_debug($debug);
-$loginresults     = $unifi_connection->login();
-if ($loginresults) {
-    $pdu_details = $unifi_connection->list_devices($pdu_mac);
+$unifi_connection = new UniFi_API\Client(
+    $controlleruser,
+    $controllerpassword,
+    $controllerurl,
+    $site_id,
+    $controllerversion
+);
 
-    /**
-     * change the model below from USPPDUP to UP1 when using a USP-Plug (thanks to @thesohoguy for contributing this)
-     */
-    if (!empty($pdu_details) && property_exists($pdu_details[0], 'model') && $pdu_details[0]->model === 'USPPDUP' && property_exists($pdu_details[0], 'outlet_overrides')) {
-        $device_id        = $pdu_details[0]->_id;
-        $outlet_overrides = $pdu_details[0]->outlet_overrides;
-
-        foreach ($outlet_overrides as $key => $value) {
-            if ($value->index === $outlet_idx) {
-                $outlet_overrides[$key]->relay_state   = $new_relay_state;
-                $outlet_overrides[$key]->cycle_enabled = $new_cycle_enabled;
-            }
-        }
-
-        $pdu_update = $unifi_connection->set_device_settings_base($device_id, ['outlet_overrides' => $outlet_overrides]);
-
-        /**
-         * provide feedback in json format
-         */
-        echo 'results:' . PHP_EOL . PHP_EOL;
-        echo json_encode($pdu_update, JSON_PRETTY_PRINT);
-        echo PHP_EOL;
-    } else {
-        echo 'not a PDU device?';
-        echo PHP_EOL;
-    }
-} else {
+$set_debug_mode = $unifi_connection->set_debug($debug);
+$loginresults   = $unifi_connection->login();
+if (!$loginresults) {
     echo 'we encountered a login error!';
     echo PHP_EOL;
+    exit();
 }
+
+$pdu_details = $unifi_connection->list_devices($pdu_mac);
+
+/**
+ * change the model below from USPPDUP to UP1 when using a USP-Plug (thanks to @thesohoguy for contributing this)
+ */
+if (
+    !empty($pdu_details) &&
+    property_exists($pdu_details[0], 'model') &&
+    $pdu_details[0]->model === 'USPPDUP' &&
+    property_exists($pdu_details[0], 'outlet_overrides')
+) {
+    $device_id        = $pdu_details[0]->_id;
+    $outlet_overrides = $pdu_details[0]->outlet_overrides;
+
+    foreach ($outlet_overrides as $key => $value) {
+        if ($value->index === $outlet_idx) {
+            $outlet_overrides[$key]->relay_state   = $new_relay_state;
+            $outlet_overrides[$key]->cycle_enabled = $new_cycle_enabled;
+        }
+    }
+
+    $pdu_update = $unifi_connection->set_device_settings_base($device_id,
+        ['outlet_overrides' => $outlet_overrides]);
+
+    /**
+     * provide feedback in json format
+     */
+    echo 'results:' . PHP_EOL . PHP_EOL;
+    echo json_encode($pdu_update, JSON_PRETTY_PRINT);
+} else {
+    echo 'not a PDU device?';
+}
+echo PHP_EOL;

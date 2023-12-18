@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.80
+ * @version Release: 1.1.81
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -23,15 +23,14 @@ class Client
     /**
      * private and protected properties
      *
-     * NOTE:
-     * do not modify the values here, instead use the constructor or the getter and setter functions/methods
+     * NOTE: do **not** modify the values here, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION             = '1.1.80';
+    const CLASS_VERSION             = '1.1.81';
     protected $baseurl              = 'https://127.0.0.1:8443';
     protected $user                 = '';
     protected $password             = '';
     protected $site                 = 'default';
-    protected $version              = '6.2.26';
+    protected $version              = '7.3.76';
     protected $debug                = false;
     protected $is_logged_in         = false;
     protected $is_unifi_os          = false;
@@ -100,9 +99,9 @@ class Client
     public function __destruct()
     {
         /**
-         * if $_SESSION['unificookie'] is set, do not log out here
+         * if $_SESSION['unificookie'] is set, do not log out here except when this is a UniFi OS-based controller
          */
-        if (isset($_SESSION['unificookie'])) {
+        if (isset($_SESSION['unificookie']) && !$this->is_unifi_os) {
             return;
         }
 
@@ -1397,9 +1396,9 @@ class Client
     }
 
     /**
-     * List of site devices with a basic subset of fields (e.g., mac, state, adopted, disabled, type, model, name)
+     * List of UniFi devices with a basic subset of properties (e.g., mac, state, adopted, disabled, type, model, name)
      *
-     * @return array|false an array containing known UniFi device objects), false upon error
+     * @return array|false an array containing known UniFi device objects, false upon error
      */
     public function list_devices_basic()
     {
@@ -1409,7 +1408,7 @@ class Client
     /**
      * Fetch UniFi devices
      *
-     * @param string $device_mac optional, the MAC address of a single UniFi device for which the call must be made
+     * @param array|string $device_mac optional, the MAC address of a single UniFi device for which the call must be made
      * @return array|false an array containing known UniFi device objects (or a single device when using the <device_mac>
      *                     parameter), false upon error
      */
@@ -2625,6 +2624,7 @@ class Client
      * @param array   $schedule         optional, schedule rules
      * @param array   $ap_group_ids     optional, array of ap group ids, required for UniFi controller versions 6.0.X
      *                                  and higher
+     * @param array $payload            optional, array of additional parameters (wlan_bands, wpa3_support, etc.)
      * @return bool true on success
      */
     public function create_wlan(
@@ -2643,9 +2643,10 @@ class Client
         $uapsd_enabled = false,
         $schedule_enabled = false,
         $schedule = [],
-        $ap_group_ids = null
+        $ap_group_ids = null,
+        $payload = []
     ) {
-        $payload = [
+        $payload = array_merge($payload,[
             'name'             => trim($name),
             'usergroup_id'     => trim($usergroup_id),
             'wlangroup_id'     => trim($wlangroup_id),
@@ -2658,7 +2659,7 @@ class Client
             'uapsd_enabled'    => $uapsd_enabled,
             'schedule_enabled' => $schedule_enabled,
             'schedule'         => $schedule,
-        ];
+        ]);
 
         if (!empty($vlan_id)) {
             $payload['networkconf_id'] = $vlan_id;

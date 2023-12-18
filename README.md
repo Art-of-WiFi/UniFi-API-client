@@ -35,6 +35,9 @@ The class automatically detects UniFi OS-based controllers and adjusts URLs and 
 If your own code implements strict validation of the URL that is passed to the constructor, please adapt your
 logic to allow URLs without a port suffix or with port 443 when working with a UniFi OS-based controller.
 
+> **IMPORTANT NOTE**: cookies are no longer supported with UniFi OS-based controllers. If your application code does use cookies,
+  they will be ignored automatically when working with UniFi OS-based controllers.
+
 Please test all methods you plan on using thoroughly before using the API Client with
 UniFi OS devices in a production environment.
 
