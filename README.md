@@ -2,8 +2,8 @@
 
 A PHP class that provides access to Ubiquiti's [**UniFi Network Controller**](https://unifi-network.ui.com/) API.
 
-UniFi Network Controller software versions 4.X.X, 5.X.X, 6.X.X, and 7.X.X (version 7.2.93 has been confirmed to work)
-are supported as well as UniFi OS-based controllers. This class is used by our API browser tool which can be found
+UniFi Network Controller software versions 4.X.X, 5.X.X, 6.X.X, 7.X.X, and 8.X.X (version **8.0.21** has been confirmed to work)
+are supported as well as Network Applications on **UniFi OS-based consoles**. This class is used by our API browser tool which can be found
 [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 The package can be installed manually or by using
@@ -13,7 +13,7 @@ easy inclusion in your projects.
 ## Requirements
 
 - a server with:
-  - PHP 5.5.0 or higher 
+  - PHP 5.5.0 or higher (soon this requirement will be raised to PHP **7.4**)
   - PHP json and PHP cURL modules
   - tested on Apache 2.4 with PHP 5.6.1 and cURL 7.42.1 and with PHP 7.4.9 and cURL 7.68.0
 - direct network connectivity between this server and the host and port (usually TCP port 8443 or port 443 for 
@@ -31,15 +31,14 @@ Support for UniFi OS-based controllers has been added as of version 1.1.47:
 - UniFi Cloud Key Gen2 Plus (UCK G2 Plus), firmware version 2.0.24 or higher
 - UniFi Cloud Console, details [here](https://help.ui.com/hc/en-us/articles/4415364143511)
 
-The class automatically detects UniFi OS-based controllers and adjusts URLs and several functions/methods accordingly.
+The class automatically detects UniFi OS consoles and adjusts the URLs and several functions/methods accordingly.
+
 If your own code implements strict validation of the URL that is passed to the constructor, please adapt your
 logic to allow URLs without a port suffix or with port 443 when working with a UniFi OS-based controller.
 
 > **IMPORTANT NOTE**: cookies are no longer supported with UniFi OS-based controllers. If your application code does use cookies,
   they will be ignored automatically when working with UniFi OS-based controllers.
 
-Please test all methods you plan on using thoroughly before using the API Client with
-UniFi OS devices in a production environment.
 
 ## Installation
 
