@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.82
+ * @version Release: 1.1.83
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -25,7 +25,7 @@ class Client
      *
      * NOTE: do **not** modify the values here, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION             = '1.1.82';
+    const CLASS_VERSION             = '1.1.83';
     protected $baseurl              = 'https://127.0.0.1:8443';
     protected $user                 = '';
     protected $password             = '';
@@ -101,7 +101,7 @@ class Client
         /**
          * if $_SESSION['unificookie'] is set, do not log out here except when this is a UniFi OS-based controller
          */
-        if (isset($_SESSION['unificookie']) && !$this->is_unifi_os) {
+        if (isset($_SESSION['unificookie'])) {
             return;
         }
 
@@ -161,6 +161,7 @@ class Client
             CURLOPT_POST       => true,
             CURLOPT_POSTFIELDS => json_encode(['username' => $this->user, 'password' => $this->password]),
             CURLOPT_HTTPHEADER => [
+                'accept: application/json',
                 'content-type: application/json',
                 'Expect:',
             ],
@@ -247,6 +248,7 @@ class Client
         ];
 
         $logout_path = '/logout';
+
         if ($this->is_unifi_os) {
             $logout_path                         = '/api/auth/logout';
             $curl_options[CURLOPT_CUSTOMREQUEST] = 'POST';
@@ -3952,6 +3954,7 @@ class Client
              * add empty Expect header to prevent cURL from injecting an "Expect: 100-continue" header
              */
             $this->curl_headers = [
+                'accept: application/json',
                 'content-type: application/json',
                 'Expect:',
             ];
