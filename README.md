@@ -64,9 +64,12 @@ Or manually add the package to your composer.json file:
 }
 ```
 
-Finally, be sure to include the autoloader in your code:
+Finally, be sure to include the composer autoloader in your code if your framework doesn't already do this for you:
 
 ```php
+/**
+ * load the class using the composer autoloader
+ */
 require_once 'vendor/autoload.php';
 ```
 
