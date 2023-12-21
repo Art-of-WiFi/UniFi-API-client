@@ -81,6 +81,9 @@ git clone https://github.com/Art-of-WiFi/UniFi-API-client.git
 When git is done cloning, include the file containing the class like so in your code:
 
 ```php
+/**
+ * load the class directly instead of using the composer autoloader
+ */
 require_once 'path/to/src/Client.php';
 ```
 
@@ -91,6 +94,9 @@ simply [download the package](https://github.com/Art-of-WiFi/UniFi-API-client/ar
 file, then include the file containing the class in your code like so:
 
 ```php
+/**
+ * load the class directly instead of using the composer autoloader
+ */
 require_once 'path/to/src/Client.php';
 ```
 
