@@ -2,8 +2,9 @@
 
 A PHP class that provides access to Ubiquiti's [**UniFi Network Controller**](https://unifi-network.ui.com/) API.
 
-UniFi Network Controller software versions 4.X.X, 5.X.X, 6.X.X, 7.X.X, and 8.X.X (version **8.0.21** has been confirmed to work)
-are supported as well as Network Applications on **UniFi OS-based consoles**. This class is used by our API browser tool which can be found
+UniFi Network Controller software versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X (version **8.0.26** has been confirmed to work)
+are supported as well as Network Applications on **UniFi OS-based consoles** (UniFi OS 3.2.9 has been confirmed to work).
+This class is used by our API browser tool which can be found
 [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 The package can be installed manually or by using
@@ -14,12 +15,13 @@ easy inclusion in your projects.
 ## Requirements
 
 - a server with:
-  - PHP 5.5.0 or higher (soon this requirement will be raised to PHP **7.4**)
+  - PHP 5.5.0 or higher (this requirement will soon be raised to PHP **7.4**)
   - PHP json and PHP cURL modules
   - tested on Apache 2.4 with PHP 5.6.1 and cURL 7.42.1 and with PHP 7.4.9 and cURL 7.68.0
 - direct network connectivity between this server and the host and port (usually TCP port 8443 or port 443 for 
   UniFi OS) where the UniFi Controller is running
-- you must use **accounts with local access** to access the UniFi Controller API through this class, do not use UniFi Cloud accounts and do not enable 2FA on the accounts that you use with this class
+- you **must** use **accounts with local access permissions** to access the UniFi Controller API through this class
+- do not use UniFi Cloud accounts and do not enable 2FA for the accounts that you use with this class
 
 
 ## UniFi OS Support
@@ -39,10 +41,14 @@ UniFi OS consoles require you to connect using port **443** instead of **8443** 
 controllers. If your own code implements strict validation of the URL that is passed to the constructor, please adapt
 your logic to allow URLs without a port suffix or with port 443 when working with a UniFi OS-based controller.
 
-### Remote access to UniFi OS-based controllers
+
+### Remote API access to UniFi OS-based controllers
 When connecting to a UniFi OS gateway through the WAN interface, you need to create a specific firewall rule to
 allow this. See this blog post on the Art of WiFi website for more details:
 https://artofwifi.net/blog/how-to-access-the-unifi-controller-by-wan-ip-or-hostname-on-a-udm-pro
+
+The "custom firewall rule" approach described there is the recommended method.
+
 
 ## Installation
 
@@ -82,6 +88,7 @@ Finally, be sure to include the composer autoloader in your code if your framewo
 require_once 'vendor/autoload.php';
 ```
 
+
 ### Git
 
 Execute the following `git` command from the shell in your project directory:
@@ -99,6 +106,7 @@ When git is done cloning, include the file containing the class like so in your 
 require_once 'path/to/src/Client.php';
 ```
 
+
 ### Download the Release
 
 If you prefer not to use composer or git,
@@ -111,6 +119,7 @@ file, then include the file containing the class in your code like so:
  */
 require_once 'path/to/src/Client.php';
 ```
+
 
 ## Example usage
 
@@ -372,7 +381,7 @@ This class is based on the initial work by the following developers:
 
 and the API as published by Ubiquiti:
 
-- https://dl.ui.com/unifi/7.0.25/unifi_sh_api
+- https://dl.ui.com/unifi/8.0.26/unifi_sh_api
 
 
 ## Important Disclaimer
