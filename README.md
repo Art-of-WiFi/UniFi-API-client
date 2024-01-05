@@ -347,9 +347,14 @@ their purpose, and their respective parameters.
 
 There is still work to be done to add functionality and further improve the usability of
 this class, so all suggestions/comments are welcome. Please use the GitHub
-[issue list](https://github.com/Art-of-WiFi/UniFi-API-client/issues) or the Ubiquiti
+[Issues section](https://github.com/Art-of-WiFi/UniFi-API-client/issues) or the Ubiquiti
 Community forums (https://community.ubnt.com/t5/UniFi-Wireless/PHP-class-to-access-the-UniFi-controller-API-updates-and/td-p/1512870)
 to share your suggestions and questions.
+
+
+#### IMPORTANT NOTE:
+When encountering issues with the UniFi API using other libraries, cURL or Postman, please do **not** open an Issue. Such issues will be closed immediately.
+Please use the [Discussions](https://github.com/Art-of-WiFi/UniFi-API-client/discussions) section instead.
 
 
 ## Contribute
