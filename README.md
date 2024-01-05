@@ -1,10 +1,10 @@
 ## UniFi Controller API client class
 
-A PHP class that provides access to Ubiquiti's [**UniFi Network Controller**](https://unifi-network.ui.com/) API.
+A PHP class that provides access to Ubiquiti's [**UniFi Network Application**](https://unifi-network.ui.com/) API.
 
-UniFi Network Controller software versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X (version **8.0.26** has been confirmed to work)
+UniFi Network Application software versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X (version **8.0.26** has been confirmed to work)
 are supported as well as Network Applications on **UniFi OS-based consoles** (UniFi OS **3.2.9** has been confirmed to work).
-This class is used by our API browser tool which can be found
+This class is used by our API Browser tool which can be found
 [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 The package can be installed manually or by using
