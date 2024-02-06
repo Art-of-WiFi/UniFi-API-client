@@ -1425,11 +1425,13 @@ class Client
     /**
      * Fetch Fingerprint devices
      *
+     * @param int|string $fingerprint_source the id can be associate to client fingerprint_source, start from 0
+     * 
      * @return array|false an array of fingerprint, contain dev_ids, dev_type_ids, family_ids, os_name_ids, os_class_ids and vendor_ids, false upon error
      */
-    public function list_fingerprint_devices()
+    public function list_fingerprint_devices($fingerprint_source = 0)
     {
-        return $this->fetch_results('/v2/api/fingerprint_devices/1');
+        return $this->fetch_results('/v2/api/fingerprint_devices/' . $fingerprint_source);
     }
 
     /**
