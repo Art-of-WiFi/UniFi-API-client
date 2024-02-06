@@ -1429,7 +1429,7 @@ class Client
      */
     public function list_fingerprint_devices()
     {
-        return $this->fetch_results('/v2/apifingerprint_devices/1');
+        return $this->fetch_results('/v2/api/fingerprint_devices/1');
     }
 
     /**
