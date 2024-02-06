@@ -1423,6 +1423,16 @@ class Client
     }
 
     /**
+     * Fetch Fingerprint devices
+     *
+     * @return array|false an array of fingerprint, contain dev_ids, dev_type_ids, family_ids, os_name_ids, os_class_ids and vendor_ids, false upon error
+     */
+    public function list_fingerprint_devices()
+    {
+        return $this->fetch_results('/v2/apifingerprint_devices/1');
+    }
+
+    /**
      * Fetch (device) tags (using REST)
      *
      * NOTES: this endpoint was introduced with controller versions 5.5.X

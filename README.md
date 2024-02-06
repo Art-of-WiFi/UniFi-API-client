@@ -245,6 +245,7 @@ their purpose, and their respective parameters.
 - list_dynamicdns()
 - list_events()
 - list_extension()
+- list_fingerprint_devices()
 - list_firewallgroups()
 - list_firmware()
 - list_guests()
