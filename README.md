@@ -2,9 +2,9 @@
 
 A PHP class that provides access to Ubiquiti's [**UniFi Network Application**](https://unifi-network.ui.com/) API.
 
-UniFi Network Application software versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X (version **8.0.26** has been confirmed to work)
-are supported as well as Network Applications on **UniFi OS-based consoles** (UniFi OS **3.2.9** has been confirmed to work).
-This class is used by our API Browser tool which can be found
+UniFi Network Application software versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X (version **8.1.104** has been confirmed to work)
+are supported as well as Network Applications on **UniFi OS-based consoles** (UniFi OS **3.2.12** has been confirmed to work).
+This class is used by our API Browser tool, which can be found
 [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 The package can be installed manually or by using
@@ -15,9 +15,9 @@ easy inclusion in your projects.
 ## Requirements
 
 - a server with:
-  - PHP 5.5.0 or higher (this requirement will soon be raised to PHP **7.4**)
+  - PHP **7.4.0** or higher (use version [1.1.83](https://github.com/Art-of-WiFi/UniFi-API-client/releases/tag/v1.1.83) for PHP 7.3.x and lower)
   - PHP json and PHP cURL modules
-  - tested on Apache 2.4 with PHP 5.6.1 and cURL 7.42.1 and with PHP 7.4.9 and cURL 7.68.0
+  - tested on Apache 2.4 with PHP 7.4.27 and cURL 7.60.0 and with PHP 8.2.12 and cURL 7.81.0
 - direct network connectivity between this server and the host and port (usually TCP port 8443 or port 443 for 
   UniFi OS) where the UniFi Controller is running
 - you **must** use **accounts with local access permissions** to access the UniFi Controller API through this class
@@ -48,6 +48,15 @@ allow this. See this blog post on the Art of WiFi website for more details:
 https://artofwifi.net/blog/how-to-access-the-unifi-controller-by-wan-ip-or-hostname-on-a-udm-pro
 
 The "custom firewall rule" approach described there is the recommended method.
+
+
+## Upgrading from a previous version
+
+When upgrading from a version before **1.1.84**, please:
+- make sure you are using PHP **7.4** or higher
+- test the client with your code for any breaking changes; the class methods now have strict parameter type hints and 
+  response types which can break your code in certain cases where the wrong type is passed or a different response type
+  is expected back
 
 
 ## Installation
