@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.85
+ * @version Release: 1.1.86
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -25,7 +25,7 @@ class Client
      *
      * NOTE: do **not** modify the values here, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION = '1.1.85';
+    const CLASS_VERSION = '1.1.86';
     protected string $baseurl              = 'https://127.0.0.1:8443';
     protected string $user                 = '';
     protected string $password             = '';
@@ -4212,37 +4212,40 @@ class Client
     /**
      * Create and return a new cURL handle
      *
-     * @return object|resource|bool cURL handle (object or resource) upon success, false upon failure
+     * @return object|resource|bool CurlHandle object with PHP 8, or a resource for lower PHP versions upon
+     *                              success, false upon failure
      */
     protected function get_curl_handle()
     {
         $ch = curl_init();
-        if (is_resource($ch)) {
-            $curl_options = [
-                CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS,
-                CURLOPT_HTTP_VERSION   => $this->curl_http_version,
-                CURLOPT_SSL_VERIFYPEER => $this->curl_ssl_verify_peer,
-                CURLOPT_SSL_VERIFYHOST => $this->curl_ssl_verify_host,
-                CURLOPT_CONNECTTIMEOUT => $this->curl_connect_timeout,
-                CURLOPT_TIMEOUT        => $this->curl_request_timeout,
-                CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_ENCODING       => '',
-                CURLOPT_HEADERFUNCTION => [$this, 'response_header_callback'],
-            ];
 
-            if ($this->debug) {
-                $curl_options[CURLOPT_VERBOSE] = true;
-            }
-
-            if (!empty($this->cookies)) {
-                $curl_options[CURLOPT_COOKIESESSION] = true;
-                $curl_options[CURLOPT_COOKIE]        = $this->cookies;
-            }
-
-            curl_setopt_array($ch, $curl_options);
-            return $ch;
+        if (!is_resource($ch) && !is_object($ch)) {
+            return false;
         }
 
-        return false;
+        $curl_options = [
+            CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS,
+            CURLOPT_HTTP_VERSION   => $this->curl_http_version,
+            CURLOPT_SSL_VERIFYPEER => $this->curl_ssl_verify_peer,
+            CURLOPT_SSL_VERIFYHOST => $this->curl_ssl_verify_host,
+            CURLOPT_CONNECTTIMEOUT => $this->curl_connect_timeout,
+            CURLOPT_TIMEOUT        => $this->curl_request_timeout,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING       => '',
+            CURLOPT_HEADERFUNCTION => [$this, 'response_header_callback'],
+        ];
+
+        if ($this->debug) {
+            $curl_options[CURLOPT_VERBOSE] = true;
+        }
+
+        if (!empty($this->cookies)) {
+            $curl_options[CURLOPT_COOKIESESSION] = true;
+            $curl_options[CURLOPT_COOKIE]        = $this->cookies;
+        }
+
+        curl_setopt_array($ch, $curl_options);
+
+        return $ch;
     }
 }
