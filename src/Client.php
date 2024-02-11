@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.87
+ * @version Release: 1.1.88
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -21,11 +21,11 @@ namespace UniFi_API;
 class Client
 {
     /**
-     * private and protected properties
+     * protected properties
      *
-     * NOTE: do **not** modify the values here, instead use the constructor or the getter and setter functions/methods
+     * NOTE: do **not** modify the values below, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION = '1.1.87';
+    const CLASS_VERSION = '1.1.88';
     protected string $baseurl              = 'https://127.0.0.1:8443';
     protected string $user                 = '';
     protected string $password             = '';
@@ -69,7 +69,15 @@ class Client
      *                                 This is only needed when you have multiple apps using the API on the same web
      *                                 server.
      */
-    public function __construct(string $user, string $password, string $baseurl = '', string $site = null, string $version = null, bool $ssl_verify = false, string $unificookie_name = 'unificookie')
+    public function __construct(
+        string $user,
+        string $password,
+        string $baseurl = '',
+        string $site = null,
+        string $version = null,
+        bool   $ssl_verify = false,
+        string $unificookie_name = 'unificookie'
+    )
     {
         if (!extension_loaded('curl')) {
             trigger_error('The PHP curl extension is not loaded. Please correct this before proceeding!');
@@ -108,7 +116,7 @@ class Client
     public function __destruct()
     {
         /**
-         * if $_SESSION[$this->unificookie_name] is set, do not log out here except when this is a UniFi OS-based controller
+         * if $_SESSION[$this->unificookie_name] is set, do not log out here
          */
         if (isset($_SESSION[$this->unificookie_name])) {
             return;
@@ -125,7 +133,9 @@ class Client
     /**
      * Login to the UniFi controller
      *
-     * @return bool|int returns true upon success, false or HTTP status upon error
+     * @return bool|int returns true upon success, false or the HTTP response code (typically 400, 401, or 403) upon
+     *                  error
+     * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#client_error_responses
      */
     public function login()
     {
@@ -168,11 +178,7 @@ class Client
         $curl_options = [
             CURLOPT_POST       => true,
             CURLOPT_POSTFIELDS => json_encode(['username' => $this->user, 'password' => $this->password]),
-            CURLOPT_HTTPHEADER => [
-                'accept: application/json',
-                'content-type: application/json',
-                'Expect:',
-            ],
+            CURLOPT_HTTPHEADER => $this->curl_headers,
             CURLOPT_REFERER    => $this->baseurl . '/login',
             CURLOPT_URL        => $this->baseurl . '/api/login',
         ];
@@ -210,7 +216,7 @@ class Client
         /**
          * based on the HTTP response code trigger an error
          */
-        if ($http_code === 400 || $http_code === 401) {
+        if ($http_code >= 400) {
             trigger_error("HTTP response status received: $http_code. Probably a controller login failure");
 
             return $http_code;
@@ -221,8 +227,9 @@ class Client
         /**
          * check the HTTP response code
          */
-        if ($http_code >= 200 && $http_code < 400) {
+        if ($http_code >= 200 ) {
             $this->is_logged_in = true;
+
             return $this->is_logged_in;
         }
 
@@ -401,9 +408,17 @@ class Client
      * @return array|bool returns an array with a single object containing details of the new user/client-device on
      *                    success, else returns false
      */
-    public function create_user(string $mac, string $user_group_id, string $name = null, string $note = null, bool $is_guest = null, bool $is_wired = null)
+    public function create_user(
+        string $mac,
+        string $user_group_id,
+        string $name = null,
+        string $note = null,
+        bool   $is_guest = null,
+        bool   $is_wired = null
+    )
     {
         $new_user = ['mac' => strtolower($mac), 'usergroup_id' => $user_group_id];
+
         if (!empty($name)) {
             $new_user['name'] = $name;
         }
@@ -1115,6 +1130,19 @@ class Client
     public function stat_client(string $client_mac)
     {
         return $this->fetch_results('/api/s/' . $this->site . '/stat/user/' . strtolower(trim($client_mac)));
+    }
+
+    /**
+     * Fetch fingerprints for client devices
+     *
+     * @param int $fingerprint_source the id of the client fingerprint_source, starts from 0, this matches the
+     *                                fingerprint_source in the client device objects, the default value is 0
+     * @return array|bool an array of fingerprints, contain dev_ids, dev_type_ids, family_ids, os_name_ids, os_class_ids
+     *                    and vendor_ids, false upon error
+     */
+    public function list_fingerprint_devices(int $fingerprint_source = 0)
+    {
+        return $this->fetch_results('/v2/api/fingerprint_devices/' . $fingerprint_source);
     }
 
     /**
