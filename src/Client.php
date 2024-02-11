@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.88
+ * @version Release: 1.1.89
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -25,7 +25,7 @@ class Client
      *
      * NOTE: do **not** modify the values below, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION = '1.1.88';
+    const CLASS_VERSION = '1.1.89';
     protected string $baseurl              = 'https://127.0.0.1:8443';
     protected string $user                 = '';
     protected string $password             = '';
@@ -227,7 +227,7 @@ class Client
         /**
          * check the HTTP response code
          */
-        if ($http_code >= 200 ) {
+        if ($http_code >= 200) {
             $this->is_logged_in = true;
 
             return $this->is_logged_in;
@@ -1512,6 +1512,74 @@ class Client
     }
 
     /**
+     * Create (device) tag (using REST)
+     *
+     * NOTES: this endpoint was introduced with controller versions 5.5.X
+     *
+     * @param string $name required, the tag name to add
+     * @param array|null $devices_macs optional, array of the MAC address(es) of the device(s) to tag with the new tag
+     * @return bool return true on success
+     */
+    public function create_tag(string $name, array $devices_macs = null): bool
+    {
+        $payload = ['name' => $name];
+
+        if (is_array($devices_macs)) {
+            $payload['member_table'] = $devices_macs;
+        }
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/tag', $payload);
+    }
+
+    /**
+     * Set tagged devices (using REST)
+     *
+     * NOTES: this endpoint was introduced with controller versions 5.5.X
+     *
+     * @param array $devices_macs required, array of the MAC address(es) of the device(s) to tag
+     * @param string $tag_id required, the _id value of the tag to set
+     * @return bool return true on success
+     */
+    public function set_tagged_devices(array $devices_macs, string $tag_id): bool
+    {
+        $this->curl_method = 'PUT';
+
+        $payload = ['member_table' => $devices_macs];
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/tag/' . $tag_id, $payload);
+    }
+
+    /**
+     * Get (device) tag (using REST)
+     *
+     * NOTES: this endpoint was introduced with controller versions 5.5.X
+     *
+     * @param string $tag_id required, the _id value of the tag to retrieve
+     * @return array|bool containing matching tag objects
+     */
+    public function get_tag(string $tag_id)
+    {
+        $this->curl_method = 'GET';
+
+        return $this->fetch_results('/api/s/' . $this->site . '/rest/tag/' . $tag_id);
+    }
+
+    /**
+     * Delete (device) tag (using REST)
+     *
+     * NOTES: this endpoint was introduced with controller versions 5.5.X
+     *
+     * @param string $tag_id required, the _id value of the tag to set
+     * @return bool return true on success
+     */
+    public function delete_tag(string $tag_id): bool
+    {
+        $this->curl_method = 'DELETE';
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/tag/' . $tag_id);
+    }
+
+    /**
      * Fetch rogue/neighboring access points
      *
      * @param int $within optional, hours to go back to list discovered "rogue" access points (default = 24 hours)
@@ -1520,6 +1588,7 @@ class Client
     public function list_rogueaps(int $within = 24)
     {
         $payload = ['within' => $within];
+
         return $this->fetch_results('/api/s/' . $this->site . '/stat/rogueap', $payload);
     }
 
