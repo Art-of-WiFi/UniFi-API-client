@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.86
+ * @version Release: 1.1.87
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -25,7 +25,7 @@ class Client
      *
      * NOTE: do **not** modify the values here, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION = '1.1.86';
+    const CLASS_VERSION = '1.1.87';
     protected string $baseurl              = 'https://127.0.0.1:8443';
     protected string $user                 = '';
     protected string $password             = '';
@@ -41,12 +41,16 @@ class Client
     protected bool   $curl_ssl_verify_peer = false;
     protected int    $curl_ssl_verify_host = 0;
     protected int    $curl_http_version    = CURL_HTTP_VERSION_NONE;
-    protected array  $curl_headers         = [];
     protected string $curl_method          = 'GET';
     protected array  $curl_methods_allowed = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     protected int    $curl_request_timeout = 30;
     protected int    $curl_connect_timeout = 10;
-    protected string $unificookie_name;
+    protected string $unificookie_name     = 'unificookie';
+    protected array  $curl_headers         = [
+        'accept: application/json',
+        'content-type: application/json',
+        'Expect:',
+    ];
 
     /**
      * Construct an instance of the UniFi API client class
@@ -139,9 +143,7 @@ class Client
         /**
          * prepare cURL and options to check whether this is a "regular" controller or one based on UniFi OS
          */
-        if (!($ch = $this->get_curl_handle())) {
-            return false;
-        }
+        $ch = $this->get_curl_handle();
 
         $curl_options = [
             CURLOPT_URL => $this->baseurl . '/',
@@ -153,6 +155,7 @@ class Client
          * execute the cURL request and get the HTTP response code
          */
         curl_exec($ch);
+
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         if (curl_errno($ch)) {
@@ -236,20 +239,11 @@ class Client
         /**
          * prepare cURL and options
          */
-        if (!($ch = $this->get_curl_handle())) {
-            return false;
-        }
+        $ch = $this->get_curl_handle();
 
         $curl_options = [
             CURLOPT_HEADER => true,
             CURLOPT_POST   => true,
-        ];
-
-        /**
-         * construct the HTTP request headers as required
-         */
-        $this->curl_headers = [
-            'Expect:',
         ];
 
         $logout_path = '/logout';
@@ -3093,9 +3087,8 @@ class Client
      *
      * @param string $device_id _id of the device which can be found with the list_devices() function
      * @param object|array $payload stdClass object or associative array containing the configuration to apply to the
-     *                                device, must be a
-     *                                (partial) object/array structured in the same manner as is returned by
-     *                                list_devices() for the device.
+     *                              device, must be a (partial) object/array structured in the same manner as is returned
+     *                              by list_devices() for the device.
      * @return bool true on success
      */
     public function set_device_settings_base(string $device_id, $payload): bool
@@ -3813,7 +3806,9 @@ class Client
                     }
 
                     return true;
-                } elseif ($response->meta->rc === 'error') {
+                }
+
+                if ($response->meta->rc === 'error') {
                     /**
                      * an error occurred:
                      * set $this->set last_error_message if the returned error message is available
@@ -3880,30 +3875,38 @@ class Client
                     return true;
                 case JSON_ERROR_DEPTH:
                     $error = 'The maximum stack depth has been exceeded';
+
                     break;
                 case JSON_ERROR_STATE_MISMATCH:
                     $error = 'Invalid or malformed JSON';
+
                     break;
                 case JSON_ERROR_CTRL_CHAR:
                     $error = 'Control character error, possibly incorrectly encoded';
+
                     break;
                 case JSON_ERROR_SYNTAX:
                     $error = 'Syntax error, malformed JSON';
+
                     break;
                 case JSON_ERROR_UTF8:
                     // PHP >= 5.3.3
                     $error = 'Malformed UTF-8 characters, possibly incorrectly encoded';
+
                     break;
                 case JSON_ERROR_RECURSION:
                     // PHP >= 5.5.0
                     $error = 'One or more recursive references in the value to be encoded';
+
                     break;
                 case JSON_ERROR_INF_OR_NAN:
                     // PHP >= 5.5.0
                     $error = 'One or more NAN or INF values in the value to be encoded';
+
                     break;
                 case JSON_ERROR_UNSUPPORTED_TYPE:
                     $error = 'A value of a type that cannot be encoded was given';
+
                     break;
             }
 
@@ -3914,9 +3917,11 @@ class Client
                 switch (json_last_error()) {
                     case JSON_ERROR_INVALID_PROPERTY_NAME:
                         $error = 'A property name that cannot be encoded was given';
+
                         break;
                     case JSON_ERROR_UTF16:
                         $error = 'Malformed UTF-16 characters, possibly incorrectly encoded';
+
                         break;
                 }
             }
@@ -3939,6 +3944,7 @@ class Client
     {
         if (!filter_var($baseurl, FILTER_VALIDATE_URL) || substr($baseurl, -1) === '/') {
             trigger_error('The URL provided is incomplete, invalid or ends with a / character!');
+
             return false;
         }
 
@@ -3955,6 +3961,7 @@ class Client
     {
         if ($this->debug && preg_match('/\s/', $site)) {
             trigger_error('The provided (short) site name may not contain any spaces');
+
             return false;
         }
 
@@ -3993,11 +4000,13 @@ class Client
     {
         if (!empty($this->cookies) && strpos($this->cookies, 'TOKEN') !== false) {
             $cookie_bits = explode('=', $this->cookies);
+
             if (!array_key_exists(1, $cookie_bits)) {
                 return;
             }
 
             $jwt_components = explode('.', $cookie_bits[1]);
+
             if (!array_key_exists(1, $jwt_components)) {
                 return;
             }
@@ -4057,17 +4066,13 @@ class Client
             return false;
         }
 
-        if (!($ch = $this->get_curl_handle())) {
-            trigger_error('get_curl_handle() did not return a resource');
-            return false;
-        }
-
-        $this->curl_headers = [];
-        $url                = $this->baseurl . $path;
+        $url = $this->baseurl . $path;
 
         if ($this->is_unifi_os) {
             $url = $this->baseurl . '/proxy/network' . $path;
         }
+
+        $ch = $this->get_curl_handle();
 
         $curl_options = [
             CURLOPT_URL => $url,
@@ -4081,14 +4086,6 @@ class Client
             $json_payload                     = json_encode($payload, JSON_UNESCAPED_SLASHES);
             $curl_options[CURLOPT_POSTFIELDS] = $json_payload;
 
-            /**
-             * add empty Expect header to prevent cURL from injecting an "Expect: 100-continue" header
-             */
-            $this->curl_headers = [
-                'accept: application/json',
-                'content-type: application/json',
-                'Expect:',
-            ];
 
             /**
              * should not use GET (the default request type) or DELETE when passing a payload,
@@ -4118,9 +4115,7 @@ class Client
             $this->create_x_csrf_token_header();
         }
 
-        if (count($this->curl_headers) > 0) {
-            $curl_options[CURLOPT_HTTPHEADER] = $this->curl_headers;
-        }
+        $curl_options[CURLOPT_HTTPHEADER] = $this->curl_headers;
 
         curl_setopt_array($ch, $curl_options);
 
@@ -4128,6 +4123,7 @@ class Client
          * execute the cURL request
          */
         $response = curl_exec($ch);
+
         if (curl_errno($ch)) {
             trigger_error('cURL error: ' . curl_error($ch));
         }
@@ -4157,6 +4153,7 @@ class Client
                 $this->is_logged_in = false;
                 $this->cookies      = '';
                 $this->exec_retries++;
+
                 curl_close($ch);
 
                 /**
@@ -4189,6 +4186,7 @@ class Client
             print_r(curl_getinfo($ch));
             print PHP_EOL . '-------URL & PAYLOAD---------' . PHP_EOL;
             print $url . PHP_EOL;
+
             if (empty($json_payload)) {
                 print 'empty payload';
             }
@@ -4206,22 +4204,18 @@ class Client
          * set method back to default value, just in case
          */
         $this->curl_method = 'GET';
+
         return $response;
     }
 
     /**
      * Create and return a new cURL handle
      *
-     * @return object|resource|bool CurlHandle object with PHP 8, or a resource for lower PHP versions upon
-     *                              success, false upon failure
+     * @return object|resource CurlHandle object with PHP 8, or a resource for lower PHP versions
      */
     protected function get_curl_handle()
     {
         $ch = curl_init();
-
-        if (!is_resource($ch) && !is_object($ch)) {
-            return false;
-        }
 
         $curl_options = [
             CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS,
