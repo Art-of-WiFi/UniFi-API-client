@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.89
+ * @version Release: 1.1.90
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -25,7 +25,7 @@ class Client
      *
      * NOTE: do **not** modify the values below, instead use the constructor or the getter and setter functions/methods
      */
-    const CLASS_VERSION = '1.1.89';
+    const CLASS_VERSION = '1.1.90';
     protected string $baseurl              = 'https://127.0.0.1:8443';
     protected string $user                 = '';
     protected string $password             = '';
@@ -4106,6 +4106,15 @@ class Client
 
             if (!array_key_exists(1, $jwt_components)) {
                 return;
+            }
+
+            /**
+             * remove any existing x-csrf-token headers first
+             */
+            foreach ($this->curl_headers as $index => $header) {
+                if (strpos(strtolower($header), strtolower('x-csrf-token:')) !== false) {
+                    unset($this->curl_headers[$index]);
+                }
             }
 
             $this->curl_headers[] = 'x-csrf-token: ' . json_decode(base64_decode($jwt_components[1]))->csrfToken;
