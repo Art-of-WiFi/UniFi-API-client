@@ -14,3 +14,7 @@
 
 # ignore PHPStorm files
 .idea/*
+
+# PHPUnit
+/phpunit.xml
+.phpunit.result.cache
