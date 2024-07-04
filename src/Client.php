@@ -1921,6 +1921,44 @@ class Client
     }
 
     /**
+     * Update an admin of the current site
+     *
+     * @param string $admin_id _id value of the admin user to update, can be obtained using the
+     *                               list_all_admins() method/function
+     * @param string $name update the name of the admin user
+     * @param string $email update the email address of the admin user
+     * @param string $password optionally update the password of the admin user
+     *
+     * @return bool true on success
+     */
+    public function update_admin(
+        string $admin_id,
+        string $name,
+        string $email,
+        string $password = ''
+    ): bool
+    {
+        $email       = trim($email);
+        $email_valid = filter_var($email, FILTER_VALIDATE_EMAIL);
+
+        if (!$email_valid) {
+            trigger_error('The email address provided is invalid!');
+            return false;
+        }
+
+        $payload = [
+            'admin'      => trim($admin_id),
+            'name'       => trim($name),
+            'email'      => $email,
+            'cmd'        => 'update-admin',
+            'role'       => 'admin',
+            'x_password' => $password,
+        ];
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
+    }
+
+    /**
      * Assign an existing admin to the current site
      *
      * @param string $admin_id _id value of the admin user to assign, can be obtained using the
