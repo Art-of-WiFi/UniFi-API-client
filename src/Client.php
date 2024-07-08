@@ -1928,14 +1928,25 @@ class Client
      * @param string $name update the name of the admin user
      * @param string $email update the email address of the admin user
      * @param string $password optionally update the password of the admin user
-     *
+     * @param bool $readonly optional, whether the new admin has readonly
+     *                                permissions, default value is false which gives the new admin
+     *                                Administrator permissions
+     * @param bool $device_adopt optional, whether the new admin has permissions to
+     *                                adopt devices, default value is false. With versions < 5.9.X this only applies
+     *                                when readonly is true.
+     * @param bool $device_restart optional, whether the new admin has permissions to
+     *                                restart devices, default value is false. With versions < 5.9.X this only applies
+     *                                when readonly is true.
      * @return bool true on success
      */
     public function update_admin(
         string $admin_id,
         string $name,
         string $email,
-        string $password = ''
+        string $password = '',
+        bool   $readonly = false,
+        bool   $device_adopt = false,
+        bool   $device_restart = false
     ): bool
     {
         $email       = trim($email);
@@ -1947,13 +1958,26 @@ class Client
         }
 
         $payload = [
-            'admin'      => trim($admin_id),
-            'name'       => trim($name),
-            'email'      => $email,
-            'cmd'        => 'update-admin',
-            'role'       => 'admin',
-            'x_password' => $password,
+            'admin'       => trim($admin_id),
+            'name'        => trim($name),
+            'email'       => $email,
+            'cmd'         => 'update-admin',
+            'role'        => 'admin',
+            'x_password'  => $password,
+            'permissions' => [],
         ];
+
+        if ($readonly) {
+            $payload['role'] = 'readonly';
+        }
+
+        if ($device_adopt) {
+            $payload['permissions'][] = 'API_DEVICE_ADOPT';
+        }
+
+        if ($device_restart) {
+            $payload['permissions'][] = 'API_DEVICE_RESTART';
+        }
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
     }
