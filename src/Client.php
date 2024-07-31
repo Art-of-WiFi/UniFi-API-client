@@ -13,7 +13,7 @@ namespace UniFi_API;
  *
  * @package UniFi_Controller_API_Client_Class
  * @author  Art of WiFi <info@artofwifi.net>
- * @version Release: 1.1.90
+ * @version Release: 1.1.91
  * @license This class is subject to the MIT license that is bundled with this package in the file LICENSE.md
  * @example This directory in the package repository contains a collection of examples:
  *          https://github.com/Art-of-WiFi/UniFi-API-client/tree/master/examples
@@ -23,9 +23,10 @@ class Client
     /**
      * protected properties
      *
-     * NOTE: do **not** modify the values below, instead use the constructor or the getter and setter functions/methods
+     * NOTE: do **not** edit the property values below, instead use the constructor or the getter and setter
+     *       functions/methods
      */
-    const CLASS_VERSION = '1.1.90';
+    const CLASS_VERSION = '1.1.91';
     protected string $baseurl              = 'https://127.0.0.1:8443';
     protected string $user                 = '';
     protected string $password             = '';
@@ -111,7 +112,7 @@ class Client
      * This method is called as soon as there are no other references to the class instance
      * https://www.php.net/manual/en/language.oop5.decon.php
      *
-     * NOTE: to force the class instance to log out when you're done, simply call logout()
+     * NOTE: to force the class instance to log out when you're done, call logout()
      */
     public function __destruct()
     {
