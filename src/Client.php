@@ -473,12 +473,10 @@ class Client
     /**
      * Fetch 5-minute site stats
      *
-     * NOTES:
-     * - defaults to the past 12 hours
-     * - this function/method is only supported on controller versions 5.5.* and later
-     * - make sure that the retention policy for 5 minutes stats is set to the correct value in
-     *   the controller settings
-     *
+     * @note - defaults to the past 12 hours
+     *       - this function/method is only supported on controller versions 5.5.* and later
+     *       - make sure that the retention policy for 5 minutes stats is set to the correct value in
+     *         the controller settings
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @return array|bool returns an array of 5-minute stats objects for the current site
@@ -510,10 +508,8 @@ class Client
      * TODO: add support for optional attrib parameter
      *       airtime_avg
      *
-     * NOTES:
-     * - defaults to the past 7*24 hours
-     * - "bytes" are no longer returned with controller version 4.9.1 and later
-     *
+     * @note - defaults to the past 7*24 hours
+     *       - "bytes" are no longer returned with controller version 4.9.1 and later
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @return array|bool returns an array of hourly stats objects for the current site
@@ -542,10 +538,8 @@ class Client
     /**
      * Fetch daily site stats
      *
-     * NOTES:
-     * - defaults to the past 52*7*24 hours
-     * - "bytes" are no longer returned with controller version 4.9.1 and later
-     *
+     * @note - defaults to the past 52*7*24 hours
+     *       - "bytes" are no longer returned with controller version 4.9.1 and later
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @return array|bool returns an array of daily stats objects for the current site
@@ -574,10 +568,8 @@ class Client
     /**
      * Fetch monthly site stats
      *
-     * NOTES:
-     * - defaults to the past 52 weeks (52*7*24 hours)
-     * - "bytes" are no longer returned with controller version 4.9.1 and later
-     *
+     * @note - defaults to the past 52 weeks (52*7*24 hours)
+     *       - "bytes" are no longer returned with controller version 4.9.1 and later
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @return array|bool returns an array of monthly stats objects for the current site
@@ -606,12 +598,10 @@ class Client
     /**
      * Fetch 5-minutes stats for a single access point or all access points
      *
-     * NOTES:
-     * - defaults to the past 12 hours
-     * - this function/method is only supported on controller versions 5.5.* and later
-     * - make sure that the retention policy for 5 minutes stats is set to the correct value in
-     *   the controller settings
-     *
+     * @note - defaults to the past 12 hours
+     *       - this function/method is only supported on controller versions 5.5.* and later
+     *       - make sure that the retention policy for 5 minutes stats is set to the correct value in
+     *         the controller settings
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|null $mac optional, AP MAC address to return stats for, when empty,
@@ -655,11 +645,9 @@ class Client
      *       user-wlan-sta_track_samples
      *       wlan-num_sta
      *
-     * NOTES:
-     * - defaults to the past 7*24 hours
-     * - make sure that the retention policy for hourly stats is set to the correct value in
-     *   the controller settings
-     *
+     * @note - defaults to the past 7*24 hours
+     *       - make sure that the retention policy for hourly stats is set to the correct value in
+     *         the controller settings
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|null $mac optional, AP MAC address to return stats for, when empty,
@@ -683,11 +671,9 @@ class Client
     /**
      * Fetch daily stats for a single access point or all access points
      *
-     * NOTES:
-     * - defaults to the past 7*24 hours
-     * - make sure that the retention policy for hourly stats is set to the correct value in
-     *   the controller settings
-     *
+     * @note - defaults to the past 7*24 hours
+     *       - make sure that the retention policy for hourly stats is set to the correct value in
+     *         the controller settings
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|null $mac optional, AP MAC address to return stats for, when empty,
@@ -711,11 +697,9 @@ class Client
     /**
      * Fetch monthly stats for a single access point or all access points
      *
-     * NOTES:
-     * - defaults to the past 52 weeks (52*7*24 hours)
-     * - make sure that the retention policy for hourly stats is set to the correct value in
-     *   the controller settings
-     *
+     * @note - defaults to the past 52 weeks (52*7*24 hours)
+     *       - make sure that the retention policy for hourly stats is set to the correct value in
+     *         the controller settings
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|null $mac optional, AP MAC address to return stats for, when empty,
@@ -740,15 +724,13 @@ class Client
      * Fetch 5-minutes stats for a single user/client device
      *
      *
-     * NOTES:
-     * - defaults to the past 12 hours
-     * - only supported with UniFi controller versions 5.8.X and higher
-     * - make sure that the retention policy for 5 minutes stats is set to the correct value in
-     *   the controller settings
-     * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
-     * section
-     *
-     * @param string $mac MAC address of user/client device to return stats for
+     * @note - defaults to the past 12 hours
+     *       - only supported with UniFi controller versions 5.8.X and higher
+     *       - make sure that the retention policy for 5-minute stats is set to the correct value in
+     *         the controller settings
+     *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
+     *         section
+     * @param string $mac MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
@@ -770,15 +752,13 @@ class Client
     /**
      * Fetch hourly stats for a single user/client device
      *
-     * NOTES:
-     * - defaults to the past 7*24 hours
-     * - only supported with UniFi controller versions 5.8.X and higher
-     * - make sure that the retention policy for hourly stats is set to the correct value in
-     *   the controller settings
-     * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
-     * section
-     *
-     * @param string $mac MAC address of user/client device to return stats fo
+     * @note - defaults to the past 7*24 hours
+     *       - only supported with UniFi controller versions 5.8.X and higher
+     *       - make sure that the retention policy for hourly stats is set to the correct value in
+     *         the controller settings
+     *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
+     *         section
+     * @param string $mac MAC address of the user/client device to return stats fo
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
@@ -800,15 +780,13 @@ class Client
     /**
      * Fetch daily stats for a single user/client device
      *
-     * NOTES:
-     * - defaults to the past 7*24 hours
-     * - only supported with UniFi controller versions 5.8.X and higher
-     * - make sure that the retention policy for daily stats is set to the correct value in
-     *   the controller settings
-     * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
-     * section
-     *
-     * @param string $mac MAC address of user/client device to return stats for
+     * @note - defaults to the past 7*24 hours
+     *       - only supported with UniFi controller versions 5.8.X and higher
+     *       - make sure that the retention policy for daily stats is set to the correct value in
+     *         the controller settings
+     *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
+     *         section
+     * @param string $mac MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
@@ -830,15 +808,13 @@ class Client
     /**
      * Fetch monthly stats for a single user/client device
      *
-     * NOTES:
-     * - defaults to the past 13 weeks (52*7*24 hours)
-     * - only supported with UniFi controller versions 5.8.X and higher
-     * - make sure that the retention policy for monthly stats is set to the correct value in
-     *   the controller settings
-     * - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
-     * section
-     *
-     * @param string $mac MAC address of user/client device to return stats for
+     * @note - defaults to the past 13 weeks (52*7*24 hours)
+     *       - only supported with UniFi controller versions 5.8.X and higher
+     *       - make sure that the retention policy for monthly stats is set to the correct value in
+     *         the controller settings
+     *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
+     *         section
+     * @param string $mac MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
@@ -860,13 +836,11 @@ class Client
     /**
      * Fetch 5-minute gateway stats
      *
-     * NOTES:
-     * - defaults to the past 12 hours
-     * - this function/method is only supported on controller versions 5.5.* and later
-     * - make sure that the retention policy for 5 minutes stats is set to the correct value in
-     *   the controller settings
-     * - requires a UniFi gateway
-     *
+     * @note - defaults to the past 12 hours
+     *       - this function/method is only supported on controller versions 5.5.* and later
+     *       - make sure that the retention policy for 5 minutes stats is set to the correct value in
+     *         the controller settings
+     *       - requires a UniFi gateway
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
@@ -888,10 +862,8 @@ class Client
     /**
      * Fetch hourly gateway stats
      *
-     * NOTES:
-     * - defaults to the past 7*24 hours
-     * - requires a UniFi gateway
-     *
+     * @note - defaults to the past 7*24 hours
+     *       - requires a UniFi gateway
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
@@ -913,10 +885,8 @@ class Client
     /**
      * Fetch daily gateway stats
      *
-     * NOTES:
-     * - defaults to the past 52 weeks (52*7*24 hours)
-     * - requires a UniFi gateway
-     *
+     * @note - defaults to the past 52 weeks (52*7*24 hours)
+     *       - requires a UniFi gateway
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
@@ -938,10 +908,8 @@ class Client
     /**
      * Fetch monthly gateway stats
      *
-     * NOTES:
-     * - defaults to the past 52 weeks (52*7*24 hours)
-     * - requires a UniFi gateway
-     *
+     * @note - defaults to the past 52 weeks (52*7*24 hours)
+     *       - requires a UniFi gateway
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
@@ -963,10 +931,8 @@ class Client
     /**
      * Fetch speed test results
      *
-     * NOTES:
-     * - defaults to the past 24 hours
-     * - requires a UniFi gateway
-     *
+     * @note - defaults to the past 24 hours
+     *       - requires a UniFi gateway
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @return array|bool returns an array of speed test result objects
@@ -983,11 +949,9 @@ class Client
     /**
      * Fetch IPS/IDS events
      *
-     * NOTES:
-     * - defaults to the past 24 hours
-     * - requires a UniFi gateway
-     * - supported in UniFi controller versions 5.9.X and higher
-     *
+     * @note - defaults to the past 24 hours
+     *       - requires a UniFi gateway
+     *       - supported in UniFi controller versions 5.9.X and higher
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param int|null $limit optional, maximum number of events to return, defaults to 10000
@@ -1006,8 +970,7 @@ class Client
     /**
      * Fetch login sessions
      *
-     * NOTES:
-     * - defaults to the past 7*24 hours
+     * @note defaults to the past 7*24 hours
      *
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
@@ -1037,8 +1000,7 @@ class Client
     /**
      * Fetch latest 'n' login sessions for a single client device
      *
-     * NOTES:
-     * - defaults to the past 7*24 hours
+     * @note defaults to the past 7*24 hours
      *
      * @param string $mac client MAC address
      * @param int|null $limit optional, maximum number of sessions to get (default value is 5)
@@ -1055,8 +1017,7 @@ class Client
     /**
      * Fetch authorizations
      *
-     * NOTES:
-     * - defaults to the past 7*24 hours
+     * @note defaults to the past 7*24 hours
      *
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
@@ -1074,10 +1035,8 @@ class Client
     /**
      * Fetch client devices that connected to the site within given timeframe
      *
-     * NOTES:
-     * - <historyhours> is only used to select clients that were online within that period,
-     *   the returned stats per client are all-time totals, irrespective of the value of <historyhours>
-     *
+     * @note $historyhours is only used to select clients that were online within that period,
+     *       the returned stats per client are all-time totals, irrespective of the value of $historyhours
      * @param int $historyhours optional, hours to go back (default is 8760 hours or 1 year)
      * @return array|bool returns an array of client device objects
      */
@@ -1091,9 +1050,7 @@ class Client
     /**
      * Fetch guest devices
      *
-     * NOTES:
-     * - defaults to the past 7*24 hours
-     *
+     * @note defaults to the past 7*24 hours
      * @param int $within optional, time frame in hours to go back to list guests with valid access (default = 24*365
      *                    hours)
      * @return array|bool returns an array of guest device objects with valid access
@@ -1861,23 +1818,21 @@ class Client
     /**
      * Invite a new admin for access to the current site
      *
-     * NOTES:
-     * - after issuing a valid request, an invite is sent to the email address provided
-     * - issuing this command against an existing admin triggers a "re-invite"
-     *
+     * @note - after issuing a valid request, an invite is sent to the email address provided
+     *       - issuing this command against an existing admin triggers a "re-invite"
      * @param string $name name to assign to the new admin user
      * @param string $email email address to assign to the new admin user
      * @param bool $enable_sso optional, whether SSO is allowed for the new admin
-     *                               default value is true which enables the SSO capability
+     *                         default value is true which enables the SSO capability
      * @param bool $readonly optional, whether the new admin has readonly
-     *                               permissions, default value is false which gives the new admin
-     *                               Administrator permissions
+     *                       permissions, default value is false which gives the new admin
+     *                       Administrator permissions
      * @param bool $device_adopt optional, whether the new admin has permissions to
-     *                               adopt devices, default value is false. With versions < 5.9.X this only applies
-     *                               when readonly is true.
+     *                           adopt devices, default value is false. With versions < 5.9.X this only applies
+     *                           when readonly is true.
      * @param bool $device_restart optional, whether the new admin has permissions to
-     *                               restart devices, default value is false. With versions < 5.9.X this only applies
-     *                               when readonly is true.
+     *                             restart devices, default value is false. With versions < 5.9.X this only applies
+     *                             when readonly is true.
      * @return bool true on success
      */
     public function invite_admin(
@@ -1969,9 +1924,7 @@ class Client
     /**
      * Revoke an admin from the current site
      *
-     * NOTES:
-     * only non-superadmin accounts can be revoked
-     *
+     * @note only non-superadmin accounts can be revoked
      * @param string $admin_id _id value of the admin to revoke, can be obtained using the
      *                         list_all_admins() method/function
      * @return bool true on success
@@ -1979,6 +1932,21 @@ class Client
     public function revoke_admin(string $admin_id): bool
     {
         $payload = ['cmd' => 'revoke-admin', 'admin' => $admin_id];
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
+    }
+
+    /**
+     * Delete an admin entirely
+     *
+     * @note Make sure the admin is revoked from all the sites before deleting
+     * @param string $admin_id _id value of the admin to delete, can be obtained using the
+     *                         list_all_admins() method/function
+     * @return bool true on success
+     */
+    public function delete_admin(string $admin_id): bool
+    {
+        $payload = ['cmd' => 'revoke-super-admin', 'admin' => $admin_id];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
     }
@@ -2006,9 +1974,7 @@ class Client
     /**
      * Fetch controller status
      *
-     * NOTES:
-     * login not required
-     *
+     * @note login is not required
      * @return bool true upon success (controller is online)
      */
     public function stat_status(): bool
@@ -2019,8 +1985,7 @@ class Client
     /**
      * Fetch full controller status
      *
-     * NOTES:
-     * login not required
+     * @note login is not required
      *
      * @return bool|array status array upon success, false upon failure
      */
@@ -2034,9 +1999,7 @@ class Client
     /**
      * Fetch device name mappings
      *
-     * NOTES:
-     * login not required
-     *
+     * @note login is not required
      * @return bool|array mappings array upon success, false upon failure
      */
     public function list_device_name_mappings()
@@ -2243,8 +2206,7 @@ class Client
     /**
      * Fetch country codes
      *
-     * NOTES:
-     * these codes following the ISO standard:
+     * @note these codes following the ISO standard:
      * https://en.wikipedia.org/wiki/ISO_3166-1_numeric
      *
      * @return array|bool containing available country codes
@@ -2395,10 +2357,9 @@ class Client
     /**
      * Disable/enable an access point (using REST)
      *
-     * NOTES:
-     * - a disabled device is excluded from the dashboard status and device count and its LED and WLAN are turned off
-     * - appears to only be supported for access points
-     * - available since controller versions 5.2.X
+     * @note - a disabled device is excluded from the dashboard status and device count and its LED and WLAN are turned off
+     *       - appears to only be supported for access points
+     *       - available since controller versions 5.2.X
      *
      * @param string $ap_id value of _id for the access point which can be obtained from the device list
      * @param bool $disable true disables the device, false enables the device
@@ -2416,9 +2377,7 @@ class Client
     /**
      * Override LED mode for a device (using REST)
      *
-     * NOTES:
-     * - available since controller versions 5.2.X
-     *
+     * @note available since controller versions 5.2.X
      * @param string $device_id value of _id for the device which can be obtained from the device list
      * @param string $override_mode off/on/default; "off" disables the LED of the device,
      *                              "on" enables the LED of the device,
@@ -2441,9 +2400,7 @@ class Client
     /**
      * Toggle flashing LED of an access point for locating purposes
      *
-     * NOTES:
-     * replaces the old set_locate_ap() and unset_locate_ap() methods/functions
-     *
+     * @note replaces the old set_locate_ap() and unset_locate_ap() methods/functions
      * @param string $mac device MAC address
      * @param bool $enable true enables flashing LED, false disables flashing LED
      * @return bool true on success
@@ -2473,9 +2430,7 @@ class Client
     /**
      * Update access point radio settings
      *
-     * NOTES:
-     * - only supported on pre-5.X.X controller versions
-     *
+     * @note only supported on pre-5.X.X controller versions
      * @param string $ap_id the "_id" value for the access point you wish to update
      * @param string $radio radio to update, default=ng
      * @param int $channel channel to apply
@@ -2524,9 +2479,7 @@ class Client
     /**
      * Update guest login settings
      *
-     * NOTES:
-     * - both portal parameters are set to the same value!
-     *
+     * @note both portal parameters are set to the same value!
      * @param bool $portal_enabled enable/disable the captive portal
      * @param bool $portal_customized enable/disable captive portal customizations
      * @param bool $redirect_enabled enable/disable captive portal redirect
@@ -3061,9 +3014,7 @@ class Client
     /**
      * Upgrade a device to the latest firmware
      *
-     * NOTES:
-     * - updates the device to the latest STABLE firmware known to the controller
-     *
+     * @note updates the device to the latest STABLE firmware known to the controller
      * @param string $device_mac MAC address of the device to upgrade
      * @return bool returns true upon success
      */
@@ -3077,10 +3028,8 @@ class Client
     /**
      * Upgrade a device to a specific firmware file
      *
-     * NOTES:
-     * - updates the device to the firmware file at the given URL
-     * - please take great care to select a valid firmware file for the device!
-     *
+     * @note - updates the device to the firmware file at the given URL
+     *       - please take great care to select a valid firmware file for the device!
      * @param string $firmware_url URL for the firmware file to upgrade the device to
      * @param string $device_mac MAC address of the device to upgrade
      * @return bool returns true upon success
@@ -3095,10 +3044,8 @@ class Client
     /**
      * Start rolling upgrade
      *
-     * NOTES:
-     * - updates all access points to the latest firmware known to the controller in a
-     *   staggered/rolling fashion
-     *
+     * @note updates all access points to the latest firmware known to the controller in a
+     *       staggered/rolling fashion
      * @return bool returns true upon success
      */
     public function start_rolling_upgrade(): bool
@@ -3141,10 +3088,8 @@ class Client
     /**
      * Power-cycle the PoE output of a switch port
      *
-     * NOTES:
-     * - only applies to switches and their PoE ports...
-     * - port must be actually providing power
-     *
+     * @note - only applies to switches and their PoE ports...
+     *       - the port must be actually providing power
      * @param string $switch_mac main MAC address of the switch
      * @param int $port_idx port number/index of the port to be affected
      * @return bool returns true upon success
@@ -3199,9 +3144,7 @@ class Client
     /**
      * Fetch Radius profiles (using REST)
      *
-     * NOTES:
-     * - this function/method is only supported on controller versions 5.5.19 and later
-     *
+     * @note this function/method is only supported on controller versions 5.5.19 and later
      * @return array|bool objects containing all Radius profiles for the current site
      */
     public function list_radius_profiles()
@@ -3212,9 +3155,7 @@ class Client
     /**
      * Fetch Radius user accounts (using REST)
      *
-     * NOTES:
-     * - this function/method is only supported on controller versions 5.5.19 and later
-     *
+     * @note this function/method is only supported on controller versions 5.5.19 and later
      * @return array|bool objects containing all Radius accounts for the current site
      */
     public function list_radius_accounts()
@@ -3225,9 +3166,7 @@ class Client
     /**
      * Create a Radius user account (using REST)
      *
-     * NOTES:
-     * - this function/method is only supported on controller versions 5.5.19 and later
-     *
+     * @note this function/method is only supported on controller versions 5.5.19 and later
      * @param string $name name for the new account
      * @param string $x_password password for the new account
      * @param int|null $tunnel_type optional, must be one of the following values:
@@ -3305,9 +3244,7 @@ class Client
     /**
      * Update a Radius account, base (using REST)
      *
-     * NOTES:
-     * - this function/method is only supported on controller versions 5.5.19 and later
-     *
+     * @note this function/method is only supported on controller versions 5.5.19 and later
      * @param string $account_id _id of the account which can be found with the list_radius_accounts() function
      * @param object|array $payload stdClass object or associative array containing the new profile to apply to the
      *                                 account, must be a (partial) object/array structured in the same manner as is
@@ -3324,9 +3261,7 @@ class Client
     /**
      * Delete a Radius account (using REST)
      *
-     * NOTES:
-     * - this function/method is only supported on controller versions 5.5.19 and later
-     *
+     * @note this function/method is only supported on controller versions 5.5.19 and later
      * @param string $account_id _id of the account which can be found with the list_radius_accounts() function
      * @return bool true on success
      */
@@ -3622,14 +3557,13 @@ class Client
     /**
      * Get Cookie from UniFi controller (singular and plural)
      *
-     * NOTES:
-     * - when the results from this method are stored in $_SESSION[$this->unificookie_name], the Class initially does not
-     *   log in to the controller when a subsequent request is made using a new instance. This speeds up the
-     *   overall request considerably. Only when a subsequent request fails (e.g. cookies have expired) is a new login
-     *   executed and the value of $_SESSION[$this->unificookie_name] updated.
-     * - to force the Class instance to log out automatically upon destruct, simply call logout() or unset
-     *   $_SESSION[$this->unificookie_name] at the end of your code
-     *
+     * @note When the results from this method are stored in $_SESSION[$this->unificookie_name], the Class initially
+     *       does not log in to the controller when a subsequent request is made using a new instance.
+     *       This speeds up the overall request considerably.
+     *       Only when a subsequent request fails (e.g. cookies have expired) will a new login be
+     *       executed and the value of $_SESSION[$this->unificookie_name] is updated.
+     *       To force the Class instance to log out automatically upon destruct, simply call logout() or unset
+     *       $_SESSION[$this->unificookie_name] at the end of your code
      * @return string the UniFi controller cookie
      */
     public function get_cookie(): string
@@ -3831,10 +3765,8 @@ class Client
     /**
      * Set value for the private property $curl_http_version
      *
-     * NOTES:
-     * - as of cURL version 7.62.0 the default value is CURL_HTTP_VERSION_2TLS which may cause issues,
-     *   this method allows to set the value to CURL_HTTP_VERSION_1_1 when needed
-     *
+     * @note As of cURL version 7.62.0 the default value is CURL_HTTP_VERSION_2TLS which may cause issues,
+     *       this method allows you to set the value to CURL_HTTP_VERSION_1_1 when needed.
      * @param int $http_version new value for $curl_http_version, CURL_HTTP_VERSION_1_1 int(2) or
      *                          CURL_HTTP_VERSION_2TLS int(4) are recommended
      * @return bool whether the request was successful or not
