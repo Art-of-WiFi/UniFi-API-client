@@ -1557,11 +1557,12 @@ class Client
      * Generate a backup
      *
      * @note this is an experimental function, please do not use unless you know exactly what you're doing
+     * @param int $days number of days for which the backup must be generated
      * @return array|bool URL from where the backup file can be downloaded once generated, false upon failure
      */
-    public function generate_backup()
+    public function generate_backup(int $days = -1)
     {
-        $payload = ['cmd' => 'backup'];
+        $payload = ['cmd' => 'backup', 'days' => $days];
 
         return $this->fetch_results('/api/s/' . $this->site . '/cmd/backup', $payload);
     }
