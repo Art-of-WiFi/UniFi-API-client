@@ -20,13 +20,17 @@ namespace UniFi_API;
  */
 class Client
 {
+    /** constants */
+    const CLASS_VERSION        = '1.1.92';
+    const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    const DEFAULT_CURL_METHOD  = 'GET';
+
     /**
      * protected properties
      *
-     * @note do **not** edit the property values below, instead use the constructor or the getter and setter
-     *       functions/methods
+     * @note do **not** directly edit the property values below, instead use the constructor or the respective
+     *       getter and setter functions/methods
      */
-    const CLASS_VERSION = '1.1.92';
     protected string $baseurl              = 'https://127.0.0.1:8443';
     protected string $user                 = '';
     protected string $password             = '';
@@ -42,19 +46,18 @@ class Client
     protected bool   $curl_ssl_verify_peer = false;
     protected int    $curl_ssl_verify_host = 0;
     protected int    $curl_http_version    = CURL_HTTP_VERSION_NONE;
-    protected string $curl_method          = 'GET';
-    protected array  $curl_methods_allowed = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
+    protected string $curl_method          = self::DEFAULT_CURL_METHOD;
     protected int    $curl_request_timeout = 30;
     protected int    $curl_connect_timeout = 10;
     protected string $unificookie_name     = 'unificookie';
     protected array  $curl_headers         = [
-        'accept: application/json',
-        'content-type: application/json',
+        'Accept: application/json',
+        'Content-Type: application/json',
         'Expect:',
     ];
 
     /**
-     * Construct an instance of the UniFi API client class
+     * Construct an instance of the UniFi API client class.
      *
      * @param string $user username to use when connecting to the UniFi controller
      * @param string $password password to use when connecting to the UniFi controller
@@ -109,23 +112,19 @@ class Client
     }
 
     /**
-     * This method is called as soon as there are no other references to the class instance
-     * https://www.php.net/manual/en/language.oop5.decon.php
+     * This method is called as soon as there are no other references to the class instance.
      *
+     * @see https://www.php.net/manual/en/language.oop5.decon.php
      * @note to force the class instance to log out when you're done, call logout()
      */
     public function __destruct()
     {
-        /**
-         * if $_SESSION[$this->unificookie_name] is set, do not log out here
-         */
+        /** if $_SESSION[$this->unificookie_name] is set, do not log out here */
         if (isset($_SESSION[$this->unificookie_name])) {
             return;
         }
 
-        /**
-         * log out, if needed
-         */
+        /** log out, if needed */
         if ($this->is_logged_in) {
             $this->logout();
         }
@@ -140,9 +139,7 @@ class Client
      */
     public function login()
     {
-        /**
-         * skip the login process if already logged in
-         */
+        /** skip the login process if already logged in */
         if ($this->update_unificookie()) {
             $this->is_logged_in = true;
         }
@@ -151,9 +148,7 @@ class Client
             return true;
         }
 
-        /**
-         * prepare cURL and options to check whether this is a "regular" controller or one based on UniFi OS
-         */
+        /** prepare cURL and options to check whether this is a "regular" controller or one based on UniFi OS */
         $ch = $this->get_curl_handle();
 
         $curl_options = [
@@ -162,9 +157,7 @@ class Client
 
         curl_setopt_array($ch, $curl_options);
 
-        /**
-         * execute the cURL request and get the HTTP response code
-         */
+        /** execute the cURL request and get the HTTP response code */
         curl_exec($ch);
 
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -173,9 +166,7 @@ class Client
             trigger_error('cURL error: ' . curl_error($ch));
         }
 
-        /**
-         * prepare the actual login
-         */
+        /** prepare the actual login */
         $curl_options = [
             CURLOPT_POST       => true,
             CURLOPT_POSTFIELDS => json_encode(['username' => $this->user, 'password' => $this->password]),
@@ -184,9 +175,7 @@ class Client
             CURLOPT_URL        => $this->baseurl . '/api/login',
         ];
 
-        /**
-         * specific to UniFi OS-based controllers
-         */
+        /** specific to UniFi OS-based controllers */
         if ($http_code === 200) {
             $this->is_unifi_os         = true;
             $curl_options[CURLOPT_URL] = $this->baseurl . '/api/auth/login';
@@ -194,9 +183,7 @@ class Client
 
         curl_setopt_array($ch, $curl_options);
 
-        /**
-         * execute the cURL request and get the HTTP response code
-         */
+        /** execute the cURL request and get the HTTP response code */
         $response  = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
@@ -214,9 +201,7 @@ class Client
             print '</pre>' . PHP_EOL;
         }
 
-        /**
-         * based on the HTTP response code trigger an error
-         */
+        /** based on the HTTP response code trigger an error */
         if ($http_code >= 400) {
             trigger_error("HTTP response status received: $http_code. Probably a controller login failure");
 
@@ -225,9 +210,7 @@ class Client
 
         curl_close($ch);
 
-        /**
-         * check the HTTP response code
-         */
+        /** check the HTTP response code */
         if ($http_code >= 200) {
             $this->is_logged_in = true;
 
@@ -244,9 +227,7 @@ class Client
      */
     public function logout(): bool
     {
-        /**
-         * prepare cURL and options
-         */
+        /** prepare cURL and options */
         $ch = $this->get_curl_handle();
 
         $curl_options = [
@@ -268,9 +249,7 @@ class Client
 
         curl_setopt_array($ch, $curl_options);
 
-        /**
-         * execute the cURL request to logout
-         */
+        /** execute the cURL request to logout */
         curl_exec($ch);
 
         if (curl_errno($ch)) {
@@ -305,9 +284,7 @@ class Client
     {
         $payload = ['cmd' => 'authorize-guest', 'mac' => strtolower($mac), 'minutes' => $minutes];
 
-        /**
-         * append received values for up/down/megabytes/ap_mac to the payload array to be submitted
-         */
+        /** append received values for up/down/megabytes/ap_mac to the payload array to be submitted */
         if (!empty($up)) {
             $payload['up'] = $up;
         }
@@ -3324,7 +3301,7 @@ class Client
      */
     public function custom_api_request(string $path, string $method = 'GET', $payload = null, string $return = 'array')
     {
-        if (!in_array($method, $this->curl_methods_allowed)) {
+        if (!in_array($method, self::CURL_METHODS_ALLOWED)) {
             return false;
         }
 
@@ -3599,8 +3576,7 @@ class Client
      */
     public function set_curl_method(string $curl_method): bool
     {
-
-        if (!in_array($curl_method, $this->curl_methods_allowed)) {
+        if (!in_array($curl_method, self::CURL_METHODS_ALLOWED)) {
             return false;
         }
 
@@ -3789,9 +3765,7 @@ class Client
         bool   $login_required = true
     )
     {
-        /**
-         * guard clause to check if logged in when needed
-         */
+        /** guard clause to check if logged in when needed */
         if ($login_required && !$this->is_logged_in) {
             return false;
         }
@@ -3826,9 +3800,7 @@ class Client
                 }
             }
 
-            /**
-             * to deal with a response coming from the new v2 API
-             */
+            /** to deal with a response coming from the new v2 API */
             if (strpos($path, '/v2/api/') === 0) {
                 if (isset($response->errorCode)) {
                     if (isset($response->message)) {
@@ -3875,7 +3847,7 @@ class Client
             $error = 'Unknown JSON error occurred';
             switch (json_last_error()) {
                 case JSON_ERROR_NONE:
-                    // JSON is valid, no error has occurred and return true early
+                    /** JSON is valid, no error has occurred and return true early */
                     return true;
                 case JSON_ERROR_DEPTH:
                     $error = 'The maximum stack depth has been exceeded';
@@ -3894,17 +3866,17 @@ class Client
 
                     break;
                 case JSON_ERROR_UTF8:
-                    // PHP >= 5.3.3
+                    /** PHP >= 5.3.3 */
                     $error = 'Malformed UTF-8 characters, possibly incorrectly encoded';
 
                     break;
                 case JSON_ERROR_RECURSION:
-                    // PHP >= 5.5.0
+                    /** PHP >= 5.5.0 */
                     $error = 'One or more recursive references in the value to be encoded';
 
                     break;
                 case JSON_ERROR_INF_OR_NAN:
-                    // PHP >= 5.5.0
+                    /** PHP >= 5.5.0 */
                     $error = 'One or more NAN or INF values in the value to be encoded';
 
                     break;
@@ -3914,9 +3886,7 @@ class Client
                     break;
             }
 
-            /**
-             * check whether we have PHP >= 7.0.0
-             */
+            /** check whether we have PHP >= 7.0.0 */
             if (defined('JSON_ERROR_INVALID_PROPERTY_NAME') && defined('JSON_ERROR_UTF16')) {
                 switch (json_last_error()) {
                     case JSON_ERROR_INVALID_PROPERTY_NAME:
@@ -3982,9 +3952,7 @@ class Client
         if (session_status() === PHP_SESSION_ACTIVE && isset($_SESSION[$this->unificookie_name]) && !empty($_SESSION[$this->unificookie_name])) {
             $this->cookies = $_SESSION[$this->unificookie_name];
 
-            /**
-             * if the cookie contains a JWT, this is a UniFi OS controller
-             */
+            /** if the cookie contains a JWT, this is a UniFi OS controller */
             if (strpos($this->cookies, 'TOKEN') !== false) {
                 $this->is_unifi_os = true;
             }
@@ -4015,9 +3983,7 @@ class Client
                 return;
             }
 
-            /**
-             * remove any existing x-csrf-token headers first
-             */
+            /** remove any existing x-csrf-token headers first */
             foreach ($this->curl_headers as $index => $header) {
                 if (strpos(strtolower($header), strtolower('x-csrf-token:')) !== false) {
                     unset($this->curl_headers[$index]);
@@ -4074,7 +4040,7 @@ class Client
      */
     protected function exec_curl(string $path, $payload = null)
     {
-        if (!in_array($this->curl_method, $this->curl_methods_allowed)) {
+        if (!in_array($this->curl_method, self::CURL_METHODS_ALLOWED)) {
             trigger_error('an invalid HTTP request type was used: ' . $this->curl_method);
             return false;
         }
@@ -4091,9 +4057,7 @@ class Client
             CURLOPT_URL => $url,
         ];
 
-        /**
-         * when a payload is passed
-         */
+        /** when a payload is passed */
         $json_payload = '';
         if (!empty($payload)) {
             $json_payload                     = json_encode($payload, JSON_UNESCAPED_SLASHES);
@@ -4132,18 +4096,14 @@ class Client
 
         curl_setopt_array($ch, $curl_options);
 
-        /**
-         * execute the cURL request
-         */
+        /** execute the cURL request */
         $response = curl_exec($ch);
 
         if (curl_errno($ch)) {
             trigger_error('cURL error: ' . curl_error($ch));
         }
 
-        /**
-         * get the HTTP response code
-         */
+        /** get the HTTP response code */
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         /**
@@ -4156,9 +4116,7 @@ class Client
             }
 
             if ($this->exec_retries === 0) {
-                /**
-                 * explicitly clear the expired Cookie/Token, update other properties and log out before logging in again
-                 */
+                /** explicitly clear the expired Cookie/Token, update other properties and log out before logging in again */
                 if (isset($_SESSION[$this->unificookie_name])) {
                     $_SESSION[$this->unificookie_name] = '';
                 }
@@ -4169,14 +4127,10 @@ class Client
 
                 curl_close($ch);
 
-                /**
-                 * then login again
-                 */
+                /** then login again */
                 $this->login();
 
-                /**
-                 * when re-login was successful, execute the same cURL request again
-                 */
+                /** when re-login was successful, execute the same cURL request again */
                 if ($this->is_logged_in) {
                     if ($this->debug) {
                         error_log(__FUNCTION__ . ': re-logged in, calling exec_curl again');
@@ -4213,10 +4167,8 @@ class Client
 
         curl_close($ch);
 
-        /**
-         * set method back to default value, just in case
-         */
-        $this->curl_method = 'GET';
+        /** set the method back to the default value, just in case */
+        $this->curl_method = self::DEFAULT_CURL_METHOD;
 
         return $response;
     }
@@ -4224,12 +4176,11 @@ class Client
     /**
      * Create and return a new cURL handle
      *
-     * @return object|resource CurlHandle object with PHP 8, or a resource for lower PHP versions
+     * @return object|resource CurlHandle object with PHP 8.* and higher, or a resource for lower PHP versions
      */
     protected function get_curl_handle()
     {
-        $ch = curl_init();
-
+        $ch           = curl_init();
         $curl_options = [
             CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS,
             CURLOPT_HTTP_VERSION   => $this->curl_http_version,
