@@ -3358,7 +3358,7 @@ class Client
      * @param string $method optional, HTTP request type, can be GET (default), POST, PUT, PATCH, or DELETE
      * @param object|array|null $payload optional, stdClass object or associative array containing the payload to pass
      * @param string $return optional, string; determines how to return results, when "boolean" the method must
-     *                       return a boolean result (true/false) or "array" when the method must return an array
+     *                       return a boolean result or "array" when the method must return an array (default)
      * @return bool|array returns results as requested, returns false on incorrect parameters
      */
     public function custom_api_request(string $path, string $method = 'GET', $payload = null, string $return = 'array')
@@ -3375,7 +3375,9 @@ class Client
 
         if ($return === 'array') {
             return $this->fetch_results($path, $payload);
-        } elseif ($return === 'boolean') {
+        }
+
+        if ($return === 'boolean') {
             return $this->fetch_results_boolean($path, $payload);
         }
 
@@ -3392,9 +3394,9 @@ class Client
      *
      * @note changed function/method name to fit its purpose
      * @param string|null $mac optional, the MAC address of a single device for which the call must be made
-     * @return array containing known device objects (or a single device when using the <mac> parameter)
+     * @return array|bool containing known device objects (or a single device when using the <mac> parameter)
      */
-    public function list_aps(string $mac = null): array
+    public function list_aps(string $mac = null)
     {
         trigger_error(
             'Function list_aps() has been deprecated, use list_devices() instead.',
@@ -3497,7 +3499,6 @@ class Client
     public function set_site(string $site): string
     {
         $this->check_site($site);
-
         $this->site = trim($site);
 
         return $this->site;
