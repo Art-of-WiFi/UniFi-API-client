@@ -21,7 +21,7 @@ namespace UniFi_API;
 class Client
 {
     /** constants */
-    const CLASS_VERSION        = '1.1.92';
+    const CLASS_VERSION        = '1.1.93';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -277,7 +277,7 @@ class Client
      * @param int|null $down optional, download speed limit in kbps
      * @param int|null $megabytes optional, data transfer limit in MB
      * @param string|null $ap_mac optional, AP MAC address to which client is connected, should result in faster
-     *                            authorization
+     *                            authorization for the client device
      * @return bool returns true upon success
      */
     public function authorize_guest(string $mac, int $minutes, int $up = null, int $down = null, int $megabytes = null, string $ap_mac = null): bool
@@ -361,12 +361,15 @@ class Client
      *
      * @note only supported with controller versions 5.9.X and higher, can be
      *       slow (up to 5 minutes) on larger controllers
-     * @param array $macs array of client MAC addresses (strings)
+     * @param array|string $mac array of client MAC addresses (strings) or a single MAC address string
      * @return bool returns true upon success
      */
-    public function forget_sta(array $macs): bool
+    public function forget_sta($mac): bool
     {
-        $payload = ['cmd' => 'forget-sta', 'macs' => array_map('strtolower', $macs)];
+        $payload = [
+            'cmd'  => 'forget-sta',
+            'macs' => array_map('strtolower', (array)$mac)
+        ];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/stamgr', $payload);
     }
@@ -1040,29 +1043,29 @@ class Client
     /**
      * Fetch online client device(s)
      *
-     * @param string|null $client_mac optional, the MAC address of a single online client device for which the call must be
-     *                           made
+     * @param string|null $mac optional, the MAC address of a single online client device for which the call must be
+     *                         made
      * @return array|bool returns an array of online client device objects, or in case of a single device request, returns a
      *                    single client device object, false upon error
      */
-    public function list_clients(string $client_mac = null)
+    public function list_clients(string $mac = null)
     {
-        if (is_string($client_mac)) {
-            $client_mac = strtolower(trim($client_mac));
+        if (is_string($mac)) {
+            $mac = strtolower(trim($mac));
         }
 
-        return $this->fetch_results('/api/s/' . $this->site . '/stat/sta/' . $client_mac);
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/sta/' . $mac);
     }
 
     /**
      * Fetch details for a single client device
      *
-     * @param string $client_mac client device MAC address
+     * @param string $mac client device MAC address
      * @return array|bool returns an object with the client device information
      */
-    public function stat_client(string $client_mac)
+    public function stat_client(string $mac)
     {
-        return $this->fetch_results('/api/s/' . $this->site . '/stat/user/' . strtolower(trim($client_mac)));
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/user/' . strtolower(trim($mac)));
     }
 
     /**
@@ -1420,14 +1423,14 @@ class Client
     /**
      * Fetch UniFi devices
      *
-     * @param array|string $device_macs optional, array containing the MAC addresses (lowercase strings) of the devices
-     *                                  to filter by, may also be a (lowercase) string containing a single MAC address
-     * @return array|bool an array containing known UniFi device objects (optionally filtered by the <device_macs>
-     *                     parameter), false upon error
+     * @param array|string $macs optional, array containing the MAC addresses (lowercase strings) of the devices
+     *                           to filter by. May also be a (lowercase) string containing a single MAC address
+     * @return array|bool an array containing known UniFi device objects, optionally filtered by the <macs>
+     *                    parameter, false upon error
      */
-    public function list_devices($device_macs = [])
+    public function list_devices($macs = [])
     {
-        $payload = ['macs' => (array) $device_macs];
+        $payload = ['macs' => array_map('strtolower', (array)$macs)];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/device', $payload);
     }
@@ -1448,15 +1451,15 @@ class Client
      *
      * @note this endpoint was introduced with controller versions 5.5.X
      * @param string $name required, the tag name to add
-     * @param array|null $devices_macs optional, array of the MAC address(es) of the device(s) to tag with the new tag
+     * @param array|null $macs optional, an array of the MAC address(es) of the device(s) to tag with the new tag
      * @return bool return true on success
      */
-    public function create_tag(string $name, array $devices_macs = null): bool
+    public function create_tag(string $name, array $macs = null): bool
     {
         $payload = ['name' => $name];
 
-        if (is_array($devices_macs)) {
-            $payload['member_table'] = $devices_macs;
+        if (is_array($macs)) {
+            $payload['member_table'] = $macs;
         }
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/tag', $payload);
@@ -1466,15 +1469,15 @@ class Client
      * Set tagged devices (using REST)
      *
      * @note this endpoint was introduced with controller versions 5.5.X
-     * @param array $devices_macs required, array of the MAC address(es) of the device(s) to tag
+     * @param array $macs required, an array of the MAC address(es) of the device(s) to tag
      * @param string $tag_id required, the _id value of the tag to set
      * @return bool return true on success
      */
-    public function set_tagged_devices(array $devices_macs, string $tag_id): bool
+    public function set_tagged_devices(array $macs, string $tag_id): bool
     {
         $this->curl_method = 'PUT';
 
-        $payload = ['member_table' => $devices_macs];
+        $payload = ['member_table' => $macs];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/tag/' . $tag_id, $payload);
     }
@@ -1572,7 +1575,8 @@ class Client
     /**
      * Fetch sites
      *
-     * @return array|bool containing a list of sites hosted on this controller with some details
+     * @return array|bool a list of sites on this controller that the credentials used have access to,
+     *                    together with some basic attributes for each site
      */
     public function list_sites()
     {
@@ -1583,7 +1587,7 @@ class Client
      * Fetch sites stats
      *
      * @note this endpoint was introduced with controller version 5.2.9
-     * @return array|bool containing statistics for all sites hosted on this controller
+     * @return array|bool statistics for all sites hosted on this controller
      */
     public function stat_sites()
     {
@@ -1594,7 +1598,8 @@ class Client
      * Create a site
      *
      * @param string $description the long name for the new site
-     * @return array|bool containing a single object with attributes of the new site ("_id", "desc", "name") on success
+     * @return array|bool false on failure or a single object with attributes of the new site ("_id", "desc", "name") on
+     *                    success
      */
     public function create_site(string $description)
     {
@@ -1634,12 +1639,10 @@ class Client
      * Update site country
      *
      * @param string $country_id _id value of the country key
-     * @param object|array $payload stdClass object or associative array containing the configuration to apply to
-     *                                 the site, must be a (partial) object/array structured in the same manner as is
-     *                                 returned by list_settings() for the section with the "country" key. Valid
-     *                                 country codes can be obtained using the list_country_codes() function/method. Do
-     *                                 not include the _id property, it is assigned by the controller and returned upon
-     *                                 success.
+     * @param object|array $payload a stdClass object or associative array containing the configuration to apply to
+     *                              the site. Must be a (partial) object/array structured in the same manner as is
+     *                              returned by list_settings() for the section with the "country" key. Valid
+     *                              country codes can be obtained using the list_country_codes() function/method.
      * @return bool true on success
      */
     public function set_site_country(string $country_id, $payload): bool
@@ -1655,12 +1658,11 @@ class Client
      *
      * @param string $locale_id _id value of the locale section
      * @param object|array $payload stdClass object or associative array containing the configuration to apply to the
-     *                                site, must be a (partial) object/array structured in the same manner as is
-     *                                returned by list_settings() for section with the "locale" key. Valid
-     *                                timezones can be obtained in Javascript as explained here:
-     *                                https://stackoverflow.com/questions/38399465/how-to-get-list-of-all-timezones-in-javascript
-     *                                or in PHP using timezone_identifiers_list(). Do not include the _id property, it
-     *                                is assigned by the controller and returned upon success.
+     *                              site. Must be a (partial) object/array structured in the same manner as is
+     *                              returned by list_settings() for the section with the "locale" key. Valid
+     *                              timezones can be obtained in JavaScript as explained here:
+     *                              https://stackoverflow.com/questions/38399465/how-to-get-list-of-all-timezones-in-javascript
+     *                              or in PHP using timezone_identifiers_list().
      * @return bool true on success
      */
     public function set_site_locale(string $locale_id, $payload): bool
@@ -1676,9 +1678,8 @@ class Client
      *
      * @param string $snmp_id _id value of the snmp section
      * @param object|array $payload stdClass object or associative array containing the configuration to apply to the
-     *                              site, must be a (partial) object/array structured in the same manner as is returned
-     *                              by list_settings() for the section with the "snmp" key. Do not include the _id
-     *                              property, it is assigned by the controller and returned upon success.
+     *                              site. Must be a (partial) object/array structured in the same manner as is returned
+     *                              by list_settings() for the section with the "snmp" key.
      * @return bool true on success
      */
     public function set_site_snmp(string $snmp_id, $payload): bool
@@ -1693,9 +1694,8 @@ class Client
      *
      * @param string $mgmt_id _id value of the mgmt section
      * @param object|array $payload stdClass object or associative array containing the configuration to apply to the
-     *                              site, must be a (partial) object/array structured in the same manner as is returned
-     *                              by list_settings() for the section with the "mgmt" key. Do not include the _id
-     *                              property, it is assigned by the controller and returned upon success.
+     *                              site. Must be a (partial) object/array structured in the same manner as is returned
+     *                              by list_settings() for the section with the "mgmt" key.
      * @return bool true on success
      */
     public function set_site_mgmt(string $mgmt_id, $payload): bool
@@ -1710,10 +1710,8 @@ class Client
      *
      * @param string $guest_access_id _id value of the guest_access section
      * @param object|array $payload stdClass object or associative array containing the configuration to apply
-     *                                      to the site, must be a (partial) object/array structured in the same manner
-     *                                      as is returned by list_settings() for the section with the "guest_access"
-     *                                      key. Do not include the _id property, it is assigned by the controller and
-     *                                      returned upon success.
+     *                              to the site. Must be a (partial) object/array structured in the same manner
+     *                              as is returned by list_settings() for the section with the "guest_access" key.
      * @return bool true on success
      */
     public function set_site_guest_access(string $guest_access_id, $payload): bool
@@ -1729,9 +1727,8 @@ class Client
      *
      * @param string $ntp_id _id value of the ntp section
      * @param object|array $payload stdClass object or associative array containing the configuration to apply to the
-     *                              site, must be a (partial) object/array structured in the same manner as is returned
-     *                              by list_settings() for the section with the "ntp" key. Do not include the _id
-     *                              property, it is assigned by the controller and returned upon success.
+     *                              site. Must be a (partial) object/array structured in the same manner as is returned
+     *                              by list_settings() for the section with the "ntp" key.
      * @return bool true on success
      */
     public function set_site_ntp(string $ntp_id, $payload): bool
@@ -1746,10 +1743,8 @@ class Client
      *
      * @param string $connectivity_id _id value of the connectivity section
      * @param object|array $payload stdClass object or associative array containing the configuration to apply
-     *                                      to the site, must be a (partial) object/array structured in the same manner
-     *                                      as is returned by list_settings() for the section with the "connectivity"
-     *                                      key. Do not include the _id property, it is assigned by the controller and
-     *                                      returned upon success.
+     *                              to the site. Must be a (partial) object/array structured in the same manner
+     *                              as is returned by list_settings() for the section with the "connectivity" key.
      * @return bool true on success
      */
     public function set_site_connectivity(string $connectivity_id, $payload): bool
@@ -2225,12 +2220,16 @@ class Client
     /**
      * Adopt a device to the selected site
      *
-     * @param string $mac device MAC address
+     * @param string|array $macs device MAC address or an array of MAC addresses
      * @return bool true on success
      */
-    public function adopt_device(string $mac): bool
+    public function adopt_device($macs): bool
     {
-        $payload = ['mac' => strtolower($mac), 'cmd' => 'adopt'];
+        $payload = [
+            'macs' => array_map('strtolower', (array)$macs),
+            'cmd' => 'adopt'
+        ];
+
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
     }
 
@@ -2243,7 +2242,7 @@ class Client
      * @param string $password SSH password
      * @param string $url inform URL to point the device to
      * @param int $port optional, SSH port
-     * @param bool $ssh_key_verify optional, whether to verify device SSH key
+     * @param bool $ssh_key_verify optional, if true, verify the SSH key for the device
      * @return bool true on success
      */
     public function advanced_adopt_device(
@@ -2271,19 +2270,56 @@ class Client
     }
 
     /**
-     * Reboot a device
+     * Migrate one or more devices.
      *
-     * @param string $mac device MAC address
-     * @param string $reboot_type optional, two options: 'soft' or 'hard', defaults to soft
-     *                            soft can be used for all devices, requests a plain restart of that device
-     *                            hard is special for PoE switches and besides the restart also requests a
-     *                            power cycle on all PoE capable ports. Keep in mind that a 'hard' reboot
-     *                            does *NOT* trigger a factory-reset.
+     * @param string|array $macs single device MAC address string or an array of MAC addresses
+     * @param string $inform_url inform URL to point the device to (e.g., http://10.1.0.10:9080/inform)
      * @return bool true on success
      */
-    public function restart_device(string $mac, string $reboot_type = 'soft'): bool
+    public function migrate_device($macs, string $inform_url): bool
     {
-        $payload = ['cmd' => 'restart', 'mac' => strtolower($mac)];
+        $payload = [
+            'cmd'        => 'migrate',
+            'inform_url' => $inform_url,
+            'macs'       => array_map('strtolower', (array)$macs)
+        ];
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+    }
+
+    /**
+     * Cancel migration for one or more devices.
+     *
+     * @param string|array $macs single device MAC address string or an array of MAC addresses
+     * @return bool true on success
+     */
+    public function cancel_migrate_device($macs): bool
+    {
+        $payload = [
+            'cmd'  => 'cancel-migrate',
+            'macs' => array_map('strtolower', (array)$macs)
+        ];
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+    }
+
+    /**
+     * Reboot one or more devices.
+     *
+     * @param string|array $macs single device MAC address string or an array of MAC addresses
+     * @param string $reboot_type optional, two options: 'soft' or 'hard', defaults to soft
+     *                            - soft can be used for all devices, requests a plain restart of that device
+     *                            - hard is special for PoE switches, also requests a power cycle on all PoE
+     *                              capable ports. Keep in mind that a 'hard' reboot
+     *                            - does *NOT* trigger a factory-reset.
+     * @return bool true on success
+     */
+    public function restart_device($macs, string $reboot_type = 'soft'): bool
+    {
+        $payload = [
+            'cmd'  => 'restart',
+            'macs' => array_map('strtolower', (array)$macs)
+        ];
 
         if (!empty($reboot_type) && in_array($reboot_type, ['soft', 'hard'])) {
             $payload['reboot_type'] = strtolower($reboot_type);
@@ -2293,16 +2329,20 @@ class Client
     }
 
     /**
-     * Force the provision of a device
+     * Force the provision of one or more devices.
      *
-     * @param string $mac device MAC address
+     * @note unclear whether this function is still supported across all controller versions
+     * @param string|array $mac single device MAC address string or an array of MAC addresses
      * @return bool true on success
      */
-    public function force_provision(string $mac): bool
+    public function force_provision($mac): bool
     {
-        $payload = ['mac' => strtolower($mac), 'cmd' => 'force-provision'];
+        $payload = [
+            'cmd'  => 'force-provision',
+            'macs' => array_map('strtolower', (array)$mac)
+        ];
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/', $payload);
     }
 
     /**
@@ -2584,7 +2624,11 @@ class Client
      */
     public function move_device(string $mac, string $site_id): bool
     {
-        $payload = ['site' => $site_id, 'mac' => strtolower($mac), 'cmd' => 'move-device'];
+        $payload = [
+            'cmd'  => 'move-device',
+            'site' => $site_id,
+            'mac'  => strtolower($mac)
+        ];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
     }
@@ -2597,7 +2641,10 @@ class Client
      */
     public function delete_device(string $mac): bool
     {
-        $payload = ['mac' => strtolower($mac), 'cmd' => 'delete-device'];
+        $payload = [
+            'cmd' => 'delete-device',
+            'mac' => strtolower($mac)
+        ];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
     }
@@ -2975,14 +3022,28 @@ class Client
      * Upgrade a device to the latest firmware
      *
      * @note updates the device to the latest STABLE firmware known to the controller
-     * @param string $device_mac MAC address of the device to upgrade
+     * @param string $mac MAC address of the device to upgrade
      * @return bool returns true upon success
      */
-    public function upgrade_device(string $device_mac): bool
+    public function upgrade_device(string $mac): bool
     {
-        $payload = ['mac' => strtolower($device_mac)];
+        $payload = ['mac' => strtolower($mac)];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/upgrade', $payload);
+    }
+
+    /**
+     * Upgrade all devices of a certain type to the latest firmware
+     *
+     * @note updates all devices of the selected type to the latest STABLE firmware known to the controller
+     * @param string $type the type of devices to upgrade, must be one of "uap", "usw", "ugw". "uap" is the default.
+     * @return bool returns true upon success
+     */
+    public function upgrade_all_devices(string $type = 'uap'): bool
+    {
+        $payload = ['type' => strtolower($type)];
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/upgrade-all', $payload);
     }
 
     /**
@@ -2991,32 +3052,33 @@ class Client
      * @note - updates the device to the firmware file at the given URL
      *       - please take great care to select a valid firmware file for the device!
      * @param string $firmware_url URL for the firmware file to upgrade the device to
-     * @param string $device_mac MAC address of the device to upgrade
+     * @param string|array $macs MAC address of the device to upgrade or an array of MAC addresses
      * @return bool returns true upon success
      */
-    public function upgrade_device_external(string $firmware_url, string $device_mac): bool
+    public function upgrade_device_external(string $firmware_url, $macs): bool
     {
-        $payload = ['url' => filter_var($firmware_url, FILTER_SANITIZE_URL), 'mac' => strtolower($device_mac)];
+        $payload = [
+            'url'  => filter_var($firmware_url, FILTER_SANITIZE_URL),
+            'macs' => array_map('strtolower', (array)$macs)
+        ];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/upgrade-external', $payload);
     }
 
     /**
-     * Start rolling upgrade
+     * Start rolling upgrade.
      *
-     * @note updates all access points to the latest firmware known to the controller in a
+     * @note updates all UniFi devices to the latest firmware known to the controller in a
      *       staggered/rolling fashion
      * @return bool returns true upon success
      */
     public function start_rolling_upgrade(): bool
     {
-        $payload = ['cmd' => 'set-rollupgrade'];
-
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/set-rollupgrade');
     }
 
     /**
-     * Cancel rolling upgrade
+     * Cancel rolling upgrade.
      *
      * @return bool returns true upon success
      */
@@ -3028,7 +3090,7 @@ class Client
     }
 
     /**
-     * Fetch firmware versions
+     * Fetch firmware versions.
      *
      * @param string $type optional, "available" or "cached", determines which firmware types to return,
      *                     default value is "available"
@@ -3048,15 +3110,15 @@ class Client
     /**
      * Power-cycle the PoE output of a switch port
      *
-     * @note - only applies to switches and their PoE ports...
+     * @note - only applies to switches and their PoE ports
      *       - the port must be actually providing power
-     * @param string $switch_mac main MAC address of the switch
+     * @param string $mac main MAC address of the switch
      * @param int $port_idx port number/index of the port to be affected
      * @return bool returns true upon success
      */
-    public function power_cycle_switch_port(string $switch_mac, int $port_idx): bool
+    public function power_cycle_switch_port(string $mac, int $port_idx): bool
     {
-        $payload = ['mac' => strtolower($switch_mac), 'port_idx' => $port_idx, 'cmd' => 'power-cycle'];
+        $payload = ['mac' => strtolower($mac), 'port_idx' => $port_idx, 'cmd' => 'power-cycle'];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
     }
@@ -3064,25 +3126,25 @@ class Client
     /**
      * Trigger an RF scan by an AP
      *
-     * @param string $ap_mac MAC address of the AP
+     * @param string $mac MAC address of the AP
      * @return bool returns true upon success
      */
-    public function spectrum_scan(string $ap_mac): bool
+    public function spectrum_scan(string $mac): bool
     {
-        $payload = ['cmd' => 'spectrum-scan', 'mac' => strtolower($ap_mac)];
+        $payload = ['cmd' => 'spectrum-scan', 'mac' => strtolower($mac)];
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
     }
 
     /**
      * Check the RF scanning state of an AP
      *
-     * @param string $ap_mac MAC address of the AP
+     * @param string $mac MAC address of the AP
      * @return array|bool containing relevant information (results if available) regarding the RF scanning state of the
      *                    AP
      */
-    public function spectrum_scan_state(string $ap_mac)
+    public function spectrum_scan_state(string $mac)
     {
-        return $this->fetch_results('/api/s/' . $this->site . '/stat/spectrum-scan/' . strtolower(trim($ap_mac)));
+        return $this->fetch_results('/api/s/' . $this->site . '/stat/spectrum-scan/' . strtolower(trim($mac)));
     }
 
     /**
@@ -3329,17 +3391,17 @@ class Client
      * Fetch access points and other devices under management of the controller (USW, USG, and/or UnIfi OS consoles)
      *
      * @note changed function/method name to fit its purpose
-     * @param string|null $device_mac optional, the MAC address of a single device for which the call must be made
-     * @return array containing known device objects (or a single device when using the <device_mac> parameter)
+     * @param string|null $mac optional, the MAC address of a single device for which the call must be made
+     * @return array containing known device objects (or a single device when using the <mac> parameter)
      */
-    public function list_aps(string $device_mac = null): array
+    public function list_aps(string $mac = null): array
     {
         trigger_error(
             'Function list_aps() has been deprecated, use list_devices() instead.',
             E_USER_DEPRECATED
         );
 
-        return $this->list_devices($device_mac);
+        return $this->list_devices($mac);
     }
 
     /**
