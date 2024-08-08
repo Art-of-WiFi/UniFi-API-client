@@ -21,7 +21,7 @@ namespace UniFi_API;
 class Client
 {
     /** constants */
-    const CLASS_VERSION        = '1.1.93';
+    const CLASS_VERSION        = '1.1.94';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -31,11 +31,11 @@ class Client
      * @note do **not** directly edit the property values below, instead use the constructor or the respective
      *       getter and setter functions/methods
      */
-    protected string $baseurl              = 'https://127.0.0.1:8443';
+    protected string $baseurl              = '';
     protected string $user                 = '';
     protected string $password             = '';
-    protected string $site                 = 'default';
-    protected string $version              = '8.0.28';
+    protected string $site                 = '';
+    protected string $version              = '';
     protected bool   $debug                = false;
     protected bool   $is_logged_in         = false;
     protected bool   $is_unifi_os          = false;
@@ -63,47 +63,40 @@ class Client
      * @param string $password password to use when connecting to the UniFi controller
      * @param string $baseurl optional, base URL of the UniFi controller which *must* include an 'https://' prefix,
      *                        a port suffix (e.g. :8443) is required for non-UniFi OS controllers,
-     *                        do not add trailing slashes, default value is 'https://127.0.0.1:8443'
+     *                        do not add trailing slashes, defaults to 'https://127.0.0.1:8443'
      * @param string|null $site optional, short site name to access, defaults to 'default'
-     * @param string|null $version optional, the version number of the controller
+     * @param string|null $version optional, the version number of the controller, defaults to '8.0.28'
      * @param bool $ssl_verify optional, whether to validate the controller's SSL certificate or not, a value of true
-     *                         is recommended for production environments to prevent potential MitM attacks, default
-     *                         value (false) disables validation of the controller's SSL certificate
-     * @param string $unificookie_name optional, name of the cookie to use, default value is 'unificookie'.
-     *                                 This is only necessary when you have multiple apps using the API on the same web
-     *                                 server.
+     *                         is recommended for production environments to prevent potential MitM attacks, defaults
+     *                         to false which disables validation of the controller's SSL certificate
+     * @param string $unificookie_name optional, name of the cookie to use, defaults to 'unificookie'.
+     *                                 This is only necessary when you have multiple apps using this API client on the
+     *                                 same web server.
      */
     public function __construct(
         string $user,
         string $password,
-        string $baseurl = '',
-        string $site = null,
-        string $version = null,
+        string $baseurl = 'https://127.0.0.1:8443',
+        string $site = 'default',
+        string $version = '8.0.28',
         bool   $ssl_verify = false,
         string $unificookie_name = 'unificookie'
     )
     {
         if (!extension_loaded('curl')) {
             trigger_error('The PHP curl extension is not loaded. Please correct this before proceeding!');
+            exit();
         }
 
-        $this->unificookie_name = trim($unificookie_name);
+        $this->check_base_url($baseurl);
+        $this->check_site($site);
+
+        $this->baseurl          = trim($baseurl);
+        $this->site             = trim($site);
         $this->user             = trim($user);
         $this->password         = trim($password);
-
-        if (!empty($baseurl)) {
-            $this->check_base_url($baseurl);
-            $this->baseurl = trim($baseurl);
-        }
-
-        if (!empty($site)) {
-            $this->check_site($site);
-            $this->site = trim($site);
-        }
-
-        if (!empty($version)) {
-            $this->version = trim($version);
-        }
+        $this->version          = trim($version);
+        $this->unificookie_name = trim($unificookie_name);
 
         if ($ssl_verify === true) {
             $this->curl_ssl_verify_peer = true;
