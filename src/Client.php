@@ -85,7 +85,6 @@ class Client
     {
         if (!extension_loaded('curl')) {
             trigger_error('The PHP curl extension is not loaded. Please correct this before proceeding!');
-            exit();
         }
 
         $this->check_base_url($baseurl);
