@@ -92,7 +92,7 @@ class Client
         $this->check_site($site);
 
         $this->baseurl          = trim($baseurl);
-        $this->site             = trim($site);
+        $this->site             = strtolower(trim($site));
         $this->user             = trim($user);
         $this->password         = trim($password);
         $this->version          = trim($version);
@@ -126,9 +126,9 @@ class Client
     /**
      * Login to the UniFi controller
      *
+     * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#client_error_responses
      * @return bool|int returns true upon success, false or the HTTP response code (typically 400, 401, or 403) upon
      *                  error
-     * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#client_error_responses
      */
     public function login()
     {
@@ -216,7 +216,7 @@ class Client
     /**
      * Logout from the UniFi controller
      *
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function logout(): bool
     {
@@ -271,7 +271,7 @@ class Client
      * @param int|null $megabytes optional, data transfer limit in MB
      * @param string|null $ap_mac optional, AP MAC address to which client is connected, should result in faster
      *                            authorization for the client device
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function authorize_guest(string $mac, int $minutes, int $up = null, int $down = null, int $megabytes = null, string $ap_mac = null): bool
     {
@@ -301,7 +301,7 @@ class Client
      * Unauthorize a client device
      *
      * @param string $mac client MAC address
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function unauthorize_guest(string $mac): bool
     {
@@ -314,7 +314,7 @@ class Client
      * Reconnect a client device
      *
      * @param string $mac client MAC address
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function reconnect_sta(string $mac): bool
     {
@@ -327,7 +327,7 @@ class Client
      * Block a client device
      *
      * @param string $mac client MAC address
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function block_sta(string $mac): bool
     {
@@ -340,7 +340,7 @@ class Client
      * Unblock a client device
      *
      * @param string $mac client MAC address
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function unblock_sta(string $mac): bool
     {
@@ -355,7 +355,7 @@ class Client
      * @note only supported with controller versions 5.9.X and higher, can be
      *       slow (up to 5 minutes) on larger controllers
      * @param array|string $mac array of client MAC addresses (strings) or a single MAC address string
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function forget_sta($mac): bool
     {
@@ -417,7 +417,7 @@ class Client
      *
      * @param string $user_id id of the client-device to be modified
      * @param string $note optional, note to be applied to the client-device
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function set_sta_note(string $user_id, string $note = ''): bool
     {
@@ -432,7 +432,7 @@ class Client
      * @param string $user_id id of the client-device to be modified
      * @param string $name optional, name to be applied to the client device, when empty or not set,
      *                        the existing name for the client device is removed
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function set_sta_name(string $user_id, string $name = ''): bool
     {
@@ -1079,7 +1079,7 @@ class Client
      *
      * @param string $client_id _id value of the client device to be modified
      * @param string $group_id _id value of the user group to assign client device to
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function set_usergroup(string $client_id, string $group_id): bool
     {
@@ -3002,7 +3002,7 @@ class Client
      * Check firmware update
      *
      * @note triggers a Device Firmware Update in Classic Settings > System settings > Maintenance
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function check_firmware_update(): bool
     {
@@ -3016,7 +3016,7 @@ class Client
      *
      * @note updates the device to the latest STABLE firmware known to the controller
      * @param string $mac MAC address of the device to upgrade
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function upgrade_device(string $mac): bool
     {
@@ -3030,7 +3030,7 @@ class Client
      *
      * @note updates all devices of the selected type to the latest STABLE firmware known to the controller
      * @param string $type the type of devices to upgrade, must be one of "uap", "usw", "ugw". "uap" is the default.
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function upgrade_all_devices(string $type = 'uap'): bool
     {
@@ -3046,7 +3046,7 @@ class Client
      *       - please take great care to select a valid firmware file for the device!
      * @param string $firmware_url URL for the firmware file to upgrade the device to
      * @param string|array $macs MAC address of the device to upgrade or an array of MAC addresses
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function upgrade_device_external(string $firmware_url, $macs): bool
     {
@@ -3063,7 +3063,7 @@ class Client
      *
      * @note updates all UniFi devices to the latest firmware known to the controller in a
      *       staggered/rolling fashion
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function start_rolling_upgrade(): bool
     {
@@ -3073,7 +3073,7 @@ class Client
     /**
      * Cancel rolling upgrade.
      *
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function cancel_rolling_upgrade(): bool
     {
@@ -3107,7 +3107,7 @@ class Client
      *       - the port must be actually providing power
      * @param string $mac main MAC address of the switch
      * @param int $port_idx port number/index of the port to be affected
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function power_cycle_switch_port(string $mac, int $port_idx): bool
     {
@@ -3120,7 +3120,7 @@ class Client
      * Trigger an RF scan by an AP
      *
      * @param string $mac MAC address of the AP
-     * @return bool returns true upon success
+     * @return bool true upon success
      */
     public function spectrum_scan(string $mac): bool
     {
@@ -3895,7 +3895,7 @@ class Client
     /**
      * Capture the latest JSON error when $this->debug is true
      *
-     * @return bool returns true upon success, false upon failure
+     * @return bool true upon success, false upon failure
      */
     protected function catch_json_last_error(): bool
     {
