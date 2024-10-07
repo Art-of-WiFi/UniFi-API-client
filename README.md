@@ -2,8 +2,10 @@
 
 A PHP class that provides access to Ubiquiti's [**UniFi Network Application**](https://unifi-network.ui.com/) API.
 
-UniFi Network Application software versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X (version **8.1.104** has been confirmed to work)
-are supported as well as Network Applications on **UniFi OS-based consoles** (UniFi OS **3.2.12** has been confirmed to work).
+UniFi Network Application software versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X (version **8.5.2** has been confirmed to
+work) are supported as well as Network Applications on **UniFi OS-based consoles** (UniFi OS **4.0.20** has been
+confirmed to work).
+
 This class is used by our API Browser tool, which can be found
 [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
@@ -15,12 +17,13 @@ easy inclusion in your projects.
 ## Requirements
 
 - a server with:
-  - PHP **7.4.0** or higher (use version [1.1.83](https://github.com/Art-of-WiFi/UniFi-API-client/releases/tag/v1.1.83) for PHP 7.3.x and lower)
+  - PHP **7.4.0** or higher (use version [1.1.83](https://github.com/Art-of-WiFi/UniFi-API-client/releases/tag/v1.1.83) 
+    for PHP 7.3.x and lower)
   - PHP json and PHP cURL modules
-  - tested on Apache 2.4 with PHP 7.4.27 and cURL 7.60.0 and with PHP 8.2.12 and cURL 7.81.0
+  - tested on Apache 2.4 with PHP 7.4.27 and cURL 7.60.0 and with PHP 8.3.11 and cURL 7.81.0
 - direct network connectivity between this server and the host and port (usually TCP port 8443 or port 443 for 
   UniFi OS) where the UniFi Controller is running
-- you **must** use **accounts with local access permissions** to access the UniFi Controller API through this class
+- you **must** use an **account with local access permissions** to access the UniFi Controller API through this class
 - do not use UniFi Cloud accounts and do not enable 2FA for the accounts that you use with this class
 
 
@@ -34,16 +37,20 @@ Support for UniFi OS-based controllers has been added as of version 1.1.47. Thes
 - UniFi Cloud Key Gen2 Plus (UCK G2 Plus), firmware version 2.0.24 or higher
 - UniFi Cloud Console, details [here](https://help.ui.com/hc/en-us/articles/4415364143511)
 - UniFi Express (UX)
+- UniFi Dream Wall (UDW)
+- UniFi Cloud Gateway Ultra (UCG-Ultra)
+- UniFi Enterprise Fortress Gateway (EFG)
 
 The class automatically detects UniFi OS consoles and adjusts the URLs and several functions/methods accordingly.
 
-UniFi OS consoles require you to connect using port **443** instead of **8443** which is used for "software-based"
-controllers. If your own code implements strict validation of the URL that is passed to the constructor, please adapt
-your logic to allow URLs without a port suffix or with port 443 when working with a UniFi OS-based controller.
+UniFi OS-based controllers require you to connect using port **443** instead of **8443** which is used for
+"software-based" controllers. If your own code implements strict validation of the URL that is passed to the
+constructor, please adapt your logic to allow URLs without a port suffix or with port 443 when working with a
+UniFi OS-based controller.
 
 
 ### Remote API access to UniFi OS-based controllers
-When connecting to a UniFi OS gateway through the WAN interface, you need to create a specific firewall rule to
+When connecting to a UniFi OS-based gateway through the WAN interface, you need to create a specific firewall rule to
 allow this. See this blog post on the Art of WiFi website for more details:
 https://artofwifi.net/blog/how-to-access-the-unifi-controller-by-wan-ip-or-hostname-on-a-udm-pro
 

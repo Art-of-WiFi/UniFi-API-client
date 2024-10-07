@@ -3,7 +3,7 @@
 namespace UniFi_API;
 
 /**
- * The UniFi API client class
+ * The UniFi API client class.
  *
  * This UniFi API client class is based on the work done by the following developers:
  *    domwo: https://community.ui.com/questions/little-php-class-for-unifi-api/933d3fb3-b401-4499-993a-f9af079a4a3a
@@ -20,40 +20,50 @@ namespace UniFi_API;
  */
 class Client
 {
-    /** constants */
+    /** Constants. */
     const CLASS_VERSION        = '1.1.95';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
     /**
-     * protected properties
+     * Protected properties.
      *
      * @note do **not** directly edit the property values below, instead use the constructor or the respective
      *       getter and setter functions/methods
      */
-    protected string $baseurl              = '';
-    protected string $user                 = '';
-    protected string $password             = '';
-    protected string $site                 = '';
-    protected string $version              = '';
-    protected bool   $debug                = false;
-    protected bool   $is_logged_in         = false;
-    protected bool   $is_unifi_os          = false;
-    protected int    $exec_retries         = 0;
-    protected string $cookies              = '';
-    protected        $last_results_raw     = null;
-    protected string $last_error_message   = '';
-    protected bool   $curl_ssl_verify_peer = false;
-    protected int    $curl_ssl_verify_host = 0;
-    protected int    $curl_http_version    = CURL_HTTP_VERSION_NONE;
-    protected string $curl_method          = self::DEFAULT_CURL_METHOD;
-    protected int    $curl_request_timeout = 30;
-    protected int    $curl_connect_timeout = 10;
-    protected string $unificookie_name     = 'unificookie';
-    protected array  $curl_headers         = [
+    protected string $baseurl                    = '';
+    protected string $user                       = '';
+    protected string $password                   = '';
+    protected string $site                       = '';
+    protected string $version                    = '';
+    protected bool   $debug                      = false;
+    protected bool   $is_logged_in               = false;
+    protected bool   $is_unifi_os                = false;
+    protected int    $exec_retries               = 0;
+    protected string $cookies                    = '';
+    protected        $last_results_raw           = null;
+    protected string $last_error_message         = '';
+    protected bool   $curl_ssl_verify_peer       = false;
+    protected int    $curl_ssl_verify_host       = 0;
+    protected int    $curl_http_version          = CURL_HTTP_VERSION_NONE;
+    protected string $curl_method                = self::DEFAULT_CURL_METHOD;
+    protected int    $curl_request_timeout       = 30;
+    protected int    $curl_connect_timeout       = 10;
+    protected string $unificookie_name           = 'unificookie';
+    protected array  $curl_headers               = [
         'Accept: application/json',
         'Content-Type: application/json',
         'Expect:',
+    ];
+    protected array  $default_site_stats_attribs = [
+        'bytes',
+        'wan-tx_bytes',
+        'wan-rx_bytes',
+        'wlan_bytes',
+        'num_sta',
+        'lan-num_sta',
+        'wlan-num_sta',
+        'time',
     ];
 
     /**
@@ -123,7 +133,7 @@ class Client
     }
 
     /**
-     * Login to the UniFi controller
+     * Login to the UniFi controller.
      *
      * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#client_error_responses
      * @return bool|int returns true upon success, false or the HTTP response code (typically 400, 401, or 403) upon
@@ -213,7 +223,7 @@ class Client
     }
 
     /**
-     * Logout from the UniFi controller
+     * Logout from the UniFi controller.
      *
      * @return bool true upon success
      */
@@ -261,7 +271,7 @@ class Client
      ****************************************************************/
 
     /**
-     * Authorize a client device
+     * Authorize a client device.
      *
      * @param string $mac client MAC address
      * @param int $minutes minutes (from now) until authorization expires
@@ -297,7 +307,7 @@ class Client
     }
 
     /**
-     * Unauthorize a client device
+     * Unauthorize a client device.
      *
      * @param string $mac client MAC address
      * @return bool true upon success
@@ -323,7 +333,7 @@ class Client
     }
 
     /**
-     * Block a client device
+     * Block a client device.
      *
      * @param string $mac client MAC address
      * @return bool true upon success
@@ -336,7 +346,7 @@ class Client
     }
 
     /**
-     * Unblock a client device
+     * Unblock a client device.
      *
      * @param string $mac client MAC address
      * @return bool true upon success
@@ -349,7 +359,7 @@ class Client
     }
 
     /**
-     * Forget one or more client devices
+     * Forget one or more client devices.
      *
      * @note only supported with controller versions 5.9.X and higher, can be
      *       slow (up to 5 minutes) on larger controllers
@@ -367,7 +377,7 @@ class Client
     }
 
     /**
-     * Create a new user/client-device
+     * Create a new user/client-device.
      *
      * @param string $mac client MAC address
      * @param string $user_group_id _id value for the user group the new user/client-device should belong to which
@@ -441,7 +451,7 @@ class Client
     }
 
     /**
-     * Fetch 5-minute site stats
+     * Fetch 5-minute site stats.
      *
      * @note - defaults to the past 12 hours
      *       - this function/method is only supported on controller versions 5.5.* and later
@@ -449,124 +459,91 @@ class Client
      *         the controller settings
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
+     * @param array|null $attribs optional, array of attributes to collect. Default values:
+     *                            'bytes', 'wan-tx_bytes', 'wan-rx_bytes', 'wlan_bytes', 'num_sta', 'lan-num_sta',
+     *                            'wlan-num_sta', 'time'
+     *                            Example values:
+     *                            'airtime_avg', 'latency_avg', 'latency_min', 'latency_max'
      * @return array|bool returns an array of 5-minute stats objects for the current site
      */
-    public function stat_5minutes_site(int $start = null, int $end = null)
+    public function stat_5minutes_site(int $start = null, int $end = null, array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (12 * 3600 * 1000) : $start;
-
-        $attribs = [
-            'bytes',
-            'wan-tx_bytes',
-            'wan-rx_bytes',
-            'wlan_bytes',
-            'num_sta',
-            'lan-num_sta',
-            'wlan-num_sta',
-            'time',
-        ];
-
+        $attribs = empty($attribs) ? $this->default_site_stats_attribs : array_merge(['time'], $attribs);
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/5minutes.site', $payload);
     }
 
     /**
-     * Fetch hourly site stats
+     * Fetch hourly site stats.
      *
      * TODO: add support for optional attrib parameter
      *       airtime_avg
      *
      * @note - defaults to the past 7*24 hours
      *       - "bytes" are no longer returned with controller version 4.9.1 and later
+     * @see stat_5minutes_site() for details on attribs
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
+     * @param array|null $attribs optional, array of attributes to collect.
      * @return array|bool returns an array of hourly stats objects for the current site
      */
-    public function stat_hourly_site(int $start = null, int $end = null)
+    public function stat_hourly_site(int $start = null, int $end = null, array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
-
-        $attribs = [
-            'bytes',
-            'wan-tx_bytes',
-            'wan-rx_bytes',
-            'wlan_bytes',
-            'num_sta',
-            'lan-num_sta',
-            'wlan-num_sta',
-            'time',
-        ];
-
+        $attribs = empty($attribs) ? $this->default_site_stats_attribs : array_merge(['time'], $attribs);
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/hourly.site', $payload);
     }
 
     /**
-     * Fetch daily site stats
+     * Fetch daily site stats.
      *
      * @note - defaults to the past 52*7*24 hours
      *       - "bytes" are no longer returned with controller version 4.9.1 and later
+     * @see stat_5minutes_site() for details on attribs
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
+     * @param array|null $attribs optional, array of attributes to collect.
      * @return array|bool returns an array of daily stats objects for the current site
      */
-    public function stat_daily_site(int $start = null, int $end = null)
+    public function stat_daily_site(int $start = null, int $end = null, array $attribs = null)
     {
         $end     = empty($end) ? (time() - (time() % 3600)) * 1000 : $end;
         $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : $start;
-
-        $attribs = [
-            'bytes',
-            'wan-tx_bytes',
-            'wan-rx_bytes',
-            'wlan_bytes',
-            'num_sta',
-            'lan-num_sta',
-            'wlan-num_sta',
-            'time',
-        ];
-
+        $attribs = empty($attribs) ? $this->default_site_stats_attribs : array_merge(['time'], $attribs);
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/daily.site', $payload);
     }
 
     /**
-     * Fetch monthly site stats
+     * Fetch monthly site stats.
      *
      * @note - defaults to the past 52 weeks (52*7*24 hours)
      *       - "bytes" are no longer returned with controller version 4.9.1 and later
+     * @see stat_5minutes_site() for details on attribs
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
+     * @param array|null $attribs optional, array of attributes to collect.
      * @return array|bool returns an array of monthly stats objects for the current site
      */
-    public function stat_monthly_site(int $start = null, int $end = null)
+    public function stat_monthly_site(int $start = null, int $end = null, array $attribs = null)
     {
         $end     = empty($end) ? (time() - (time() % 3600)) * 1000 : $end;
         $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : $start;
-
-        $attribs = [
-            'bytes',
-            'wan-tx_bytes',
-            'wan-rx_bytes',
-            'wlan_bytes',
-            'num_sta',
-            'lan-num_sta',
-            'wlan-num_sta',
-            'time',
-        ];
-
+        $attribs = empty($attribs) ? $this->default_site_stats_attribs : array_merge(['time'], $attribs);
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/monthly.site', $payload);
     }
 
     /**
-     * Fetch 5-minutes stats for a single access point or all access points
+     * Fetch 5-minutes stats for a single access point or all access points.
      *
      * @note - defaults to the past 12 hours
      *       - this function/method is only supported on controller versions 5.5.* and later
@@ -576,13 +553,37 @@ class Client
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|null $mac optional, AP MAC address to return stats for, when empty,
      *                      stats for all APs are returned
+     * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time). Example values:
+     *                       'bytes',
+     *                       'num_sta',
+     *                       'time',
+     *                       'wifi_tx_attempts',
+     *                       'tx_retries',
+     *                       'wifi_tx_dropped',
+     *                       'mac_filter_rejections',
+     *                       'user-wlan-num_sta_connected',
+     *                       'user-wlan-num_sta_disconnected',
+     *                       'na-wifi_tx_attempts',
+     *                       'ng-wifi_tx_attempts',
+     *                       'na-wifi_tx_dropped',
+     *                       'ng-wifi_tx_dropped',
+     *                       'na-tx_retries',
+     *                       'ng-tx_retries',
+     *                       'na-tx_packets',
+     *                       'ng-tx_packets',
+     *                       'na-tx_bytes',
+     *                       'ng-tx_bytes',
+     *                       'na-rx_packets',
+     *                       'ng-rx_packets',
+     *                       'na-rx_bytes',
+     *                       'ng-rx_bytes',
      * @return array|bool returns an array of 5-minute stats objects
      */
-    public function stat_5minutes_aps(int $start = null, int $end = null, string $mac = null)
+    public function stat_5minutes_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (12 * 3600 * 1000) : $start;
-        $attribs = ['bytes', 'num_sta', 'time'];
+        $attribs = empty($attribs) ? ['bytes', 'num_sta', 'time'] : array_merge(['time'], $attribs);
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         if (!empty($mac)) {
@@ -593,42 +594,24 @@ class Client
     }
 
     /**
-     * Fetch hourly stats for a single access point or all access points
-     *
-     * TODO: optionally add ["top_filter_by" => "tx_retries"] to payload
-     *       add optional parameter for attribs to support:
-     *       wifi_tx_attempts
-     *       tx_retries
-     *       wifi_tx_dropped
-     *       sta_assoc_failures
-     *       sta_wpa_auth_failures
-     *       mac_filter_rejections
-     *       sta_dhcp_failures
-     *       sta_assoc_min
-     *       sta_assoc_max
-     *       sta_connect_time_min
-     *       sta_connect_time_max
-     *       sta_connect_time_total
-     *       user-wlan-num_sta_connected
-     *       user-wlan-num_sta_disconnected
-     *       user-wlan-sta_assoc_samples
-     *       user-wlan-sta_track_samples
-     *       wlan-num_sta
+     * Fetch hourly stats for a single access point or all access points.
      *
      * @note - defaults to the past 7*24 hours
      *       - make sure that the retention policy for hourly stats is set to the correct value in
      *         the controller settings
+     * @see stat_5minutes_aps() for supported attribs
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|null $mac optional, AP MAC address to return stats for, when empty,
      *                       stats for all APs are returned
+     * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time).
      * @return array|bool returns an array of hourly stats objects
      */
-    public function stat_hourly_aps(int $start = null, int $end = null, string $mac = null)
+    public function stat_hourly_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
     {
         $end     = empty($end) ? (time() * 1000) : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
-        $attribs = ['bytes', 'num_sta', 'time'];
+        $attribs = empty($attribs) ? ['bytes', 'num_sta', 'time'] : array_merge(['time'], $attribs);
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         if (!empty($mac)) {
@@ -639,22 +622,24 @@ class Client
     }
 
     /**
-     * Fetch daily stats for a single access point or all access points
+     * Fetch daily stats for a single access point or all access points.
      *
      * @note - defaults to the past 7*24 hours
      *       - make sure that the retention policy for hourly stats is set to the correct value in
      *         the controller settings
+     * @see stat_5minutes_aps() for supported attribs
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|null $mac optional, AP MAC address to return stats for, when empty,
-     *                      stats for all APs are returned
+     *                         stats for all APs are returned
+     * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time).
      * @return array|bool returns an array of daily stats objects
      */
-    public function stat_daily_aps(int $start = null, int $end = null, string $mac = null)
+    public function stat_daily_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
-        $attribs = ['bytes', 'num_sta', 'time'];
+        $attribs = empty($attribs) ? ['bytes', 'num_sta', 'time'] : array_merge(['time'], $attribs);
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         if (!empty($mac)) {
@@ -670,17 +655,19 @@ class Client
      * @note - defaults to the past 52 weeks (52*7*24 hours)
      *       - make sure that the retention policy for hourly stats is set to the correct value in
      *         the controller settings
+     * @see stat_5minutes_aps() for supported attribs
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|null $mac optional, AP MAC address to return stats for, when empty,
-     *                      stats for all APs are returned
+     *                         stats for all APs are returned
+     * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time).
      * @return array|bool returns an array of monthly stats objects
      */
-    public function stat_monthly_aps(int $start = null, int $end = null, string $mac = null)
+    public function stat_monthly_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : $start;
-        $attribs = ['bytes', 'num_sta', 'time'];
+        $attribs = empty($attribs) ? ['bytes', 'num_sta', 'time'] : array_merge(['time'], $attribs);
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         if (!empty($mac)) {
@@ -691,8 +678,7 @@ class Client
     }
 
     /**
-     * Fetch 5-minutes stats for a single user/client device
-     *
+     * Fetch 5-minutes stats for a single user/client device.
      *
      * @note - defaults to the past 12 hours
      *       - only supported with UniFi controller versions 5.8.X and higher
@@ -704,9 +690,9 @@ class Client
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
-     *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets, satisfaction, wifi_tx_attempts
-     *                        default value is ['rx_bytes', 'tx_bytes']
+     *                            rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
+     *                            tx_packets, satisfaction, wifi_tx_attempts
+     *                            default value is ['rx_bytes', 'tx_bytes']
      * @return array|bool returns an array of 5-minute stats objects
      */
     public function stat_5minutes_user(string $mac, int $start = null, int $end = null, array $attribs = null)
@@ -720,7 +706,7 @@ class Client
     }
 
     /**
-     * Fetch hourly stats for a single user/client device
+     * Fetch hourly stats for a single user/client device.
      *
      * @note - defaults to the past 7*24 hours
      *       - only supported with UniFi controller versions 5.8.X and higher
@@ -728,13 +714,11 @@ class Client
      *         the controller settings
      *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
      *         section
+     * @see stat_5minutes_user() for details on attribs
      * @param string $mac MAC address of the user/client device to return stats fo
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
-     * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
-     *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets, satisfaction, wifi_tx_attempts
-     *                        default value is ['rx_bytes', 'tx_bytes']
+     * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of hourly stats objects
      */
     public function stat_hourly_user(string $mac, int $start = null, int $end = null, array $attribs = null)
@@ -748,7 +732,7 @@ class Client
     }
 
     /**
-     * Fetch daily stats for a single user/client device
+     * Fetch daily stats for a single user/client device.
      *
      * @note - defaults to the past 7*24 hours
      *       - only supported with UniFi controller versions 5.8.X and higher
@@ -756,13 +740,11 @@ class Client
      *         the controller settings
      *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
      *         section
+     * @see stat_5minutes_user() for details on attribs
      * @param string $mac MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
-     * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
-     *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets, satisfaction, wifi_tx_attempts
-     *                        default value is ['rx_bytes', 'tx_bytes']
+     * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of daily stats objects
      */
     public function stat_daily_user(string $mac, int $start = null, int $end = null, array $attribs = null)
@@ -776,7 +758,7 @@ class Client
     }
 
     /**
-     * Fetch monthly stats for a single user/client device
+     * Fetch monthly stats for a single user/client device.
      *
      * @note - defaults to the past 13 weeks (52*7*24 hours)
      *       - only supported with UniFi controller versions 5.8.X and higher
@@ -784,13 +766,11 @@ class Client
      *         the controller settings
      *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
      *         section
+     * @see stat_5minutes_user() for details on attribs
      * @param string $mac MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
-     * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
-     *                        rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                        tx_packets, satisfaction, wifi_tx_attempts
-     *                        default value is ['rx_bytes', 'tx_bytes']
+     * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of monthly stats objects
      */
     public function stat_monthly_user(string $mac, int $start = null, int $end = null, array $attribs = null)
@@ -804,7 +784,7 @@ class Client
     }
 
     /**
-     * Fetch 5-minute gateway stats
+     * Fetch 5-minute gateway stats.
      *
      * @note - defaults to the past 12 hours
      *       - this function/method is only supported on controller versions 5.5.* and later
@@ -814,9 +794,9 @@ class Client
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
-     *                       mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
-     *                       lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
-     *                       default is ['time', 'mem', 'cpu', 'loadavg_5']
+     *                            mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
+     *                            lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
+     *                            default is ['time', 'mem', 'cpu', 'loadavg_5']
      * @return array|bool returns an array of 5-minute stats objects for the gateway belonging to the current site
      */
     public function stat_5minutes_gateway(int $start = null, int $end = null, array $attribs = null)
@@ -830,16 +810,14 @@ class Client
     }
 
     /**
-     * Fetch hourly gateway stats
+     * Fetch hourly gateway stats.
      *
      * @note - defaults to the past 7*24 hours
      *       - requires a UniFi gateway
+     * @see stat_5minutes_gateway() for details on attribs
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
-     * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
-     *                       mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
-     *                       lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
-     *                       default is ['time', 'mem', 'cpu', 'loadavg_5']
+     * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of hourly stats objects for the gateway belonging to the current site
      */
     public function stat_hourly_gateway(int $start = null, int $end = null, array $attribs = null)
@@ -853,16 +831,14 @@ class Client
     }
 
     /**
-     * Fetch daily gateway stats
+     * Fetch daily gateway stats.
      *
      * @note - defaults to the past 52 weeks (52*7*24 hours)
      *       - requires a UniFi gateway
+     * @see stat_5minutes_gateway() for details on attribs
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
-     * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
-     *                       mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
-     *                       lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
-     *                       default is ['time', 'mem', 'cpu', 'loadavg_5']
+     * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of hourly stats objects for the gateway belonging to the current site
      */
     public function stat_daily_gateway(int $start = null, int $end = null, array $attribs = null)
@@ -876,16 +852,14 @@ class Client
     }
 
     /**
-     * Fetch monthly gateway stats
+     * Fetch monthly gateway stats.
      *
      * @note - defaults to the past 52 weeks (52*7*24 hours)
      *       - requires a UniFi gateway
+     * @see stat_5minutes_gateway() for details on attribs
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
-     * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
-     *                       mem, cpu, loadavg_5, lan-rx_errors, lan-tx_errors, lan-rx_bytes,
-     *                       lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
-     *                       default is ['time', 'mem', 'cpu', 'loadavg_5']
+     * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of monthly stats objects for the gateway belonging to the current site
      */
     public function stat_monthly_gateway(int $start = null, int $end = null, array $attribs = null)
@@ -899,7 +873,7 @@ class Client
     }
 
     /**
-     * Fetch speed test results
+     * Fetch speed test results.
      *
      * @note - defaults to the past 24 hours
      *       - requires a UniFi gateway
@@ -917,7 +891,7 @@ class Client
     }
 
     /**
-     * Fetch IPS/IDS events
+     * Fetch IPS/IDS events.
      *
      * @note - defaults to the past 24 hours
      *       - requires a UniFi gateway
