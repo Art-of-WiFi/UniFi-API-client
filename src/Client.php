@@ -1514,6 +1514,18 @@ class Client
     }
 
     /**
+     * Download a generated backup file
+     *
+     * @note this is an experimental function, please do not use unless you know exactly what you're doing
+     * @param string $filepath the path to the generated backup file
+     * @return string|bool the raw content of the backup file, false upon failure
+     */
+    public function download_backup(string $filepath)
+    {
+        return $this->exec_curl($filepath);
+    }
+
+    /**
      * Fetch auto backups
      *
      * @return array|bool containing objects with backup details on success
