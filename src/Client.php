@@ -1489,7 +1489,7 @@ class Client
     }
 
     /**
-     * Fetch known rogue access points
+     * Fetch known rogue access points.
      *
      * @return array|bool containing known rogue access point objects
      */
@@ -1499,7 +1499,7 @@ class Client
     }
 
     /**
-     * Generate a backup
+     * Generate a backup.
      *
      * @note this is an experimental function, please do not use unless you know exactly what you're doing
      * @param int $days number of days for which the backup must be generated
@@ -1513,7 +1513,7 @@ class Client
     }
 
     /**
-     * Download a generated backup file
+     * Download a generated backup file.
      *
      * @note this is an experimental function, please do not use unless you know exactly what you're doing
      * @param string $filepath the path to the generated backup file
@@ -1525,7 +1525,7 @@ class Client
     }
 
     /**
-     * Fetch auto backups
+     * Fetch auto backups.
      *
      * @return array|bool containing objects with backup details on success
      */
@@ -1537,7 +1537,7 @@ class Client
     }
 
     /**
-     * Generate a backup/export of the current site
+     * Generate a backup/export of the current site.
      *
      * @note this is an experimental function, please do not use unless you know exactly what you're doing
      * @return array|bool URL from where the backup/export file can be downloaded once generated, false upon failure
