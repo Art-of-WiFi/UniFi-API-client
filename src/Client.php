@@ -3113,7 +3113,7 @@ class Client
      */
     public function start_rolling_upgrade(): bool
     {
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/set-rollupgrade');
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/set-rollupgrade', ['uap', 'usw', 'ugw']);
     }
 
     /**
