@@ -3107,13 +3107,14 @@ class Client
     /**
      * Start rolling upgrade.
      *
-     * @note updates all UniFi devices to the latest firmware known to the controller in a
+     * @note upgrades all UniFi devices to the latest firmware known to the controller in a
      *       staggered/rolling fashion
+     * @param array $payload optional, array of device types to upgrade, default is all device types
      * @return bool true upon success
      */
-    public function start_rolling_upgrade(): bool
+    public function start_rolling_upgrade(array $payload = ['uap', 'usw', 'ugw', 'uxg']): bool
     {
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/set-rollupgrade', ['uap', 'usw', 'ugw', 'uxg']);
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/set-rollupgrade', $payload);
     }
 
     /**
