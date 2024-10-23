@@ -20,7 +20,7 @@ namespace UniFi_API;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '1.1.96';
+    const CLASS_VERSION        = '1.1.99';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -677,7 +677,7 @@ class Client
     }
 
     /**
-     * Fetch 5-minutes stats for a single user/client device.
+     * Fetch 5-minutes stats for a single user/client device or all user/client devices.
      *
      * @note - defaults to the past 12 hours
      *       - only supported with UniFi controller versions 5.8.X and higher
@@ -685,16 +685,16 @@ class Client
      *         the controller settings
      *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
      *         section
-     * @param string $mac MAC address of the user/client device to return stats for
+     * @param string|null $mac optional, MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
      *                            rx_bytes, tx_bytes, signal, rx_rate, tx_rate, rx_retries, tx_retries, rx_packets,
-     *                            tx_packets, satisfaction, wifi_tx_attempts
-     *                            default value is ['rx_bytes', 'tx_bytes']
+     *                            tx_packets, satisfaction, wifi_tx_attempts, 'duration'
+     *                            default value is ['rx_bytes', 'tx_bytes', 'time']
      * @return array|bool returns an array of 5-minute stats objects
      */
-    public function stat_5minutes_user(string $mac, int $start = null, int $end = null, array $attribs = null)
+    public function stat_5minutes_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (12 * 3600 * 1000) : $start;
@@ -705,7 +705,7 @@ class Client
     }
 
     /**
-     * Fetch hourly stats for a single user/client device.
+     * Fetch hourly stats for a single user/client device or all user/client devices.
      *
      * @note - defaults to the past 7*24 hours
      *       - only supported with UniFi controller versions 5.8.X and higher
@@ -714,24 +714,28 @@ class Client
      *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
      *         section
      * @see stat_5minutes_user() for details on attribs
-     * @param string $mac MAC address of the user/client device to return stats fo
+     * @param string|null $mac optional, MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of hourly stats objects
      */
-    public function stat_hourly_user(string $mac, int $start = null, int $end = null, array $attribs = null)
+    public function stat_hourly_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
         $attribs = empty($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
-        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
+
+        if (!empty($mac)) {
+            $payload['mac'] = strtolower($mac);
+        }
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/hourly.user', $payload);
     }
 
     /**
-     * Fetch daily stats for a single user/client device.
+     * Fetch daily stats for a single user/client device or all user/client devices.
      *
      * @note - defaults to the past 7*24 hours
      *       - only supported with UniFi controller versions 5.8.X and higher
@@ -740,24 +744,28 @@ class Client
      *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
      *         section
      * @see stat_5minutes_user() for details on attribs
-     * @param string $mac MAC address of the user/client device to return stats for
+     * @param string|null $mac optional, MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of daily stats objects
      */
-    public function stat_daily_user(string $mac, int $start = null, int $end = null, array $attribs = null)
+    public function stat_daily_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
         $attribs = empty($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
-        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
+
+        if (!empty($mac)) {
+            $payload['mac'] = strtolower($mac);
+        }
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/daily.user', $payload);
     }
 
     /**
-     * Fetch monthly stats for a single user/client device.
+     * Fetch monthly stats for a single user/client device or all user/client devices.
      *
      * @note - defaults to the past 13 weeks (52*7*24 hours)
      *       - only supported with UniFi controller versions 5.8.X and higher
@@ -765,19 +773,23 @@ class Client
      *         the controller settings
      *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
      *         section
-     * @see stat_5minutes_user() for details on attribs
-     * @param string $mac MAC address of the user/client device to return stats for
+     * @param string|null $mac optional, MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of monthly stats objects
+     * @see stat_5minutes_user() for details on attribs
      */
-    public function stat_monthly_user(string $mac, int $start = null, int $end = null, array $attribs = null)
+    public function stat_monthly_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (13 * 7 * 24 * 3600 * 1000) : $start;
         $attribs = empty($attribs) ? ['time', 'rx_bytes', 'tx_bytes'] : array_merge(['time'], $attribs);
-        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end, 'mac' => strtolower($mac)];
+        $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
+
+        if (!empty($mac)) {
+            $payload['mac'] = strtolower($mac);
+        }
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/monthly.user', $payload);
     }
@@ -3366,6 +3378,63 @@ class Client
     }
 
     /**
+     * Fetch system log entries.
+     *
+     * @note - defaults to the past 7*24 hours
+     *       - results are paged; use $page_number to iterate over pages and $page_size to set page size
+     * @param string $class optional, class of the system log entries to fetch, known valid values:
+     *                      'device-alert', 'next-ai-alert', 'vpn-alert', 'admin-activity', 'update-alert',
+     *                      'client-alert', 'threat-alert', 'triggers', default value is 'device-alert'
+     * @param ?int $start optional, start time in milliseconds since the Unix epoch
+     * @param ?int $end optional, end time in milliseconds since the Unix epoch
+     * @param int $page_number optional, page number to fetch, default value is 0 (first page)
+     * @param int $page_size optional, number of entries to fetch per page, default value is 100
+     * @param array $custom_payload optional, an array of additional parameters to pass with the request. Is merged
+     *                              with the default payload array constructed by this method using array_merge().
+     * @return array|bool array containing results from the selected system log section/class, false on error.
+     *                    The 'data' key in the returned array contains the actual system log entries.
+     *                    The returned array also contains the page number and size, and the total number of entries
+     *                    available.
+     */
+    public function get_system_log(string $class = 'device-alert', int $start = null, int $end = null, int $page_number = 0, int $page_size = 100, array $custom_payload = [])
+    {
+        $end   = empty($end) ? time() * 1000  : $end;
+        $start = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
+
+        $payload = [
+            'pageNumber'    => $page_number,
+            'pageSize'      => $page_size,
+            'timestampFrom' => $start,
+            'timestampTo'   => $end,
+        ];
+
+        switch ($class) {
+            case 'next-ai-alert':
+                $payload['nextAiCategory'] = ['CLIENT', 'DEVICE', 'INTERNET', 'VPN'];
+                break;
+            case 'admin-activity':
+                $payload['activity_keys'] = ['ACCESSED_NETWORK_WEB', 'ACCESSED_NETWORK_IOS', 'ACCESSED_NETWORK_ANDROID'];
+                $payload['change_keys']   = ['CLIENT', 'DEVICE', 'HOTSPOT', 'INTERNET', 'NETWORK', 'PROFILE', 'ROUTING', 'SECURITY', 'SYSTEM', 'VPN', 'WIFI'];
+                break;
+            case 'update-alert':
+                $payload['systemLogDeviceTypes'] = ['GATEWAYS', 'SWITCHES', 'ACCESS_POINT', 'SMART_POWER', 'BUILDING_TO_BUILDING_BRIDGES', 'UNIFI_LTE'];
+                break;
+            case 'client-alert':
+                $payload['clientType']               = ['GUEST', 'TELEPORT', 'VPN', 'WIRELESS', 'RADIUS', 'WIRED'];
+                $payload['guestAuthorizationMethod'] = ['FACEBOOK_SOCIAL_GATEWAY', 'FREE_TRIAL', 'GOOGLE_SOCIAL_GATEWAY', 'NONE', 'PASSWORD', 'PAYMENT', 'RADIUS', 'VOUCHER'];
+                break;
+            case 'threat-alert':
+                $payload['threatTypes'] = ['HONEYPOT', 'THREAT'];
+                break;
+            case 'triggers':
+                $payload['triggerTypes'] = ['TRAFFIC_RULE', 'TRAFFIC_ROUTE', 'FIREWALL_RULE'];
+                break;
+        }
+
+        return $this->fetch_results('/v2/api/site/' . $this->site . '/system-log/' . $class, array_merge($payload, $custom_payload));
+    }
+
+    /**
      * List device states
      *
      * @note this function returns a partial implementation of the codes listed at this URL:
@@ -3954,38 +4023,30 @@ class Client
                     return true;
                 case JSON_ERROR_DEPTH:
                     $error = 'The maximum stack depth has been exceeded';
-
                     break;
                 case JSON_ERROR_STATE_MISMATCH:
                     $error = 'Invalid or malformed JSON';
-
                     break;
                 case JSON_ERROR_CTRL_CHAR:
                     $error = 'Control character error, possibly incorrectly encoded';
-
                     break;
                 case JSON_ERROR_SYNTAX:
                     $error = 'Syntax error, malformed JSON';
-
                     break;
                 case JSON_ERROR_UTF8:
                     /** PHP >= 5.3.3 */
                     $error = 'Malformed UTF-8 characters, possibly incorrectly encoded';
-
                     break;
                 case JSON_ERROR_RECURSION:
                     /** PHP >= 5.5.0 */
                     $error = 'One or more recursive references in the value to be encoded';
-
                     break;
                 case JSON_ERROR_INF_OR_NAN:
                     /** PHP >= 5.5.0 */
                     $error = 'One or more NAN or INF values in the value to be encoded';
-
                     break;
                 case JSON_ERROR_UNSUPPORTED_TYPE:
                     $error = 'A value of a type that cannot be encoded was given';
-
                     break;
             }
 
@@ -3994,11 +4055,9 @@ class Client
                 switch (json_last_error()) {
                     case JSON_ERROR_INVALID_PROPERTY_NAME:
                         $error = 'A property name that cannot be encoded was given';
-
                         break;
                     case JSON_ERROR_UTF16:
                         $error = 'Malformed UTF-16 characters, possibly incorrectly encoded';
-
                         break;
                 }
             }
@@ -4116,7 +4175,6 @@ class Client
                         $this->cookies      = $cookie_crumb;
                         $this->is_logged_in = true;
                         $this->is_unifi_os  = false;
-
                         break;
                     }
 
@@ -4124,7 +4182,6 @@ class Client
                         $this->cookies      = $cookie_crumb;
                         $this->is_logged_in = true;
                         $this->is_unifi_os  = true;
-
                         break;
                     }
                 }
