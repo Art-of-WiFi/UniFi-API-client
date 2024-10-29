@@ -20,7 +20,7 @@ namespace UniFi_API;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '1.1.99';
+    const CLASS_VERSION        = '1.1.100';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -2098,7 +2098,8 @@ class Client
      * @param int|null $up upload speed limit in kbps
      * @param int|null $down download speed limit in kbps
      * @param int|null $megabytes data transfer limit in MB
-     * @return array containing a single object which contains the create_time(stamp) of the voucher(s) created
+     * @return array|bool containing a single object/array which contains the create_time(stamp) of the voucher(s)
+     *                    created, false upon failure
      */
     public function create_voucher(
         int    $minutes,
@@ -2108,7 +2109,7 @@ class Client
         int    $up = null,
         int    $down = null,
         int    $megabytes = null
-    ): array
+    )
     {
         $payload = [
             'cmd'    => 'create-voucher',
