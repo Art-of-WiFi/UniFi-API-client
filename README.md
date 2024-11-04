@@ -7,7 +7,7 @@ This class is used by our API Browser tool, which can be found
 
 The package can be installed manually or by using
 composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for
-easy inclusion in your projects.
+easy inclusion in your projects. See #Installation for more details.
 
 ## Supported Versions
 
