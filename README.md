@@ -32,17 +32,19 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 ## UniFi OS Support
 
-Support for UniFi OS-based controllers has been added as of version 1.1.47. These devices have been verified to work:
+Support for UniFi OS-based controllers has been added as of version 1.1.47. These devices/services have been verified
+to work:
 - UniFi Dream Router (UDR)
 - UniFi Dream Machine (UDM)
 - UniFi Dream Machine Pro (UDM PRO)
 - UniFi Cloud Key Gen2 (UCK G2), firmware version 2.0.24 or higher
 - UniFi Cloud Key Gen2 Plus (UCK G2 Plus), firmware version 2.0.24 or higher
-- UniFi Cloud Console, details [here](https://help.ui.com/hc/en-us/articles/4415364143511)
 - UniFi Express (UX)
 - UniFi Dream Wall (UDW)
 - UniFi Cloud Gateway Ultra (UCG-Ultra)
+- UniFi CloudKey Enterprise (CK-Enterprise)
 - UniFi Enterprise Fortress Gateway (EFG)
+- Official UniFi Hosting, details [here](https://help.ui.com/hc/en-us/articles/4415364143511)
 
 The class automatically detects UniFi OS consoles and adjusts the URLs and several functions/methods accordingly.
 
