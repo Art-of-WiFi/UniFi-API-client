@@ -2,16 +2,19 @@
 
 A PHP class that provides access to Ubiquiti's [**UniFi Network Application**](https://unifi-network.ui.com/) API.
 
-UniFi Network Application software versions 5.X.X, 6.X.X, 7.X.X, and 8.X.X (version **8.5.2** has been confirmed to
-work) are supported as well as Network Applications on **UniFi OS-based consoles** (UniFi OS **4.0.20** has been
-confirmed to work).
-
 This class is used by our API Browser tool, which can be found
 [here](https://github.com/Art-of-WiFi/UniFi-API-browser).
 
 The package can be installed manually or by using
 composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for
 easy inclusion in your projects.
+
+## Supported Versions
+
+| Software                             | Versions                                            |
+|--------------------------------------|-----------------------------------------------------|
+| UniFi Network Application/controller | 5.X.X, 6.X.X, 7.X.X, 8.X.X (**8.5.6 is confirmed**) |
+| UniFi OS                             | 3.X, 4.X (**4.1.15 is confirmed**)                  |
 
 
 ## Requirements
