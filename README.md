@@ -317,6 +317,8 @@ their purpose, and their respective parameters.
 - set_request_timeout()
 - set_site()
 - set_site_connectivity()
+- set_site_network_optimization()
+- set_site_rsyslogd()
 - set_site_country()
 - set_site_guest_access()
 - set_site_locale()
