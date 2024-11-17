@@ -4359,7 +4359,7 @@ class Client
     {
         $ch           = curl_init();
         $curl_options = [
-            CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS,
+            CURLOPT_PROTOCOLS      =>  CURLPROTO_HTTPS | CURLPROTO_HTTP,
             CURLOPT_HTTP_VERSION   => $this->curl_http_version,
             CURLOPT_SSL_VERIFYPEER => $this->curl_ssl_verify_peer,
             CURLOPT_SSL_VERIFYHOST => $this->curl_ssl_verify_host,
