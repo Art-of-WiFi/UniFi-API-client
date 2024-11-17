@@ -1,0 +1,61 @@
+name: PHP test
+
+on: [ push, pull_request ]
+
+jobs:
+  test:
+    name: Test
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        unifi-version: [ stable-5, stable-6, v7.0, v7.1, v7.2, v7.3, v7.4, v7.5, v8.0 ]
+        php-version: [ 7.4, "8.0", 8.1, 8.2, 8.3 ]
+        mongo-version: [ 3.6 ]
+        os: [ ubuntu-latest ]
+
+    services:
+      mongo:
+        image: mongo:${{ matrix.mongo-version }}
+        ports:
+          - "27017:27017/tcp"
+      unifi:
+        image: jacobalberty/unifi:${{ matrix.unifi-version }}
+        env:
+          DB_URI: mongodb://mongo/unifi
+          STATDB_URI: mongodb://mongo/unifi_stat
+          DB_NAME: unifi
+        ports:
+          - "8443:8443/tcp"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Use PHP ${{ matrix.php-version }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: curl, json
+
+      - name: Get composer cache directory
+        id: composercache
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composercache.outputs.dir }}
+          key: ${{ runner.os }}-php-${{ matrix.php-version }}-${{ hashFiles('**/composer.json') }}
+          restore-keys: ${{ runner.os }}-php-${{ matrix.php-version }}-
+
+      - name: Install dependencies
+        run: |
+          composer install --prefer-dist
+
+      - name: Unit tests
+        run: |
+          composer run-script test
+
+      - name: Integration tests
+        run: |
+          composer run-script integration-test   

@@ -28,5 +28,16 @@
         "psr-4": {
             "UniFi_API\\": "src/"
         }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^8.5"
+    },
+    "scripts": {
+        "test" : [
+            "vendor/bin/phpunit --testdox --testsuite \"Unit tests\""
+        ],
+        "integration-test" : [
+            "vendor/bin/phpunit --testdox --testsuite \"Integration tests\""
+        ]
     }
 }

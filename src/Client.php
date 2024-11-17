@@ -1747,6 +1747,22 @@ class Client
     }
 
     /**
+     * Creates default admin account for controller in setup mode
+     *
+     * @return bool true on success
+     */
+    public function add_default_admin()
+    {
+        $payload = [
+            'cmd'        => 'add-default-admin',
+            'name'       => $this->user,
+            'x_password' => $this->password,
+        ];
+
+        return $this->fetch_results_boolean('/api/cmd/sitemgr', $payload, false);
+    }
+
+    /**
      * Fetch admins
      *
      * @return array|bool containing administrator objects for selected site
