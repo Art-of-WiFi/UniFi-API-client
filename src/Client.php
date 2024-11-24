@@ -20,7 +20,7 @@ namespace UniFi_API;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '1.1.101';
+    const CLASS_VERSION        = '1.1.102';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -121,12 +121,12 @@ class Client
      */
     public function __destruct()
     {
-        /** if $_SESSION[$this->unificookie_name] is set, do not log out here */
+        /** If $_SESSION[$this->unificookie_name] is set, do not log out here. */
         if (isset($_SESSION[$this->unificookie_name])) {
             return;
         }
 
-        /** log out, if needed */
+        /** Log out, if needed. */
         if ($this->is_logged_in) {
             $this->logout();
         }
