@@ -13,8 +13,8 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 | Software                             | Versions                                            |
 |--------------------------------------|-----------------------------------------------------|
-| UniFi Network Application/controller | 5.X.X, 6.X.X, 7.X.X, 8.X.X (**8.5.6 is confirmed**) |
-| UniFi OS                             | 3.X, 4.X (**4.1.15 is confirmed**)                  |
+| UniFi Network Application/controller | 5.X.X, 6.X.X, 7.X.X, 8.X.X (**8.6.9 is confirmed**) |
+| UniFi OS                             | 3.X, 4.X (**4.1.9 is confirmed**)                   |
 
 
 ## Requirements
@@ -64,17 +64,15 @@ The "custom firewall rule" approach described there is the recommended method.
 
 ## Upgrading from a previous version
 
-When upgrading from a version before **1.1.84**, please:
-- make sure you are using PHP **7.4** or higher
-- test the client with your code for any breaking changes; the class methods now have strict parameter type hints and 
-  response types which can break your code in certain cases where the wrong type is passed or a different response type
-  is expected back
+When upgrading from a version before **2.0.0**, please:
+- change your code to use the new Exceptions that are thrown by the class
+- test the client with your code for any breaking changes
+- make sure you are using composer to install the class because the code is no longer held within a single file
 
 
 ## Installation
 
-Use [Composer](#composer), [Git](#git) or simply [Download the Release](#download-the-release) to install the 
-API client class.
+Use [Composer](#composer) or [Git](#git) to install the API client class.
 
 
 ### Composer
@@ -95,7 +93,7 @@ Or manually add the package to your composer.json file:
 ```javascript
 {
     "require": {
-        "art-of-wifi/unifi-api-client": "^1.1"
+        "art-of-wifi/unifi-api-client": "^2.0"
     }
 }
 ```
@@ -127,21 +125,6 @@ When git is done cloning, include the file containing the class like so in your 
 require_once 'path/to/src/Client.php';
 ```
 
-
-### Download the Release
-
-If you prefer not to use composer or git,
-simply [download the package](https://github.com/Art-of-WiFi/UniFi-API-client/archive/master.zip), unpack the zip
-file, then include the file containing the class in your code like so:
-
-```php
-/**
- * load the class directly instead of using the composer autoloader
- */
-require_once 'path/to/src/Client.php';
-```
-
-
 ## Example usage
 
 A basic example how to use the class:
@@ -161,21 +144,63 @@ $login            = $unifi_connection->login();
 $results          = $unifi_connection->list_alarms(); // returns a PHP array containing alarm objects
 ```
 
-Please refer to the `examples/` directory for some more detailed examples which can be used as a starting point for your
+## Example Exception handling
+
+The class now throws Exceptions for various error conditions instead of using PHP's `trigger_error()` function.
+Here is an example of how to catch these Exceptions:
+```php
+/**
+ * load the class using the composer autoloader
+ */
+require_once 'vendor/autoload.php';
+
+try {
+    /**
+     * initialize the UniFi API connection class, log in to the controller and request the alarms collection
+     * (this example assumes you have already assigned the correct values to the variables used)
+     */
+    $unifi_connection = new UniFi_API\Client($controller_user, $controller_password, $controller_url, $site_id, $controller_version, true);
+    $login            = $unifi_connection->login();
+    $results          = $unifi_connection->list_alarms(); // returns a PHP array containing alarm objects
+} catch (CurlExtensionNotLoadedException $e) {
+    echo 'CurlExtensionNotLoadedException: ' . $e->getMessage(). PHP_EOL;
+} catch (InvalidBaseUrlException $e) {
+    echo 'InvalidBaseUrlException: ' . $e->getMessage(). PHP_EOL;
+} catch (InvalidSiteNameException $e) {
+    echo 'InvalidSiteNameException: ' . $e->getMessage(). PHP_EOL;
+} catch (JsonDecodeException $e) {
+    echo 'JsonDecodeException: ' . $e->getMessage(). PHP_EOL;
+} catch (LoginRequiredException $e) {
+    echo 'LoginRequiredException: ' . $e->getMessage(). PHP_EOL;
+} catch (CurlGeneralErrorException $e) {
+    echo 'CurlGeneralErrorException: ' . $e->getMessage(). PHP_EOL;
+} catch (CurlTimeoutException $e) {
+    echo 'CurlTimeoutException: ' . $e->getMessage(). PHP_EOL;
+} catch (LoginFailedException $e) {
+    echo 'LoginFailedException: ' . $e->getMessage(). PHP_EOL;
+} catch (Exception $e) {
+    echo 'General Exception: ' . $e->getMessage(). PHP_EOL;
+}
+
+```
+
+Please refer to the `examples/` directory for some more detailed examples that can be used as a starting point for your
 own PHP code.
+
+The `list_alarms.php` example there is a good starting point to see how to use the new Exception handling.
 
 
 #### IMPORTANT NOTES:
 
 1. In the above example, `$site_id` is the short site "name" (usually 8 characters long) that is visible in the URL when
-   managing the site in the UniFi Network Controller. For example with this URL:
+   managing the site in the UniFi Network Controller. For example, with this URL:
 
    `https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
 
    `jl3z2shm` is the short site "name" and the value to assign to $site_id.
 
 2. The 6th optional parameter that is passed to the constructor in the above example (`true`), enables validation of
-   the controller's SSL certificate which is otherwise **disabled** by default. It is **highly recommended** to enable
+   the controller's SSL certificate, which is otherwise **disabled** by default. It is **highly recommended** to enable
    this feature in production environments where you have a valid SSL cert installed on the UniFi Controller that is
    associated with the FQDN in the `controller_url` parameter. This option was added with API client version 1.1.16.
 
@@ -188,189 +213,9 @@ own PHP code.
 
 ## Functions/methods supported
 
-The class currently supports the following functions/methods to access the UniFi Controller API. This list is sorted
-alphabetically. Please refer to the comments in the source code for more details on each of the functions/methods,
+The class currently supports a large and growing number of functions/methods to access the UniFi Controller API. 
+Please refer to the comments in the source code for more details on each of the functions/methods,
 their purpose, and their respective parameters.
-
-- adopt_device()
-- advanced_adopt_device()
-- archive_alarm()
-- assign_existing_admin()
-- authorize_guest()
-- block_sta()
-- cancel_rolling_upgrade()
-- check_controller_update()
-- check_firmware_update()
-- cmd_stat()
-- count_alarms()
-- create_apgroup()
-- create_dynamicdns()
-- create_firewallgroup()
-- create_hotspotop()
-- create_network()
-- create_radius_account()
-- create_user()
-- create_usergroup()
-- create_voucher()
-- create_wlan()
-- custom_api_request()
-- delete_apgroup()
-- delete_device()
-- delete_firewallgroup()
-- delete_network()
-- delete_radius_account()
-- delete_site()
-- delete_usergroup()
-- delete_wlan()
-- disable_ap()
-- disable_wlan()
-- edit_apgroup()
-- edit_client_fixedip()
-- edit_client_name()
-- edit_firewallgroup()
-- edit_usergroup()
-- extend_guest_validity()
-- forget_sta()
-- generate_backup()
-- generate_backup_site()
-- get_class_version()
-- get_cookie()
-- get_cookies()
-- get_curl_connection_timeout()
-- get_curl_http_version()
-- get_curl_method()
-- get_curl_request_timeout()
-- get_curl_request_timeout()
-- get_curl_ssl_verify_host()
-- get_curl_ssl_verify_peer()
-- get_debug()
-- get_is_unifi_os()
-- get_last_error_message()
-- get_last_results_raw()
-- get_site()
-- invite_admin()
-- led_override()
-- list_admins()
-- list_all_admins()
-- list_alarms()
-- list_aps()
-- list_backups()
-- list_clients()
-- list_country_codes()
-- list_current_channels()
-- list_dashboard()
-- list_device_name_mappings()
-- list_device_states()
-- list_devices()
-- list_devices_basic()
-- list_dynamicdns()
-- list_events()
-- list_extension()
-- list_firewallgroups()
-- list_firmware()
-- list_guests()
-- list_health()
-- list_hotspotop()
-- list_known_rogueaps()
-- list_networkconf()
-- list_portconf()
-- list_portforward_stats()
-- list_portforwarding()
-- list_radius_accounts()
-- list_radius_profiles()
-- list_self()
-- list_settings()
-- list_sites()
-- list_tags()
-- list_users()
-- list_wlan_groups()
-- list_wlanconf()
-- locate_ap()
-- login()
-- logout()
-- move_device()
-- power_cycle_switch_port()
-- reboot_cloudkey()
-- rename_ap()
-- revoke_admin()
-- revoke_voucher()
-- set_ap_radiosettings()
-- set_ap_wlangroup()
-- set_connection_timeout()
-- set_cookies()
-- set_curl_http_version()
-- set_curl_request_timeout()
-- set_curl_ssl_verify_host()
-- set_curl_ssl_verify_peer()
-- set_debug()
-- set_device_settings_base()
-- set_dynamicdns()
-- set_element_adoption()
-- set_guestlogin_settings()
-- set_guestlogin_settings_base()
-- set_ips_settings_base()
-- set_is_unifi_os()
-- set_locate_ap() (deprecated but still available as alias)
-- set_networksettings_base()
-- set_radius_account_base()
-- set_request_method()
-- set_request_timeout()
-- set_site()
-- set_site_connectivity()
-- set_site_country()
-- set_site_guest_access()
-- set_site_locale()
-- set_site_mgmt()
-- set_site_name()
-- set_site_ntp()
-- set_site_snmp()
-- set_sta_name()
-- set_sta_note()
-- set_super_identity_settings_base()
-- set_super_mgmt_settings_base()
-- set_super_smtp_settings_base()
-- set_usergroup()
-- set_wlan_mac_filter()
-- set_wlansettings()
-- set_wlansettings_base()
-- site_leds()
-- spectrum_scan()
-- spectrum_scan_state()
-- start_rolling_upgrade()
-- stat_5minutes_aps()
-- stat_5minutes_gateway()
-- stat_5minutes_site()
-- stat_5minutes_user()
-- stat_allusers()
-- stat_auths()
-- stat_client()
-- stat_daily_aps()
-- stat_daily_gateway()
-- stat_daily_site()
-- stat_daily_user()
-- stat_full_status()
-- stat_hourly_aps()
-- stat_hourly_gateway()
-- stat_hourly_site()
-- stat_hourly_user()
-- stat_ips_events()
-- stat_monthly_aps()
-- stat_monthly_gateway()
-- stat_monthly_site()
-- stat_monthly_user()
-- stat_payment()
-- stat_sessions()
-- stat_sites()
-- stat_speedtest_results()
-- stat_sta_sessions_latest()
-- stat_status()
-- stat_sysinfo()
-- stat_voucher()
-- unauthorize_guest()
-- unblock_sta()
-- unset_locate_ap() (deprecated but still available as alias)
-- upgrade_device()
-- upgrade_device_external()
 
 
 ## Need help or have suggestions?
@@ -402,7 +247,7 @@ This class is based on the initial work by the following developers:
 
 and the API as published by Ubiquiti:
 
-- https://dl.ui.com/unifi/8.0.26/unifi_sh_api
+- https://dl.ui.com/unifi/8.6.9/unifi_sh_api
 
 
 ## Important Disclaimer
