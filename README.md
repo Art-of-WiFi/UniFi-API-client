@@ -13,8 +13,8 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 | Software                             | Versions                                            |
 |--------------------------------------|-----------------------------------------------------|
-| UniFi Network Application/controller | 5.X.X, 6.X.X, 7.X.X, 8.X.X (**8.6.9 is confirmed**) |
-| UniFi OS                             | 3.X, 4.X (**4.1.9 is confirmed**)                   |
+| UniFi Network Application/controller | 5.x.x, 6.x.x, 7.x.x, 8.x.x (**8.6.9 is confirmed**) |
+| UniFi OS                             | 3.x, 4.x (**4.1.9 is confirmed**)                   |
 
 
 ## Requirements
@@ -107,7 +107,6 @@ Finally, be sure to include the composer autoloader in your code if your framewo
 require_once 'vendor/autoload.php';
 ```
 
-
 ### Git
 
 Execute the following `git` command from the shell in your project directory:
@@ -127,7 +126,7 @@ require_once 'path/to/src/Client.php';
 
 ## Example usage
 
-A basic example how to use the class:
+A basic example of how to use the class:
 
 ```php
 /**
@@ -229,6 +228,28 @@ The class currently supports a large and growing number of functions/methods to 
 Please refer to the comments in the source code for more details on each of the functions/methods,
 their purpose, and their respective parameters.
 
+If you are using an advanced IDE such as PHPStorm or VS Code, you can use its code completion and other
+features to explore the available functions/methods thanks to the extensive PHPDoc comments in the code.
+
+
+## Looking for version 1.x.x?
+
+With versions 1.x.x of the API client, the code was contained within a single file which can be useful in specific
+cases.
+This has changed with version 2.0.0 where the code is now split into multiple files and is managed using composer.
+
+If you are looking for the version 1.x.x code, you can tell composer to install that version by using the following
+syntax in your `composer.json` file:
+
+```javascript
+{
+    "require": {
+        "art-of-wifi/unifi-api-client": "^1.1"
+    }
+}
+```
+
+Alternatively, you can download the latest 1.x.x code from the [releases page](https://github.com/Art-of-WiFi/UniFi-API-client/releases).
 
 ## Need help or have suggestions?
 
