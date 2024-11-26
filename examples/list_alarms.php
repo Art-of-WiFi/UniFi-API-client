@@ -3,8 +3,18 @@
  * PHP API usage example
  *
  * contributed by: Art of WiFi
- * description:    example basic PHP script to pull current alarms from the UniFi controller and output in json format
+ * description: An example basic PHP script to pull current alarms from the UniFi controller and output in JSON format,
+ *              also demonstrates how to catch exceptions.
  */
+
+use UniFi_API\Exceptions\CurlExtensionNotLoadedException;
+use UniFi_API\Exceptions\CurlGeneralErrorException;
+use UniFi_API\Exceptions\CurlTimeoutException;
+use UniFi_API\Exceptions\InvalidBaseUrlException;
+use UniFi_API\Exceptions\InvalidSiteNameException;
+use UniFi_API\Exceptions\JsonDecodeException;
+use UniFi_API\Exceptions\LoginFailedException;
+use UniFi_API\Exceptions\LoginRequiredException;
 
 /**
  * using the composer autoloader
@@ -12,8 +22,14 @@
 require_once 'vendor/autoload.php';
 
 /**
- * include the config file (place your credentials etc. there if not already present)
- * see the config.template.php file for an example
+ * Include the config file (place your credentials etc. there if not already present), see the config.template.php
+ * file for an example.
+ *
+ * @var array $controlleruser
+ * @var array $controllerpassword
+ * @var array $controllerurl
+ * @var array $controllerversion
+ * @var array $debug
  */
 require_once 'config.php';
 
@@ -21,11 +37,6 @@ require_once 'config.php';
  * the site to use
  */
 $site_id = '<enter your site id here>';
-
-/**
- * whether to enable debugging or not
- */
-$debug = false;
 
 try {
     /**

@@ -166,6 +166,11 @@ use UniFi_API\Exceptions\LoginRequiredException;
  */
 require_once 'vendor/autoload.php';
 
+/**
+ * include the config file (place your credentials etc. there if not already present)
+ */
+require_once 'config.php';
+
 try {
     /**
      * initialize the UniFi API connection class, log in to the controller and request the alarms collection
