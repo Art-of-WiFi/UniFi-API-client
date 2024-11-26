@@ -149,6 +149,19 @@ $results          = $unifi_connection->list_alarms(); // returns a PHP array con
 The class now throws Exceptions for various error conditions instead of using PHP's `trigger_error()` function.
 Here is an example of how to catch these Exceptions:
 ```php
+<?php
+/**
+ * PHP API usage example with Exception handling
+ */
+use UniFi_API\Exceptions\CurlExtensionNotLoadedException;
+use UniFi_API\Exceptions\CurlGeneralErrorException;
+use UniFi_API\Exceptions\CurlTimeoutException;
+use UniFi_API\Exceptions\InvalidBaseUrlException;
+use UniFi_API\Exceptions\InvalidSiteNameException;
+use UniFi_API\Exceptions\JsonDecodeException;
+use UniFi_API\Exceptions\LoginFailedException;
+use UniFi_API\Exceptions\LoginRequiredException;
+
 /**
  * load the class using the composer autoloader
  */
@@ -181,7 +194,6 @@ try {
 } catch (Exception $e) {
     echo 'General Exception: ' . $e->getMessage(). PHP_EOL;
 }
-
 ```
 
 Please refer to the `examples/` directory for some more detailed examples that can be used as a starting point for your
