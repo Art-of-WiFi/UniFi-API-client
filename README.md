@@ -247,7 +247,7 @@ Please refer to the comments/PHP DocBlocks in the source code for more details o
 their purpose, and their respective parameters.
 
 If you are using an advanced IDE such as PHPStorm or VS Code, you can use its code completion and other
-features to explore the available functions/methods thanks to the extensive PHPDoc comments in the code.
+features to explore the available functions/methods thanks to the extensive PHP DocBlocks throughout the code.
 
 
 ## Looking for version 1.x.x?
