@@ -1,5 +1,10 @@
 ## UniFi Controller API client class
 
+[![License](https://img.shields.io/github/license/Art-of-WiFi/UniFi-API-client)](https://github.com/Art-of-WiFi/UniFi-API-client/blob/main/LICENSE)
+[![Packagist Version](https://img.shields.io/packagist/v/art-of-wifi/unifi-api-client)](https://packagist.org/packages/art-of-wifi/unifi-api-client)
+[![Downloads](https://img.shields.io/packagist/dt/art-of-wifi/unifi-api-client)](https://packagist.org/packages/art-of-wifi/unifi-api-client)
+[![PHP Version](https://img.shields.io/packagist/php-v/art-of-wifi/unifi-api-client)](https://packagist.org/packages/art-of-wifi/unifi-api-client)
+
 A PHP class that provides access to Ubiquiti's [**UniFi Network Application**](https://unifi-network.ui.com/) API.
 
 This class is used by our API Browser tool, which can be found
@@ -22,8 +27,7 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 - a server with:
   - PHP **7.4.0** or higher (use version [1.1.83](https://github.com/Art-of-WiFi/UniFi-API-client/releases/tag/v1.1.83) 
     for PHP 7.3.x and lower)
-  - PHP json and PHP cURL modules
-  - tested on Apache 2.4 with PHP 7.4.27 and cURL 7.60.0 and with PHP 8.3.11 and cURL 7.81.0
+  - PHP json and PHP cURL modules enabled
 - direct network connectivity between this server and the host and port (usually TCP port 8443 or port 443 for 
   UniFi OS) where the UniFi Controller is running
 - you **must** use an **account with local access permissions** to access the UniFi Controller API through this class
@@ -32,8 +36,10 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 ## UniFi OS Support
 
-Support for UniFi OS-based controllers has been added as of version 1.1.47. These devices/services have been verified
-to work:
+Besides the "software-based" UniFi controllers, this class also supports UniFi OS-based controllers starting from
+version **1.1.47**.
+
+These devices/services have been verified to work:
 - UniFi Dream Router (UDR)
 - UniFi Dream Machine (UDM)
 - UniFi Dream Machine Pro (UDM PRO)
@@ -62,12 +68,12 @@ https://artofwifi.net/blog/how-to-access-the-unifi-controller-by-wan-ip-or-hostn
 The "custom firewall rule" approach described there is the recommended method.
 
 
-## Upgrading from a previous version
+## Upgrading from previous versions
 
 When upgrading from a version before **2.0.0**, please:
 - change your code to use the new Exceptions that are thrown by the class
 - test the client with your code for any breaking changes
-- make sure you are using composer to install the class because the code is no longer held within a single file
+- make sure you are using [Composer](#composer) to install the class because the code is no longer held within a single file
 
 
 ## Installation
@@ -77,18 +83,17 @@ Use [Composer](#composer) or [Git](#git) to install the API client class.
 
 ### Composer
 
-The preferred installation method is through [composer](https://getcomposer.org). 
-Follow these [installation instructions](https://getcomposer.org/doc/00-intro.md) if you don't have composer
+The preferred installation method is through [Composer](https://getcomposer.org). 
+Follow these [installation instructions](https://getcomposer.org/doc/00-intro.md) if you don't have Composer
 installed already.
 
-Once composer is installed, simply execute this command from the shell in your project
-directory:
+Once Composer is installed, execute this command from the shell in your project directory:
 
 ```sh
 composer require art-of-wifi/unifi-api-client
 ```
 
-Or manually add the package to your composer.json file:
+Or manually add the package to your `composer.json` file:
 
 ```javascript
 {
@@ -143,9 +148,32 @@ $login            = $unifi_connection->login();
 $results          = $unifi_connection->list_alarms(); // returns a PHP array containing alarm objects
 ```
 
-## Example Exception handling
+#### IMPORTANT NOTES:
 
-The class now throws Exceptions for various error conditions instead of using PHP's `trigger_error()` function.
+1. In the above example, `$site_id` is the short site "name" (usually 8 characters long) that is visible in the URL when
+   managing the site in the UniFi Network Controller. For example, with this URL:
+
+   `https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
+
+   `jl3z2shm` is the short site "name" and the value to assign to $site_id.
+
+2. The 6th optional parameter that is passed to the constructor in the above example (`true`), enables validation of
+   the controller's SSL certificate, which is otherwise **disabled** by default. It is **highly recommended** to enable
+   this feature in production environments where you have a valid SSL cert installed on the UniFi Controller that is
+   associated with the FQDN in the `controller_url` parameter. This option was added with API client version 1.1.16.
+
+3. Using an administrator account (`$controller_user` in the above example) with **read-only** permissions can limit 
+   visibility on certain collection/object properties. See this
+   [issue](https://github.com/Art-of-WiFi/UniFi-API-client/issues/129) and this 
+   [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/94) for an example where the WPA2 password isn't
+   visible for **read-only** administrator accounts.
+
+
+## Exception handling
+
+The class now throws **Exceptions** for various error conditions instead of using PHP's `trigger_error()` function. This
+allows for more granular error handling in your application code.
+
 Here is an example of how to catch these Exceptions:
 ```php
 <?php
@@ -196,41 +224,26 @@ try {
 } catch (LoginFailedException $e) {
     echo 'LoginFailedException: ' . $e->getMessage(). PHP_EOL;
 } catch (Exception $e) {
+    /** catch any other Exceptions that might be thrown */
     echo 'General Exception: ' . $e->getMessage(). PHP_EOL;
 }
 ```
 
-Please refer to the `examples/` directory for some more detailed examples that can be used as a starting point for your
-own PHP code.
+Although the PHP DocBlocks for most public methods/functions contain `@throws Exception`, it is recommended to catch
+other specific Exceptions that can be thrown by the API Client class to provide more detailed error messages to your
+application code.
 
-The `list_alarms.php` example there is a good starting point to see how to use the new Exception handling.
+In most cases, the class will let Exceptions bubble up to the calling code, but in some cases it will catch them and
+throw a new Exception with a more specific message.
 
-
-#### IMPORTANT NOTES:
-
-1. In the above example, `$site_id` is the short site "name" (usually 8 characters long) that is visible in the URL when
-   managing the site in the UniFi Network Controller. For example, with this URL:
-
-   `https://<controller IP address or FQDN>:8443/manage/site/jl3z2shm/dashboard`
-
-   `jl3z2shm` is the short site "name" and the value to assign to $site_id.
-
-2. The 6th optional parameter that is passed to the constructor in the above example (`true`), enables validation of
-   the controller's SSL certificate, which is otherwise **disabled** by default. It is **highly recommended** to enable
-   this feature in production environments where you have a valid SSL cert installed on the UniFi Controller that is
-   associated with the FQDN in the `controller_url` parameter. This option was added with API client version 1.1.16.
-
-3. Using an administrator account (`$controller_user` in the above example) with **read-only** permissions can limit 
-   visibility on certain collection/object properties. See this
-   [issue](https://github.com/Art-of-WiFi/UniFi-API-client/issues/129) and this 
-   [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/94) for an example where the WPA2 password isn't
-   visible for **read-only** administrator accounts.
+The `list_alarms.php` example in the `examples/` directory is a good starting point to see how you can implement
+Exception handling.
 
 
 ## Functions/methods supported
 
 The class currently supports a large and growing number of functions/methods to access the UniFi Controller API. 
-Please refer to the comments in the source code for more details on each of the functions/methods,
+Please refer to the comments/PHP DocBlocks in the source code for more details on each of the functions/methods,
 their purpose, and their respective parameters.
 
 If you are using an advanced IDE such as PHPStorm or VS Code, you can use its code completion and other
@@ -270,12 +283,6 @@ When encountering issues with the UniFi API using other libraries, cURL or Postm
 Please use the [Discussions](https://github.com/Art-of-WiFi/UniFi-API-client/discussions) section instead.
 
 
-## Contribute
-
-If you would like to contribute code (improvements), please open an issue and include
-your code there or else create a pull request.
-
-
 ## Credits
 
 This class is based on the initial work by the following developers:
@@ -286,6 +293,15 @@ This class is based on the initial work by the following developers:
 and the API as published by Ubiquiti:
 
 - https://dl.ui.com/unifi/8.6.9/unifi_sh_api
+
+## Contributors
+
+A big thanks to all the contributors who have helped with this project!
+
+[![Contributors](https://img.shields.io/github/contributors/Art-of-WiFi/UniFi-API-client)](https://github.com/Art-of-WiFi/UniFi-API-client/graphs/contributors)
+
+If you would like to contribute to this project, please open an issue and include
+your suggestions or code there or else create a pull request.
 
 
 ## Important Disclaimer

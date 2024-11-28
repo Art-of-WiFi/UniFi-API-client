@@ -33,7 +33,7 @@ use UniFi_API\Exceptions\MethodDeprecatedException;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '2.0.0';
+    const CLASS_VERSION        = '2.0.2';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -131,7 +131,7 @@ class Client
      *
      * @see https://www.php.net/manual/en/language.oop5.decon.php
      * @note to force the class instance to log out when you're done, call logout()
-     * @throws CurlGeneralErrorException|CurlTimeoutException
+     * @throws CurlGeneralErrorException|CurlTimeoutException|CurlTimeoutException
      */
     public function __destruct()
     {
@@ -151,7 +151,7 @@ class Client
      *
      * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Status#client_error_responses
      * @return bool returns true upon a successful login
-     * @throws CurlGeneralErrorException|CurlTimeoutException|LoginFailedException|CurlTimeoutException
+     * @throws LoginFailedException|CurlTimeoutException|CurlGeneralErrorException
      */
     public function login(): bool
     {
@@ -229,7 +229,7 @@ class Client
         }
 
         /** If the HTTP response code is 200, we are logged in. */
-        if ($http_code >= 200) {
+        if ($http_code === 200) {
             curl_close($ch);
             return $this->is_logged_in = true;
         }
@@ -417,7 +417,7 @@ class Client
      * @param bool|null $is_wired optional, defines whether the new user/client-device is wired or not
      * @return array|bool returns an array with a single object containing details of the new user/client-device on
      *                    success, else returns false
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function create_user(
         string $mac,
@@ -497,7 +497,7 @@ class Client
      *                            Example values:
      *                            'airtime_avg', 'latency_avg', 'latency_min', 'latency_max'
      * @return array|bool returns an array of 5-minute stats objects for the current site
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_5minutes_site(int $start = null, int $end = null, array $attribs = null)
     {
@@ -521,7 +521,7 @@ class Client
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs optional, array of attributes to collect.
      * @return array|bool returns an array of hourly stats objects for the current site
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      * @see stat_5minutes_site() for details on attribs
      */
     public function stat_hourly_site(int $start = null, int $end = null, array $attribs = null)
@@ -543,7 +543,7 @@ class Client
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs optional, array of attributes to collect.
      * @return array|bool returns an array of daily stats objects for the current site
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      * @see stat_5minutes_site() for details on attribs
      */
     public function stat_daily_site(int $start = null, int $end = null, array $attribs = null)
@@ -565,7 +565,7 @@ class Client
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs optional, array of attributes to collect.
      * @return array|bool returns an array of monthly stats objects for the current site
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      * @see stat_5minutes_site() for details on attribs
      */
     public function stat_monthly_site(int $start = null, int $end = null, array $attribs = null)
@@ -614,7 +614,7 @@ class Client
      *                       'na-rx_bytes',
      *                       'ng-rx_bytes',
      * @return array|bool returns an array of 5-minute stats objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_5minutes_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
     {
@@ -642,7 +642,7 @@ class Client
      *                       stats for all APs are returned
      * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time).
      * @return array|bool returns an array of hourly stats objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      * @see stat_5minutes_aps() for supported attribs
      */
     public function stat_hourly_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
@@ -671,7 +671,7 @@ class Client
      *                         stats for all APs are returned
      * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time).
      * @return array|bool returns an array of daily stats objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      * @see stat_5minutes_aps() for supported attribs
      */
     public function stat_daily_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
@@ -700,7 +700,7 @@ class Client
      *                         stats for all APs are returned
      * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time).
      * @return array|bool returns an array of monthly stats objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      * @see stat_5minutes_aps() for supported attribs
      */
     public function stat_monthly_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
@@ -734,7 +734,7 @@ class Client
      *                            tx_packets, satisfaction, wifi_tx_attempts, 'duration'
      *                            default value is ['rx_bytes', 'tx_bytes', 'time']
      * @return array|bool returns an array of 5-minute stats objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_5minutes_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
     {
@@ -760,7 +760,7 @@ class Client
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of hourly stats objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      * @see stat_5minutes_user() for details on attribs
      */
     public function stat_hourly_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
@@ -791,7 +791,7 @@ class Client
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of daily stats objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      * @see stat_5minutes_user() for details on attribs
      */
     public function stat_daily_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
@@ -822,7 +822,7 @@ class Client
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of monthly stats objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      * @see stat_5minutes_user() for details on attribs
      */
     public function stat_monthly_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
@@ -854,7 +854,7 @@ class Client
      *                            lan-tx_bytes, lan-rx_packets, lan-tx_packets, lan-rx_dropped, lan-tx_dropped
      *                            default is ['time', 'mem', 'cpu', 'loadavg_5']
      * @return array|bool returns an array of 5-minute stats objects for the gateway belonging to the current site
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_5minutes_gateway(int $start = null, int $end = null, array $attribs = null)
     {
@@ -875,7 +875,7 @@ class Client
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of hourly stats objects for the gateway belonging to the current site
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      * @see stat_5minutes_gateway() for details on attribs
      */
     public function stat_hourly_gateway(int $start = null, int $end = null, array $attribs = null)
@@ -897,7 +897,7 @@ class Client
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of hourly stats objects for the gateway belonging to the current site
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      * @see stat_5minutes_gateway() for details on attribs
      */
     public function stat_daily_gateway(int $start = null, int $end = null, array $attribs = null)
@@ -919,7 +919,7 @@ class Client
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of monthly stats objects for the gateway belonging to the current site
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      * @see stat_5minutes_gateway() for details on attribs
      */
     public function stat_monthly_gateway(int $start = null, int $end = null, array $attribs = null)
@@ -940,7 +940,7 @@ class Client
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @return array|bool returns an array of speed test result objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_speedtest_results(int $start = null, int $end = null)
     {
@@ -961,7 +961,7 @@ class Client
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param int|null $limit optional, maximum number of events to return, defaults to 10000
      * @return array|bool returns an array of IPS/IDS event objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_ips_events(int $start = null, int $end = null, int $limit = null)
     {
@@ -985,7 +985,7 @@ class Client
      * @param string $type optional, client type to return sessions for, can be 'all', 'guest' or 'user'; default
      *                      value is 'all'
      * @return array|bool returns an array of login session objects for all devices or a single device
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_sessions(int $start = null, int $end = null, string $mac = null, string $type = 'all')
     {
@@ -1012,7 +1012,7 @@ class Client
      * @param string $mac client MAC address
      * @param int|null $limit optional, maximum number of sessions to get (default value is 5)
      * @return array|bool returns an array of login session objects for all devices or a single device
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_sta_sessions_latest(string $mac, int $limit = null)
     {
@@ -1030,7 +1030,7 @@ class Client
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @return array|bool returns an array of authorization objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_auths(int $start = null, int $end = null)
     {
@@ -1048,7 +1048,7 @@ class Client
      *       the returned stats per client are all-time totals, irrespective of the value of $historyhours
      * @param int $historyhours optional, hours to go back (default is 8760 hours or 1 year)
      * @return array|bool returns an array of client device objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_allusers(int $historyhours = 8760)
     {
@@ -1064,7 +1064,7 @@ class Client
      * @param int $within optional, time frame in hours to go back to list guests with valid access (default = 24*365
      *                    hours)
      * @return array|bool returns an array of guest device objects with valid access
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_guests(int $within = 8760)
     {
@@ -1080,7 +1080,7 @@ class Client
      *                         made
      * @return array|bool returns an array of online client device objects, or in case of a single device request, returns a
      *                    single client device object, false upon error
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_clients(string $mac = null)
     {
@@ -1096,7 +1096,7 @@ class Client
      *
      * @param string $mac client device MAC address
      * @return array|bool returns an object with the client device information
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_client(string $mac)
     {
@@ -1110,7 +1110,7 @@ class Client
      *                                fingerprint_source in the client device objects, the default value is 0
      * @return array|bool an array of fingerprints, contain dev_ids, dev_type_ids, family_ids, os_name_ids, os_class_ids
      *                    and vendor_ids, false upon error
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_fingerprint_devices(int $fingerprint_source = 0)
     {
@@ -1140,7 +1140,7 @@ class Client
      * @param string|null $network_id optional, _id value for the network where the ip belongs to
      * @param string|null $fixed_ip optional, IP address, value of client device's fixed_ip field
      * @return array|bool returns an array containing a single object with attributes of the updated client on success
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function edit_client_fixedip(string $client_id, bool $use_fixedip, string $network_id = null, string $fixed_ip = null)
     {
@@ -1170,7 +1170,7 @@ class Client
      * @param string $client_id _id value for the client device
      * @param string $name name of the client
      * @return array|bool returns an array containing a single object with attributes of the updated client on success
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function edit_client_name(string $client_id, string $name)
     {
@@ -1192,7 +1192,7 @@ class Client
      * Fetch user groups
      *
      * @return array|bool returns an array of user group objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_usergroups()
     {
@@ -1207,7 +1207,7 @@ class Client
      * @param int $group_up limit upload bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
      * @return array|bool containing a single object with attributes of the new usergroup ("_id", "name",
      *               "qos_rate_max_down", "qos_rate_max_up", "site_id") on success
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function create_usergroup(string $group_name, int $group_dn = -1, int $group_up = -1)
     {
@@ -1229,7 +1229,7 @@ class Client
      * @param int $group_dn limit download bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
      * @param int $group_up limit upload bandwidth in Kbps (default = -1, which sets bandwidth to unlimited)
      * @return array|bool returns an array containing a single object with attributes of the updated usergroup on success
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function edit_usergroup(string $group_id, string $site_id, string $group_name, int $group_dn = -1, int $group_up = -1)
     {
@@ -1264,7 +1264,7 @@ class Client
      * Fetch AP groups
      *
      * @return array|bool containing the current AP groups on success
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_apgroups()
     {
@@ -1278,7 +1278,7 @@ class Client
      * @param array $device_macs optional, array containing the MAC addresses (strings) of the APs to add to the new
      *                            group
      * @return array|bool containing a single object with attributes of the new AP group on success
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function create_apgroup(string $group_name, array $device_macs = [])
     {
@@ -1295,7 +1295,7 @@ class Client
      * @param array $device_macs array containing the members of the AP group which overwrites the existing
      *                            group_members (passing an empty array clears the AP member list)
      * @return array|bool containing a single object with attributes of the updated AP group on success
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function edit_apgroup(string $group_id, string $group_name, array $device_macs)
     {
@@ -1330,7 +1330,7 @@ class Client
      *
      * @param string $group_id optional, _id value of the single firewall group to list
      * @return array|bool containing the current firewall groups or the selected firewall group on success
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_firewallgroups(string $group_id = '')
     {
@@ -1346,7 +1346,7 @@ class Client
      *                              port numbers)
      *                              (default is an empty array)
      * @return array|bool containing a single object with attributes of the new firewall group on success
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function create_firewallgroup(string $group_name, string $group_type, array $group_members = [])
     {
@@ -1371,7 +1371,7 @@ class Client
      * @param array $group_members array containing the members of the group (IPv4 addresses, IPv6 addresses or port
      *                              numbers) which overwrites the existing group_members (default is an empty array)
      * @return array|bool containing a single object with attributes of the updated firewall group on success
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function edit_firewallgroup(string $group_id, string $site_id, string $group_name, string $group_type, array $group_members = [])
     {
@@ -1410,7 +1410,7 @@ class Client
      * Fetch firewall rules (using REST).
      *
      * @return array|bool containing the current firewall rules on success
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_firewallrules()
     {
@@ -1422,7 +1422,7 @@ class Client
      *
      * @param string $route_id _id value of the static route to get settings for
      * @return array|bool containing the static routes and their settings
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_routing(string $route_id = '')
     {
@@ -1433,7 +1433,7 @@ class Client
      * Fetch health metrics.
      *
      * @return array|bool  containing health metric objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_health()
     {
@@ -1446,7 +1446,7 @@ class Client
      * @param boolean $five_minutes when true, return stats based on 5 minute intervals,
      *                              returns hourly stats by default (supported on controller versions 5.5.* and higher)
      * @return array|bool containing dashboard metric objects (available since controller version 4.9.1.alpha)
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_dashboard(bool $five_minutes = false)
     {
@@ -1459,7 +1459,7 @@ class Client
      * Fetch client devices.
      *
      * @return array|bool containing known client device objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_users()
     {
@@ -1470,7 +1470,7 @@ class Client
      * List of UniFi devices with a basic subset of properties (e.g., mac, state, adopted, disabled, type, model, name).
      *
      * @return array|bool an array containing known UniFi device objects, false upon error
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_devices_basic()
     {
@@ -1484,7 +1484,7 @@ class Client
      *                           to filter by. May also be a (lowercase) string containing a single MAC address
      * @return array|bool an array containing known UniFi device objects, optionally filtered by the <macs>
      *                    parameter, false upon error
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_devices($macs = [])
     {
@@ -1498,7 +1498,7 @@ class Client
      *
      * @note this endpoint was introduced with controller versions 5.5.X
      * @return array|bool containing known device tag objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_tags()
     {
@@ -1549,7 +1549,7 @@ class Client
      * @note this endpoint was introduced with controller versions 5.5.X
      * @param string $tag_id required, the _id value of the tag to retrieve
      * @return array|bool containing matching tag objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function get_tag(string $tag_id)
     {
@@ -1578,7 +1578,7 @@ class Client
      *
      * @param int $within optional, hours to go back to list discovered "rogue" access points (default = 24 hours)
      * @return array|bool containing rogue/neighboring access point objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_rogueaps(int $within = 24)
     {
@@ -1591,7 +1591,7 @@ class Client
      * Fetch known rogue access points.
      *
      * @return array|bool containing known rogue access point objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_known_rogueaps()
     {
@@ -1604,7 +1604,7 @@ class Client
      * @note this is an experimental function, please do not use unless you know exactly what you're doing
      * @param int $days number of days for which the backup must be generated
      * @return array|bool URL from where the backup file can be downloaded once generated, false upon failure
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function generate_backup(int $days = -1)
     {
@@ -1619,7 +1619,7 @@ class Client
      * @note this is an experimental function, please do not use unless you know exactly what you're doing
      * @param string $filepath the path to the generated backup file
      * @return string|bool the raw content of the backup file, false upon failure
-     * @throws InvalidCurlMethodException|CurlGeneralErrorException|LoginFailedException
+     * @throws Exception|CurlGeneralErrorException|CurlTimeoutException
      */
     public function download_backup(string $filepath)
     {
@@ -1630,7 +1630,7 @@ class Client
      * Fetch auto backups.
      *
      * @return array|bool containing objects with backup details on success
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_backups()
     {
@@ -1644,7 +1644,7 @@ class Client
      *
      * @note this is an experimental function, please do not use unless you know exactly what you're doing
      * @return array|bool URL from where the backup/export file can be downloaded once generated, false upon failure
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function generate_backup_site()
     {
@@ -1658,7 +1658,7 @@ class Client
      *
      * @return array|bool a list of sites on this controller that the credentials used have access to,
      *                    together with some basic attributes for each site
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_sites()
     {
@@ -1670,7 +1670,7 @@ class Client
      *
      * @note this endpoint was introduced with controller version 5.2.9
      * @return array|bool statistics for all sites hosted on this controller
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_sites()
     {
@@ -1683,7 +1683,7 @@ class Client
      * @param string $description the long name for the new site
      * @return array|bool false on failure or a single object with attributes of the new site ("_id", "desc", "name") on
      *                    success
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function create_site(string $description)
     {
@@ -1852,7 +1852,7 @@ class Client
      * Fetch admins.
      *
      * @return array|bool containing administrator objects for selected site
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_admins()
     {
@@ -1865,7 +1865,7 @@ class Client
      * Fetch all admins.
      *
      * @return array|bool containing administrator objects for all sites
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_all_admins()
     {
@@ -1891,8 +1891,7 @@ class Client
      *                             restart devices, default value is false. With versions < 5.9.X this only applies
      *                             when readonly is true.
      * @return bool true on success
-     * @throws EmailInvalidException
-     * @throws Exception
+     * @throws EmailInvalidException|Exception
      */
     public function invite_admin(
         string $name,
@@ -1997,8 +1996,7 @@ class Client
      *                             restart devices, default value is false. With versions < 5.9.X this only applies
      *                             when readonly is true.
      * @return bool true on success
-     * @throws EmailInvalidException
-     * @throws Exception
+     * @throws EmailInvalidException|Exception
      */
     public function update_admin(
         string $admin_id,
@@ -2077,7 +2075,7 @@ class Client
      * Fetch WLAN groups.
      *
      * @return array|bool containing known wlan_groups
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_wlan_groups()
     {
@@ -2088,7 +2086,7 @@ class Client
      * Fetch sysinfo.
      *
      * @return array containing known sysinfo data
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_sysinfo()
     {
@@ -2139,7 +2137,7 @@ class Client
      * Fetch self.
      *
      * @return array|bool containing information about the logged-in user
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_self()
     {
@@ -2151,7 +2149,7 @@ class Client
      *
      * @param int|null $create_time optional, create time of the vouchers to fetch in Unix timestamp in seconds
      * @return array|bool containing hotspot voucher objects
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_voucher(int $create_time = null)
     {
@@ -2165,7 +2163,7 @@ class Client
      *
      * @param int|null $within optional, number of hours to go back to fetch payments
      * @return array|bool containing hotspot payments
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function stat_payment(int $within = null)
     {
@@ -2197,7 +2195,7 @@ class Client
      * Fetch hotspot operators (using REST).
      *
      * @return array|bool containing hotspot operators
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_hotspotop()
     {
@@ -2218,7 +2216,7 @@ class Client
      * @param int|null $megabytes data transfer limit in MB
      * @return array|bool containing a single object/array which contains the create_time(stamp) of the voucher(s)
      *                    created, false upon failure
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function create_voucher(
         int    $minutes,
@@ -2287,7 +2285,7 @@ class Client
      * Fetch port forwarding stats.
      *
      * @return array|bool containing port forwarding stats
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_portforward_stats()
     {
@@ -2298,7 +2296,7 @@ class Client
      * Fetch DPI stats.
      *
      * @return array|bool containing DPI stats
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_dpi_stats()
     {
@@ -2313,7 +2311,7 @@ class Client
      * @param array|null $cat_filter optional, array containing numeric category ids to filter by,
      *                           only to be combined with a "by_app" value for $type
      * @return array|bool containing filtered DPI stats
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_dpi_stats_filtered(string $type = 'by_cat', array $cat_filter = null)
     {
@@ -2334,7 +2332,7 @@ class Client
      * Fetch current channels.
      *
      * @return array|bool containing currently allowed channels
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_current_channels()
     {
@@ -2348,7 +2346,7 @@ class Client
      * https://en.wikipedia.org/wiki/ISO_3166-1_numeric
      *
      * @return array|bool containing available country codes
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_country_codes()
     {
@@ -2359,7 +2357,7 @@ class Client
      * Fetch port forwarding settings.
      *
      * @return array|bool containing port forwarding settings
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_portforwarding()
     {
@@ -2370,7 +2368,7 @@ class Client
      * Fetch port configurations.
      *
      * @return array|bool containing port configurations
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_portconf()
     {
@@ -2381,7 +2379,7 @@ class Client
      * Fetch VoIP extensions.
      *
      * @return array|bool containing VoIP extensions
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_extension()
     {
@@ -2392,7 +2390,7 @@ class Client
      * Fetch site settings.
      *
      * @return array|bool containing site configuration settings
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_settings()
     {
@@ -2853,7 +2851,7 @@ class Client
      * Fetch dynamic DNS settings (using REST).
      *
      * @return array|bool containing dynamic DNS settings
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_dynamicdns()
     {
@@ -2899,7 +2897,7 @@ class Client
      *
      * @param string $network_id optional, _id value of the network to get settings for
      * @return array|bool containing (non-wireless) networks and their settings
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_networkconf(string $network_id = '')
     {
@@ -2914,7 +2912,7 @@ class Client
      *                              list_networkconf() for the specific network type. Do not include the _id property,
      *                              it is assigned by the controller and returned upon success.
      * @return array|bool containing a single object with details of the new network on success, else returns false
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function create_network($payload)
     {
@@ -2959,7 +2957,7 @@ class Client
      * @param string $wlan_id optional, _id value of the wlan to fetch the settings for
      * @return array|bool containing wireless networks and their settings, or an array containing a single wireless network
      *               when using the <wlan_id> parameter
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_wlanconf(string $wlan_id = '')
     {
@@ -3148,7 +3146,7 @@ class Client
      *                              value is 0
      * @param integer $limit optional, number of events to return, default value is 3000
      * @return array|bool containing known events
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_events(int $historyhours = 720, int $start = 0, int $limit = 3000)
     {
@@ -3170,7 +3168,7 @@ class Client
      *                       Example: ["archived" => false, "key" => "EVT_GW_WANTransition"]
      *                       return only unarchived for a specific key
      * @return array|bool containing known alarms
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_alarms(array $payload = [])
     {
@@ -3183,7 +3181,7 @@ class Client
      * @param bool|null $archived optional, if true all alarms are counted, if false only non-archived (active) alarms are
      *                       counted, by default all alarms are counted
      * @return array|bool containing the alarm count
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function count_alarms(bool $archived = null)
     {
@@ -3217,7 +3215,7 @@ class Client
      * @note triggers an update of the controller's cached, latest known version.
      * @return array|bool returns an array with a single object containing details of the current known latest
      *                    controller version info on success, else returns false
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function check_controller_update()
     {
@@ -3321,7 +3319,7 @@ class Client
      * @param string $type optional, "available" or "cached", determines which firmware types to return,
      *                     default value is "available"
      * @return array|bool containing firmware versions
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_firmware(string $type = 'available')
     {
@@ -3370,7 +3368,7 @@ class Client
      * @param string $mac MAC address of the AP
      * @return array|bool containing relevant information (results if available) regarding the RF scanning state of the
      *                    AP
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function spectrum_scan_state(string $mac)
     {
@@ -3399,7 +3397,7 @@ class Client
      *
      * @note this function/method is only supported on controller versions 5.5.19 and later
      * @return array|bool objects containing all Radius profiles for the current site
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_radius_profiles()
     {
@@ -3411,7 +3409,7 @@ class Client
      *
      * @note this function/method is only supported on controller versions 5.5.19 and later
      * @return array|bool objects containing all Radius accounts for the current site
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function list_radius_accounts()
     {
@@ -3456,7 +3454,7 @@ class Client
      *                                    15     E.164 with NSAP format subaddress
      * @param string|null $vlan optional, VLAN to assign to the account
      * @return bool|array                 containing a single object for the newly created account upon success, else returns false
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function create_radius_account(
         string $name,
@@ -3581,7 +3579,7 @@ class Client
      *                    The 'data' key in the returned array contains the actual system log entries.
      *                    The returned array also contains the page number and size, and the total number of entries
      *                    available.
-     * @throws JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     public function get_system_log(string $class = 'device-alert', int $start = null, int $end = null, int $page_number = 0, int $page_size = 100, array $custom_payload = [])
     {
@@ -3656,7 +3654,7 @@ class Client
      * @param string $return optional, string; determines how to return results, when "boolean" the method must
      *                       return a boolean result or "array" when the method must return an array (default)
      * @return bool|array returns results as requested, returns false on incorrect parameters
-     * @throws JsonDecodeException|LoginRequiredException|Exception
+     * @throws Exception
      */
     public function custom_api_request(string $path, string $method = 'GET', $payload = null, string $return = 'array')
     {
@@ -4079,7 +4077,7 @@ class Client
      *                         the "data" array
      * @param boolean $login_required optional, whether the method requires to be logged in or not
      * @return bool|array returns an array with the "data" array on success, else returns boolean if $boolean is true
-     * @throws JsonDecodeException|LoginRequiredException|Exception|LoginRequiredException
+     * @throws Exception
      */
     protected function fetch_results(
         string $path,
@@ -4150,7 +4148,7 @@ class Client
      *                                   request
      * @param bool $login_required optional, whether the method requires to be logged in or not
      * @return bool [description]
-     * @throws Exception|JsonDecodeException|LoginRequiredException
+     * @throws Exception
      */
     protected function fetch_results_boolean(string $path, $payload = null, bool $login_required = true): bool
     {
@@ -4161,7 +4159,7 @@ class Client
      * Capture the latest JSON error and throw an Exception.
      *
      * @return bool true, if no error occurred
-     * @throws JsonDecodeException|LoginRequiredException when a JSON error occurred
+     * @throws JsonDecodeException when a JSON error occurred
      */
     protected function get_json_last_error(): bool
     {
@@ -4342,7 +4340,7 @@ class Client
      * @param string $path path for the request
      * @param object|array|null $payload optional, payload to pass with the request
      * @return bool|string response returned by the controller API
-     * @throws InvalidCurlMethodException|CurlGeneralErrorException|LoginFailedException|CurlTimeoutException
+     * @throws CurlGeneralErrorException|CurlTimeoutException|InvalidCurlMethodException|LoginFailedException
      */
     protected function exec_curl(string $path, $payload = null)
     {
@@ -4367,7 +4365,6 @@ class Client
         if (!empty($payload)) {
             $json_payload                     = json_encode($payload, JSON_UNESCAPED_SLASHES);
             $curl_options[CURLOPT_POSTFIELDS] = $json_payload;
-
 
             /**
              * Should not use GET (the default request type) or DELETE when passing a payload,

@@ -8,7 +8,8 @@
         "unifi",
         "controller",
         "api",
-        "client"
+        "client",
+        "unifi os"
     ],
     "homepage": "https://github.com/Art-of-WiFi/UniFi-API-client",
     "license": "MIT",

@@ -6,7 +6,6 @@
  * description: An example basic PHP script to pull current alarms from the UniFi controller and output in JSON format,
  *              also demonstrates how to catch exceptions.
  */
-
 use UniFi_API\Exceptions\CurlExtensionNotLoadedException;
 use UniFi_API\Exceptions\CurlGeneralErrorException;
 use UniFi_API\Exceptions\CurlTimeoutException;
@@ -38,10 +37,10 @@ require_once 'config.php';
  */
 $site_id = '<enter your site id here>';
 
+/**
+ * initialize the UniFi API connection class and log in to the controller and do our thing
+ */
 try {
-    /**
-     * initialize the UniFi API connection class and log in to the controller and do our thing
-     */
     $unifi_connection = new UniFi_API\Client(
         $controlleruser,
         $controllerpassword,
@@ -55,7 +54,7 @@ try {
     $data           = $unifi_connection->list_alarms();
 
     /**
-     * provide feedback in json format
+     * echo the results in JSON format
      */
     echo json_encode($data, JSON_PRETTY_PRINT);
 } catch (CurlExtensionNotLoadedException $e) {
@@ -66,7 +65,6 @@ try {
     echo 'InvalidSiteNameException: ' . $e->getMessage(). PHP_EOL;
 } catch (JsonDecodeException $e) {
     echo 'JsonDecodeException: ' . $e->getMessage(). PHP_EOL;
-    echo $unifi_connection->get_last_results_raw();
 } catch (LoginRequiredException $e) {
     echo 'LoginRequiredException: ' . $e->getMessage(). PHP_EOL;
 } catch (CurlGeneralErrorException $e) {
@@ -76,5 +74,6 @@ try {
 } catch (LoginFailedException $e) {
     echo 'LoginFailedException: ' . $e->getMessage(). PHP_EOL;
 } catch (Exception $e) {
+    /** catch any other Exceptions that might be thrown */
     echo 'General Exception: ' . $e->getMessage(). PHP_EOL;
 }
