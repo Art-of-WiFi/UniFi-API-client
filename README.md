@@ -201,7 +201,7 @@ require_once 'config.php';
 
 /**
  * initialize the UniFi API connection class, log in to the controller and request the alarms collection
- * (this example assumes you have already assigned the correct values to the variables used)
+ * (this example assumes you have already assigned the correct values to the variables in config.php)
  */
 try {
     $unifi_connection = new UniFi_API\Client($controller_user, $controller_password, $controller_url, $site_id, $controller_version, true);
