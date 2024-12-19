@@ -391,8 +391,8 @@ class Client
      *                    success, else returns false
      */
     public function create_user(
-        string $mac,
-        string $user_group_id,
+        string  $mac,
+        string  $user_group_id,
         ?string $name = null,
         ?string $note = null,
         ?bool   $is_guest = null,
@@ -1210,7 +1210,7 @@ class Client
      * Create AP group
      *
      * @param string $group_name name to assign to the AP group
-     * @param array $device_macs optional, array containing the MAC addresses (strings) of the APs to add to the new
+     * @param array|null $device_macs optional, array containing the MAC addresses (strings) of the APs to add to the new
      *                            group
      * @return array|bool containing a single object with attributes of the new AP group on success
      */
@@ -1260,7 +1260,7 @@ class Client
     /**
      * Fetch firewall groups (using REST)
      *
-     * @param string $group_id optional, _id value of the single firewall group to list
+     * @param string|null $group_id optional, _id value of the single firewall group to list
      * @return array|bool containing the current firewall groups or the selected firewall group on success
      */
     public function list_firewallgroups(?string $group_id = '')
@@ -1273,7 +1273,7 @@ class Client
      *
      * @param string $group_name name to assign to the firewall group
      * @param string $group_type firewall group type; valid values are address-group, ipv6-address-group, port-group
-     * @param array $group_members array containing the members of the new group (IPv4 addresses, IPv6 addresses or
+     * @param array|null $group_members array containing the members of the new group (IPv4 addresses, IPv6 addresses or
      *                              port numbers)
      *                              (default is an empty array)
      * @return array|bool containing a single object with attributes of the new firewall group on success
@@ -2065,10 +2065,10 @@ class Client
      *
      * @param string $name name for the hotspot operator
      * @param string $x_password clear text password for the hotspot operator
-     * @param string $note optional, note to attach to the hotspot operator
+     * @param string|null $note optional, note to attach to the hotspot operator
      * @return bool true upon success
      */
-    public function create_hotspotop(string $name, string $x_password, ?string $note = ''): bool
+    public function create_hotspotop(string $name, string $x_password, ?string $note = null): bool
     {
         $payload = ['name' => $name, 'x_password' => $x_password];
         if (!empty($note)) {
@@ -2108,9 +2108,9 @@ class Client
         int    $count = 1,
         int    $quota = 0,
         string $note = '',
-        ?int    $up = null,
-        ?int    $down = null,
-        ?int    $megabytes = null
+        ?int   $up = null,
+        ?int   $down = null,
+        ?int   $megabytes = null
     )
     {
         $payload = [
@@ -2838,23 +2838,23 @@ class Client
      * @return bool true on success
      */
     public function create_wlan(
-        string $name,
-        string $x_passphrase,
-        string $usergroup_id,
-        string $wlangroup_id,
-        bool   $enabled = true,
-        bool   $hide_ssid = false,
-        bool   $is_guest = false,
-        string $security = 'open',
-        string $wpa_mode = 'wpa2',
-        string $wpa_enc = 'ccmp',
+        string  $name,
+        string  $x_passphrase,
+        string  $usergroup_id,
+        string  $wlangroup_id,
+        bool    $enabled = true,
+        bool    $hide_ssid = false,
+        bool    $is_guest = false,
+        string  $security = 'open',
+        string  $wpa_mode = 'wpa2',
+        string  $wpa_enc = 'ccmp',
         ?bool   $vlan_enabled = null,
         ?string $vlan_id = null,
-        bool   $uapsd_enabled = false,
-        bool   $schedule_enabled = false,
-        array  $schedule = [],
+        bool    $uapsd_enabled = false,
+        bool    $schedule_enabled = false,
+        array   $schedule = [],
         ?array  $ap_group_ids = null,
-        array  $payload = []
+        array   $payload = []
     ): bool
     {
         $payload = array_merge($payload, [
@@ -3280,8 +3280,8 @@ class Client
      * @return bool|array                 containing a single object for the newly created account upon success, else returns false
      */
     public function create_radius_account(
-        string $name,
-        string $x_password,
+        string  $name,
+        string  $x_password,
         ?int    $tunnel_type = null,
         ?int    $tunnel_medium_type = null,
         ?string $vlan = null
@@ -3934,7 +3934,7 @@ class Client
     /**
      * Fetch results; execute the cURL request and return results.
      *
-     * @param string $path request path
+     * @param string|null $path request path
      * @param object|array|null $payload optional, PHP associative array or stdClass Object, payload to pass with the
      *                                   request
      * @param boolean $boolean optional, whether the method should return a boolean result, else return
@@ -3944,9 +3944,9 @@ class Client
      */
     protected function fetch_results(
         ?string $path,
-               $payload = null,
-        bool   $boolean = false,
-        bool   $login_required = true
+                $payload = null,
+        bool    $boolean = false,
+        bool    $login_required = true
     )
     {
         /** Guard clause to check if logged in when needed. */
