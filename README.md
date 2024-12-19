@@ -16,10 +16,10 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 ## Supported Versions
 
-| Software                             | Versions                                                     |
-|--------------------------------------|--------------------------------------------------------------|
-| UniFi Network Application/controller | 5.X.X, 6.X.X, 7.X.X, 8.X.X, 9.X.X (**9.0.101 is confirmed**) |
-| UniFi OS                             | 3.x, 4.x (**4.1.9 is confirmed**)                            |
+| Software                             | Versions                                             |
+|--------------------------------------|------------------------------------------------------|
+| UniFi Network Application/controller | 5.X, 6.X, 7.X, 8.X, 9.0.X (**9.0.101 is confirmed**) |
+| UniFi OS                             | 3.x, 4.x (**4.1.9 is confirmed**)                    |
 
 
 ## Requirements
