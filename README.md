@@ -1,5 +1,10 @@
 ## UniFi Controller API client class
 
+[![License](https://img.shields.io/github/license/Art-of-WiFi/UniFi-API-client)](https://github.com/Art-of-WiFi/UniFi-API-client/blob/main/LICENSE)
+[![Packagist Version](https://img.shields.io/packagist/v/art-of-wifi/unifi-api-client)](https://packagist.org/packages/art-of-wifi/unifi-api-client)
+[![Downloads](https://img.shields.io/packagist/dt/art-of-wifi/unifi-api-client)](https://packagist.org/packages/art-of-wifi/unifi-api-client)
+[![PHP Version](https://img.shields.io/packagist/php-v/art-of-wifi/unifi-api-client)](https://packagist.org/packages/art-of-wifi/unifi-api-client)
+
 A PHP class that provides access to Ubiquiti's [**UniFi Network Application**](https://unifi-network.ui.com/) API.
 
 This class is used by our API Browser tool, which can be found
