@@ -87,8 +87,8 @@ class Client
         string $user,
         string $password,
         string $baseurl = 'https://127.0.0.1:8443',
-        string $site = 'default',
-        string $version = '8.0.28',
+        ?string $site = 'default',
+        ?string $version = '8.0.28',
         bool   $ssl_verify = false,
         string $unificookie_name = 'unificookie'
     )
@@ -4304,11 +4304,8 @@ class Client
 
                 curl_close($ch);
 
-                /** Login again. */
-                $this->login();
-
-                /** When the re-login was successful, execute the same cURL request again. */
-                if ($this->is_logged_in) {
+                /** Re-login, and if successful, execute the same cURL request again. */
+                if ($this->login()) {
                     if ($this->debug) {
                         error_log(__FUNCTION__ . ': re-logged in, calling exec_curl again');
                     }
