@@ -283,7 +283,7 @@ class Client
      *                            authorization for the client device
      * @return bool true upon success
      */
-    public function authorize_guest(string $mac, int $minutes, int $up = null, int $down = null, int $megabytes = null, string $ap_mac = null): bool
+    public function authorize_guest(string $mac, int $minutes, ?int $up = null, ?int $down = null, ?int $megabytes = null, ?string $ap_mac = null): bool
     {
         $payload = ['cmd' => 'authorize-guest', 'mac' => strtolower($mac), 'minutes' => $minutes];
 
@@ -393,10 +393,10 @@ class Client
     public function create_user(
         string $mac,
         string $user_group_id,
-        string $name = null,
-        string $note = null,
-        bool   $is_guest = null,
-        bool   $is_wired = null
+        ?string $name = null,
+        ?string $note = null,
+        ?bool   $is_guest = null,
+        ?bool   $is_wired = null
     )
     {
         $new_user = ['mac' => strtolower($mac), 'usergroup_id' => $user_group_id];
@@ -467,7 +467,7 @@ class Client
      *                            'airtime_avg', 'latency_avg', 'latency_min', 'latency_max'
      * @return array|bool returns an array of 5-minute stats objects for the current site
      */
-    public function stat_5minutes_site(int $start = null, int $end = null, array $attribs = null)
+    public function stat_5minutes_site(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (12 * 3600 * 1000) : $start;
@@ -491,7 +491,7 @@ class Client
      * @param array|null $attribs optional, array of attributes to collect.
      * @return array|bool returns an array of hourly stats objects for the current site
      */
-    public function stat_hourly_site(int $start = null, int $end = null, array $attribs = null)
+    public function stat_hourly_site(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -512,7 +512,7 @@ class Client
      * @param array|null $attribs optional, array of attributes to collect.
      * @return array|bool returns an array of daily stats objects for the current site
      */
-    public function stat_daily_site(int $start = null, int $end = null, array $attribs = null)
+    public function stat_daily_site(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? (time() - (time() % 3600)) * 1000 : $end;
         $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : $start;
@@ -533,7 +533,7 @@ class Client
      * @param array|null $attribs optional, array of attributes to collect.
      * @return array|bool returns an array of monthly stats objects for the current site
      */
-    public function stat_monthly_site(int $start = null, int $end = null, array $attribs = null)
+    public function stat_monthly_site(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? (time() - (time() % 3600)) * 1000 : $end;
         $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : $start;
@@ -580,7 +580,7 @@ class Client
      *                       'ng-rx_bytes',
      * @return array|bool returns an array of 5-minute stats objects
      */
-    public function stat_5minutes_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
+    public function stat_5minutes_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (12 * 3600 * 1000) : $start;
@@ -608,7 +608,7 @@ class Client
      * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time).
      * @return array|bool returns an array of hourly stats objects
      */
-    public function stat_hourly_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
+    public function stat_hourly_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null)
     {
         $end     = empty($end) ? (time() * 1000) : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -636,7 +636,7 @@ class Client
      * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time).
      * @return array|bool returns an array of daily stats objects
      */
-    public function stat_daily_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
+    public function stat_daily_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -664,7 +664,7 @@ class Client
      * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time).
      * @return array|bool returns an array of monthly stats objects
      */
-    public function stat_monthly_aps(int $start = null, int $end = null, string $mac = null, array $attribs = null)
+    public function stat_monthly_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : $start;
@@ -696,7 +696,7 @@ class Client
      *                            default value is ['rx_bytes', 'tx_bytes', 'time']
      * @return array|bool returns an array of 5-minute stats objects
      */
-    public function stat_5minutes_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
+    public function stat_5minutes_user(?string $mac = null, ?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (12 * 3600 * 1000) : $start;
@@ -722,7 +722,7 @@ class Client
      * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of hourly stats objects
      */
-    public function stat_hourly_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
+    public function stat_hourly_user(?string $mac = null, ?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -752,7 +752,7 @@ class Client
      * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of daily stats objects
      */
-    public function stat_daily_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
+    public function stat_daily_user(?string $mac = null, ?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -782,7 +782,7 @@ class Client
      * @return array|bool returns an array of monthly stats objects
      * @see stat_5minutes_user() for details on attribs
      */
-    public function stat_monthly_user(string $mac = null, int $start = null, int $end = null, array $attribs = null)
+    public function stat_monthly_user(?string $mac = null, ?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (13 * 7 * 24 * 3600 * 1000) : $start;
@@ -812,7 +812,7 @@ class Client
      *                            default is ['time', 'mem', 'cpu', 'loadavg_5']
      * @return array|bool returns an array of 5-minute stats objects for the gateway belonging to the current site
      */
-    public function stat_5minutes_gateway(int $start = null, int $end = null, array $attribs = null)
+    public function stat_5minutes_gateway(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (12 * 3600 * 1000) : $start;
@@ -833,7 +833,7 @@ class Client
      * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of hourly stats objects for the gateway belonging to the current site
      */
-    public function stat_hourly_gateway(int $start = null, int $end = null, array $attribs = null)
+    public function stat_hourly_gateway(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -854,7 +854,7 @@ class Client
      * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of hourly stats objects for the gateway belonging to the current site
      */
-    public function stat_daily_gateway(int $start = null, int $end = null, array $attribs = null)
+    public function stat_daily_gateway(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? (time() - (time() % 3600)) * 1000 : $end;
         $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : $start;
@@ -875,7 +875,7 @@ class Client
      * @param array|null $attribs array containing attributes (strings) to be returned
      * @return array|bool returns an array of monthly stats objects for the gateway belonging to the current site
      */
-    public function stat_monthly_gateway(int $start = null, int $end = null, array $attribs = null)
+    public function stat_monthly_gateway(?int $start = null, ?int $end = null, ?array $attribs = null)
     {
         $end     = empty($end) ? (time() - (time() % 3600)) * 1000 : $end;
         $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : $start;
@@ -894,7 +894,7 @@ class Client
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @return array|bool returns an array of speed test result objects
      */
-    public function stat_speedtest_results(int $start = null, int $end = null)
+    public function stat_speedtest_results(?int $start = null, ?int $end = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (24 * 3600 * 1000) : $start;
@@ -914,7 +914,7 @@ class Client
      * @param int|null $limit optional, maximum number of events to return, defaults to 10000
      * @return array|bool returns an array of IPS/IDS event objects
      */
-    public function stat_ips_events(int $start = null, int $end = null, int $limit = null)
+    public function stat_ips_events(?int $start = null, ?int $end = null, ?int $limit = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (24 * 3600 * 1000) : $start;
@@ -937,7 +937,7 @@ class Client
      *                      value is 'all'
      * @return array|bool returns an array of login session objects for all devices or a single device
      */
-    public function stat_sessions(int $start = null, int $end = null, string $mac = null, string $type = 'all')
+    public function stat_sessions(?int $start = null, ?int $end = null, ?string $mac = null, string $type = 'all')
     {
         if (!in_array($type, ['all', 'guest', 'user'])) {
             return false;
@@ -963,7 +963,7 @@ class Client
      * @param int|null $limit optional, maximum number of sessions to get (default value is 5)
      * @return array|bool returns an array of login session objects for all devices or a single device
      */
-    public function stat_sta_sessions_latest(string $mac, int $limit = null)
+    public function stat_sta_sessions_latest(string $mac, ?int $limit = null)
     {
         $limit   = empty($limit) ? 5 : $limit;
         $payload = ['mac' => strtolower($mac), '_limit' => $limit, '_sort' => '-assoc_time'];
@@ -980,7 +980,7 @@ class Client
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @return array|bool returns an array of authorization objects
      */
-    public function stat_auths(int $start = null, int $end = null)
+    public function stat_auths(?int $start = null, ?int $end = null)
     {
         $end     = empty($end) ? time() : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600) : $start;
@@ -1027,7 +1027,7 @@ class Client
      * @return array|bool returns an array of online client device objects, or in case of a single device request, returns a
      *                    single client device object, false upon error
      */
-    public function list_clients(string $mac = null)
+    public function list_clients(?string $mac = null)
     {
         if (is_string($mac)) {
             $mac = strtolower(trim($mac));
@@ -1083,7 +1083,7 @@ class Client
      * @param string|null $fixed_ip optional, IP address, value of client device's fixed_ip field
      * @return array|bool returns an array containing a single object with attributes of the updated client on success
      */
-    public function edit_client_fixedip(string $client_id, bool $use_fixedip, string $network_id = null, string $fixed_ip = null)
+    public function edit_client_fixedip(string $client_id, bool $use_fixedip, ?string $network_id = null, ?string $fixed_ip = null)
     {
         $this->curl_method = 'PUT';
 
@@ -1214,7 +1214,7 @@ class Client
      *                            group
      * @return array|bool containing a single object with attributes of the new AP group on success
      */
-    public function create_apgroup(string $group_name, array $device_macs = [])
+    public function create_apgroup(string $group_name, ?array $device_macs = [])
     {
         $payload = ['device_macs' => $device_macs, 'name' => $group_name];
 
@@ -1263,7 +1263,7 @@ class Client
      * @param string $group_id optional, _id value of the single firewall group to list
      * @return array|bool containing the current firewall groups or the selected firewall group on success
      */
-    public function list_firewallgroups(string $group_id = '')
+    public function list_firewallgroups(?string $group_id = '')
     {
         return $this->fetch_results('/api/s/' . $this->site . '/rest/firewallgroup/' . trim($group_id));
     }
@@ -1278,7 +1278,7 @@ class Client
      *                              (default is an empty array)
      * @return array|bool containing a single object with attributes of the new firewall group on success
      */
-    public function create_firewallgroup(string $group_name, string $group_type, array $group_members = [])
+    public function create_firewallgroup(string $group_name, string $group_type, ?array $group_members = [])
     {
         if (!in_array($group_type, ['address-group', 'ipv6-address-group', 'port-group'])) {
             return false;
@@ -1433,7 +1433,7 @@ class Client
      * @param array|null $macs optional, an array of the MAC address(es) of the device(s) to tag with the new tag
      * @return bool return true on success
      */
-    public function create_tag(string $name, array $macs = null): bool
+    public function create_tag(string $name, ?array $macs = null): bool
     {
         $payload = ['name' => $name];
 
@@ -2040,7 +2040,7 @@ class Client
      * @param int|null $create_time optional, create time of the vouchers to fetch in Unix timestamp in seconds
      * @return array|bool containing hotspot voucher objects
      */
-    public function stat_voucher(int $create_time = null)
+    public function stat_voucher(?int $create_time = null)
     {
         $payload = isset($create_time) ? ['create_time' => $create_time] : [];
 
@@ -2053,7 +2053,7 @@ class Client
      * @param int|null $within optional, number of hours to go back to fetch payments
      * @return array|bool containing hotspot payments
      */
-    public function stat_payment(int $within = null)
+    public function stat_payment(?int $within = null)
     {
         $path_suffix = isset($within) ? '?within=' . $within : '';
 
@@ -2068,7 +2068,7 @@ class Client
      * @param string $note optional, note to attach to the hotspot operator
      * @return bool true upon success
      */
-    public function create_hotspotop(string $name, string $x_password, string $note = ''): bool
+    public function create_hotspotop(string $name, string $x_password, ?string $note = ''): bool
     {
         $payload = ['name' => $name, 'x_password' => $x_password];
         if (!empty($note)) {
@@ -2108,9 +2108,9 @@ class Client
         int    $count = 1,
         int    $quota = 0,
         string $note = '',
-        int    $up = null,
-        int    $down = null,
-        int    $megabytes = null
+        ?int    $up = null,
+        ?int    $down = null,
+        ?int    $megabytes = null
     )
     {
         $payload = [
@@ -2193,7 +2193,7 @@ class Client
      *                           only to be combined with a "by_app" value for $type
      * @return array|bool containing filtered DPI stats
      */
-    public function list_dpi_stats_filtered(string $type = 'by_cat', array $cat_filter = null)
+    public function list_dpi_stats_filtered(string $type = 'by_cat', ?array $cat_filter = null)
     {
         if (!in_array($type, ['by_cat', 'by_app'])) {
             return false;
@@ -2848,12 +2848,12 @@ class Client
         string $security = 'open',
         string $wpa_mode = 'wpa2',
         string $wpa_enc = 'ccmp',
-        bool   $vlan_enabled = null,
-        string $vlan_id = null,
+        ?bool   $vlan_enabled = null,
+        ?string $vlan_id = null,
         bool   $uapsd_enabled = false,
         bool   $schedule_enabled = false,
         array  $schedule = [],
-        array  $ap_group_ids = null,
+        ?array  $ap_group_ids = null,
         array  $payload = []
     ): bool
     {
@@ -3022,7 +3022,7 @@ class Client
      *                       counted, by default all alarms are counted
      * @return array|bool containing the alarm count
      */
-    public function count_alarms(bool $archived = null)
+    public function count_alarms(?bool $archived = null)
     {
         $path_suffix = $archived === false ? '?archived=false' : null;
 
@@ -3282,9 +3282,9 @@ class Client
     public function create_radius_account(
         string $name,
         string $x_password,
-        int    $tunnel_type = null,
-        int    $tunnel_medium_type = null,
-        string $vlan = null
+        ?int    $tunnel_type = null,
+        ?int    $tunnel_medium_type = null,
+        ?string $vlan = null
     )
     {
         $tunnel_type_values        = [null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
@@ -3399,7 +3399,7 @@ class Client
      *                    The returned array also contains the page number and size, and the total number of entries
      *                    available.
      */
-    public function get_system_log(string $class = 'device-alert', int $start = null, int $end = null, int $page_number = 0, int $page_size = 100, array $custom_payload = [])
+    public function get_system_log(string $class = 'device-alert', ?int $start = null, ?int $end = null, int $page_number = 0, int $page_size = 100, array $custom_payload = [])
     {
         $end   = empty($end) ? time() * 1000  : $end;
         $start = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -3508,7 +3508,7 @@ class Client
      * @param string|null $mac optional, the MAC address of a single device for which the call must be made
      * @return array|bool containing known device objects (or a single device when using the <mac> parameter)
      */
-    public function list_aps(string $mac = null)
+    public function list_aps(?string $mac = null)
     {
         trigger_error(
             'Function list_aps() has been deprecated, use list_devices() instead.',
@@ -3943,7 +3943,7 @@ class Client
      * @return bool|array returns an array with the "data" array on success, else returns false
      */
     protected function fetch_results(
-        string $path,
+        ?string $path,
                $payload = null,
         bool   $boolean = false,
         bool   $login_required = true
