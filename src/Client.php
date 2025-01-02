@@ -20,7 +20,7 @@ namespace UniFi_API;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '1.1.103';
+    const CLASS_VERSION        = '1.1.104';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
