@@ -3899,12 +3899,12 @@ class Client
     }
 
     /**
-     * Set value for the private property $curl_http_version.
+     * Set the value for the private property $curl_http_version.
      *
-     * @note As of cURL version 7.62.0 the default value is CURL_HTTP_VERSION_2TLS which may cause issues,
-     *       this method allows you to set the value to CURL_HTTP_VERSION_1_1 when needed.
-     * @param int $http_version new value for $curl_http_version, CURL_HTTP_VERSION_1_1 int(2) or
-     *                          CURL_HTTP_VERSION_2TLS int(4) are recommended
+     * @note As of cURL version 7.62.0 the default value is CURL_HTTP_VERSION_2TLS. This can cause issues in certain
+     *       cases, this method allows you to set the value to CURL_HTTP_VERSION_1_1 when needed.
+     * @param int $http_version new value for $curl_http_version. Values using PHP constants CURL_HTTP_VERSION_1_1 or
+     *                          CURL_HTTP_VERSION_2TLS are recommended.
      * @return bool whether the request was successful or not
      * @see https://curl.se/libcurl/c/CURLOPT_HTTP_VERSION.html
      */
@@ -4356,7 +4356,7 @@ class Client
     {
         $ch           = curl_init();
         $curl_options = [
-            CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS,
+            CURLOPT_PROTOCOLS      => CURLPROTO_HTTPS | CURLPROTO_HTTP,
             CURLOPT_HTTP_VERSION   => $this->curl_http_version,
             CURLOPT_SSL_VERIFYPEER => $this->curl_ssl_verify_peer,
             CURLOPT_SSL_VERIFYHOST => $this->curl_ssl_verify_host,
