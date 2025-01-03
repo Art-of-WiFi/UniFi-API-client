@@ -253,9 +253,9 @@ features to explore the available functions/methods thanks to the extensive PHP 
 
 ## Looking for version 1.x.x?
 
-With versions 1.x.x of the API client, the code was contained within a single file which can be useful in specific
-cases.
-This has changed with version 2.0.0 where the code is now split into multiple files and is managed using composer.
+With versions 1.x.x of the API client, the entire client was contained within a single file which can be useful in
+specific cases.
+This has changed with version 2.0.0 where the code is now split across multiple files and is managed using composer.
 
 If you are looking for the version 1.x.x code, you can tell composer to install that version by using the following
 syntax in your `composer.json` file:
@@ -270,7 +270,7 @@ syntax in your `composer.json` file:
 
 Alternatively, you can download the latest 1.x.x code from the [releases page](https://github.com/Art-of-WiFi/UniFi-API-client/releases).
 
-When necessary, we will update the **version_1** branch with the latest 1.x.x code.
+Whenever necessary, we will make sure to update the **version_1** branch with the latest 1.x.x code.
 
 ## Need help or have suggestions?
 
