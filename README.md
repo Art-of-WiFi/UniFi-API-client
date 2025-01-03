@@ -74,6 +74,7 @@ When upgrading from a version before **2.0.0**, please:
 - change your code to use the new Exceptions that are thrown by the class
 - test the client with your code for any breaking changes
 - make sure you are using [Composer](#composer) to install the class because the code is no longer held within a single file
+- see the note [here](#looking-for-version-1xx) regarding the single file version (1.x.x) of the API client
 
 
 ## Installation
@@ -268,6 +269,8 @@ syntax in your `composer.json` file:
 ```
 
 Alternatively, you can download the latest 1.x.x code from the [releases page](https://github.com/Art-of-WiFi/UniFi-API-client/releases).
+
+When necessary, we will update the **version_1** branch with the latest 1.x.x code.
 
 ## Need help or have suggestions?
 
