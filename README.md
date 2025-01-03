@@ -79,11 +79,6 @@ When upgrading from a version before **2.0.0**, please:
 
 ## Installation
 
-Use [Composer](#composer) or [Git](#git) to install the API client class.
-
-
-### Composer
-
 The preferred installation method is through [Composer](https://getcomposer.org). 
 Follow these [installation instructions](https://getcomposer.org/doc/00-intro.md) if you don't have Composer
 installed already.
@@ -111,23 +106,6 @@ Finally, be sure to include the composer autoloader in your code if your framewo
  * load the class using the composer autoloader
  */
 require_once 'vendor/autoload.php';
-```
-
-### Git
-
-Execute the following `git` command from the shell in your project directory:
-
-```sh
-git clone https://github.com/Art-of-WiFi/UniFi-API-client.git
-```
-
-When git is done cloning, include the file containing the class like so in your code:
-
-```php
-/**
- * load the class directly instead of using the composer autoloader
- */
-require_once 'path/to/src/Client.php';
 ```
 
 ## Example usage
