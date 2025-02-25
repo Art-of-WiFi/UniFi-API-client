@@ -1109,6 +1109,26 @@ class Client
         return $this->fetch_results('/v2/api/site/' . $this->site . '/clients/active?' . $query);
     }
 
+    /**
+     * Fetch client devices history (offline client devices)
+     *
+     * @param bool $onlyNonBlocked include non-blocked client devices in the response
+     * @param bool $includeUnifiDevices include UniFi devices in the response
+     * @param int $withinHours the number of hours a device has been offline to be included in the response
+     *                         (0 = no limit)
+     * @return array|bool returns an array of (offline) client device objects, false upon error
+     * @throws Exception
+     */
+    public function list_clients_history(bool $onlyNonBlocked = true, bool $includeUnifiDevices = true, int $withinHours = 0)
+    {
+        $query = http_build_query([
+            'onlyNonBlocked' => $onlyNonBlocked,
+            'includeUnifiDevices' => $includeUnifiDevices,
+            'withinHours' => $withinHours,
+        ]);
+
+        return $this->fetch_results('/v2/api/site/' . $this->site . '/clients/history?' . $query);
+    }
 
     /**
      * Fetch details for a single client device
