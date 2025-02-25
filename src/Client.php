@@ -1092,6 +1092,25 @@ class Client
     }
 
     /**
+     * Fetch active client devices
+     *
+     * @param bool $includeTrafficUsage include the traffic usage of the client devices in the response
+     * @param bool $includeUnifiDevices include UniFi devices in the response
+     * @return array|bool returns an array of active client device objects, false upon error
+     * @throws Exception
+     */
+    public function list_active_clients(bool $includeTrafficUsage = true, bool $includeUnifiDevices = true)
+    {
+        $query = http_build_query([
+            'includeTrafficUsage' => $includeTrafficUsage,
+            'includeUnifiDevices' => $includeUnifiDevices,
+        ]);
+
+        return $this->fetch_results('/v2/api/site/' . $this->site . '/clients/active?' . $query);
+    }
+
+
+    /**
      * Fetch details for a single client device
      *
      * @param string $mac client device MAC address
