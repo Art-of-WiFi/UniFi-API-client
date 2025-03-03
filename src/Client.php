@@ -1122,9 +1122,9 @@ class Client
     public function list_clients_history(bool $onlyNonBlocked = true, bool $includeUnifiDevices = true, int $withinHours = 0)
     {
         $query = http_build_query([
-            'onlyNonBlocked' => $onlyNonBlocked,
+            'onlyNonBlocked'      => $onlyNonBlocked,
             'includeUnifiDevices' => $includeUnifiDevices,
-            'withinHours' => $withinHours,
+            'withinHours'         => $withinHours,
         ]);
 
         return $this->fetch_results('/v2/api/site/' . $this->site . '/clients/history?' . $query);
