@@ -14,6 +14,7 @@ use UniFi_API\Exceptions\JsonDecodeException;
 use UniFi_API\Exceptions\LoginFailedException;
 use UniFi_API\Exceptions\LoginRequiredException;
 use UniFi_API\Exceptions\MethodDeprecatedException;
+use UniFi_API\Exceptions\NotAnOsConsoleException;
 
 /**
  * The UniFi API client class.
@@ -3262,6 +3263,40 @@ class Client
     }
 
     /**
+     * Get the recent firmware update for an UniFi-OS console
+     *
+     * @return array|bool returns an array with a single object containing details of the current known latest
+     *                     UniFi OS version info on success, else returns false
+     * @throws Exception
+     */
+    public function get_update_os_console()
+    {
+        if (!$this->is_unifi_os) {
+            throw new NotAnOsConsoleException();
+        }
+
+        return $this->fetch_results('/api/firmware/update', null, false, true, false);
+    }
+
+    /**
+     * Update the OS for an UniFi-OS console
+     *
+     * @note triggers an UniFi OS Update in Control Plane > Updates > UniFi OS
+     * @return bool true upon success
+     * @throws Exception
+     */
+    public function update_os_console(): bool
+    {
+        if (!$this->is_unifi_os) {
+            throw new NotAnOsConsoleException();
+        }
+
+        $payload = ['persistFullData' => true];
+
+        return $this->fetch_results_boolean('/api/firmware/update', $payload, true, false);
+    }
+
+    /**
      * Check firmware update.
      *
      * @note triggers a Device Firmware Update in Classic Settings > System settings > Maintenance
@@ -4122,7 +4157,8 @@ class Client
         string $path,
                $payload = null,
         bool   $boolean = false,
-        bool   $login_required = true
+        bool   $login_required = true,
+        bool   $prefix_path = true
     )
     {
         /** Guard clause to check if logged in when needed. */
@@ -4130,11 +4166,14 @@ class Client
             throw new LoginRequiredException();
         }
 
-        $this->last_results_raw = $this->exec_curl($path, $payload);
+        $this->last_results_raw = $this->exec_curl($path, $payload, $prefix_path);
 
         if (is_string($this->last_results_raw)) {
             $response = json_decode($this->last_results_raw);
-            $this->get_json_last_error();
+
+            if (!empty($this->last_results_raw)) {
+                $this->get_json_last_error();
+            }
 
             if (isset($response->meta->rc)) {
                 if ($response->meta->rc === 'ok') {
@@ -4174,6 +4213,24 @@ class Client
 
                 return $response;
             }
+
+            /** Deal with a responses from an UniFi OS console */
+            if (strpos($path, '/api/') === 0) {
+                if (isset($response->code)) {
+                    $this->last_error_message = 'An unknown error was returned by an UniFi OS endpoint.';
+                    if (isset($response->message)) {
+                        $this->last_error_message = $response->message;
+                    }
+
+                    throw new Exception('Error code: ' . $response->code . ', message: ' . $this->last_error_message);
+                }
+
+                if (is_object($response) && !$boolean) {
+                    return [$response];
+                }
+
+                return true;
+            }
         }
 
         return false;
@@ -4189,9 +4246,14 @@ class Client
      * @return bool [description]
      * @throws Exception
      */
-    protected function fetch_results_boolean(string $path, $payload = null, bool $login_required = true): bool
+    protected function fetch_results_boolean(
+        string $path,
+               $payload = null,
+        bool   $login_required = true,
+        bool   $prefix_path = true
+    ): bool
     {
-        return $this->fetch_results($path, $payload, true, $login_required);
+        return $this->fetch_results($path, $payload, true, $login_required, $prefix_path);
     }
 
     /**
@@ -4381,7 +4443,7 @@ class Client
      * @return bool|string response returned by the controller API
      * @throws CurlGeneralErrorException|CurlTimeoutException|InvalidCurlMethodException|LoginFailedException
      */
-    protected function exec_curl(string $path, $payload = null)
+    protected function exec_curl(string $path, $payload = null, $prefix_path = true)
     {
         if (!in_array($this->curl_method, self::CURL_METHODS_ALLOWED)) {
             throw new InvalidCurlMethodException();
@@ -4389,7 +4451,7 @@ class Client
 
         $url = $this->baseurl . $path;
 
-        if ($this->is_unifi_os) {
+        if ($this->is_unifi_os && $prefix_path) {
             $url = $this->baseurl . '/proxy/network' . $path;
         }
 
