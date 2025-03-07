@@ -228,6 +228,10 @@ their purpose, and their respective parameters.
 If you are using an advanced IDE such as PHPStorm or VS Code, you can use its code completion and other
 features to explore the available functions/methods thanks to the extensive PHP DocBlocks throughout the code.
 
+For a quick overview of the available functions/methods, you can also check the API Reference here:
+
+[API Reference](API_REFERENCE.md)
+
 
 ## Looking for version 1.x.x?
 

@@ -2791,10 +2791,10 @@ class Client
      * Update "Super Management" settings, base.
      *
      * @param string $settings_id value of _id for the site settings section where key = "super_mgmt", settings
-     *                                  can be obtained using the list_settings() function
+     *                            can be obtained using the list_settings() function
      * @param object|array $payload stdClass object or associative array containing the "Super Management" settings
-     *                                  to apply, must be a (partial) object/array structured in the same manner as is
-     *                                  returned by list_settings() for the "super_mgmt" section.
+     *                              to apply, must be a (partial) object/array structured in the same manner as is
+     *                              returned by list_settings() for the "super_mgmt" section.
      * @return bool true on success
      * @throws Exception
      */
@@ -2807,10 +2807,10 @@ class Client
      * Update "Super SMTP" settings, base.
      *
      * @param string $settings_id value of _id for the site settings section where key = "super_smtp", settings
-     *                                  can be obtained using the list_settings() function
+     *                            can be obtained using the list_settings() function
      * @param object|array $payload stdClass object or associative array containing the "Super SMTP" settings to
-     *                                  apply, must be a (partial) object/array structured in the same manner as is
-     *                                  returned by list_settings() for the "super_smtp" section.
+     *                              apply, must be a (partial) object/array structured in the same manner as is
+     *                              returned by list_settings() for the "super_smtp" section.
      * @return bool true on success
      * @throws Exception
      */
@@ -2901,9 +2901,8 @@ class Client
      * Create dynamic DNS settings, base (using REST).
      *
      * @param object|array $payload stdClass object or associative array containing the configuration to apply to the
-     *                              site, must be a
-     *                              (partial) object/array structured in the same manner as is returned by
-     *                              list_dynamicdns() for the site.
+     *                              site, must be a (partial) object/array structured in the same manner as is returned
+     *                              by list_dynamicdns() for the site.
      * @return bool true on success
      * @throws Exception
      */
@@ -2917,9 +2916,8 @@ class Client
      *
      * @param string $dynamicdns_id _id of the settings which can be found with the list_dynamicdns() function
      * @param object|array $payload stdClass object or associative array containing the configuration to apply to
-     *                                    the site, must be a
-     *                                    (partial) object/array structured in the same manner as is returned by
-     *                                    list_dynamicdns() for the site.
+     *                              the site, must be a (partial) object/array structured in the same manner as is
+     *                              returned by list_dynamicdns() for the site.
      * @return bool true on success
      * @throws Exception
      */
@@ -2963,8 +2961,8 @@ class Client
      *
      * @param string $network_id the "_id" value for the network you wish to update
      * @param object|array $payload stdClass object or associative array containing the configuration to apply to
-     *                                 the network, must be a (partial) object/array structured in the same manner as
-     *                                 is returned by list_networkconf() for the network.
+     *                              the network, must be a (partial) object/array structured in the same manner as
+     *                              is returned by list_networkconf() for the network.
      * @return bool true on success
      * @throws Exception
      */
@@ -2995,7 +2993,7 @@ class Client
      *
      * @param string $wlan_id optional, _id value of the wlan to fetch the settings for
      * @return array|bool containing wireless networks and their settings, or an array containing a single wireless network
-     *               when using the <wlan_id> parameter
+     *                    when using the <wlan_id> parameter
      * @throws Exception
      */
     public function list_wlanconf(string $wlan_id = '')
@@ -3008,7 +3006,7 @@ class Client
      *
      * @param string $name SSID
      * @param string $x_passphrase new pre-shared key, minimal length is 8 characters, maximum length is 63,
-     *                                  assign a value of null when security = 'open'
+     *                             assign a value of null when security = 'open'
      * @param string $usergroup_id user group id that can be found using the list_usergroups() function
      * @param string $wlangroup_id wlan group id that can be found using the list_wlan_groups() function
      * @param boolean $enabled optional, enable/disable wlan
@@ -3150,13 +3148,11 @@ class Client
     /**
      * Update MAC filter for a wlan.
      *
-     * @param string $wlan_id the "_id" value for the WLAN which can be found with the list_wlanconf()
-     *                                   function
+     * @param string $wlan_id the "_id" value for the WLAN which can be found with the list_wlanconf() function
      * @param string $mac_filter_policy string, "allow" or "deny"; default MAC policy to apply
      * @param bool $mac_filter_enabled true enables the policy, false disables it
      * @param array $macs must contain valid MAC strings to be placed in the MAC filter list,
-     *                                   replacing existing values. Existing MAC filter list can be obtained
-     *                                   through list_wlanconf().
+     *                    replacing existing values. Existing MAC filter list can be obtained through list_wlanconf().
      * @return bool true on success
      * @throws Exception
      */
@@ -3182,7 +3178,7 @@ class Client
      *
      * @param integer $historyhours optional, hours to go back, default value is 720 hours
      * @param integer $start optional, which event number to start with (useful for paging of results), default
-     *                              value is 0
+     *                       value is 0
      * @param integer $limit optional, number of events to return, default value is 3000
      * @return array|bool containing known events
      * @throws Exception
@@ -3218,7 +3214,7 @@ class Client
      * Count alarms.
      *
      * @param bool|null $archived optional, if true all alarms are counted, if false only non-archived (active) alarms are
-     *                       counted, by default all alarms are counted
+     *                            counted, by default all alarms are counted
      * @return array|bool containing the alarm count
      * @throws Exception
      */
@@ -3540,8 +3536,8 @@ class Client
      * @note this function/method is only supported on controller versions 5.5.19 and later
      * @param string $account_id _id of the account which can be found with the list_radius_accounts() function
      * @param object|array $payload stdClass object or associative array containing the new profile to apply to the
-     *                                 account, must be a (partial) object/array structured in the same manner as is
-     *                                 returned by list_radius_accounts() for the account.
+     *                              account, must be a (partial) object/array structured in the same manner as is
+     *                              returned by list_radius_accounts() for the account.
      * @return bool true on success
      * @throws Exception
      */
@@ -3615,9 +3611,9 @@ class Client
      * @param array $custom_payload optional, an array of additional parameters to pass with the request. Is merged
      *                              with the default payload array constructed by this method using array_merge().
      * @return array array containing results from the selected system log section/class.
-     *                    The 'data' key in the returned array contains the actual system log entries.
-     *                    The returned array also contains the page number and size, and the total number of entries
-     *                    available.
+     *               The 'data' key in the returned array contains the actual system log entries.
+     *               The returned array also contains the page number and size, and the total number of entries
+     *               available.
      * @throws Exception
      */
     public function get_system_log(string $class = 'device-alert', ?int $start = null, ?int $end = null, int $page_number = 0, int $page_size = 100, array $custom_payload = [])
@@ -3656,6 +3652,62 @@ class Client
         }
 
         return $this->fetch_results('/v2/api/site/' . $this->site . '/system-log/' . $class, array_merge($payload, $custom_payload));
+    }
+
+    /**
+     * Get a list of all DNS records.
+     *
+     * @return array|null The list of DNS records, or null on failure.
+     * @throws Exception If the request fails.
+     */
+    public function list_dns_records(): ?array
+    {
+        return $this->fetch_results('/v2/api/site/' . $this->site . '/static-dns');
+    }
+
+    /**
+     * Create a new DNS record.
+     *
+     * @param string $record_type The DNS record type, can be A, AAAA, MX, TXT, SRV, NS (for forwarding)
+     * @param string $value The value of the DNS record (e.g., IP address for A records or DNS server address for NS records).
+     * @param string $key The domain name or subdomain for the DNS record.
+     * @param int|null $ttl Time-to-Live value for the record (leave null to set to "auto").
+     * @param bool $enabled Whether the DNS record is enabled.
+     * @throws Exception If the request fails.
+     * @return object|null The response from the API, or null on failure.
+     */
+    public function create_dns_record(string $record_type, string $value, string $key, ?int $ttl = null, bool $enabled = true): ?object
+    {
+        if (!in_array($record_type, ['A', 'AAAA', 'MX', 'TXT', 'SRV', 'NS'])) {
+            throw new Exception('Invalid record type: ' . $record_type);
+        }
+
+        $payload = [
+            'record_type' => $record_type,
+            'value'       => $value,
+            'key'         => $key,
+            'enabled'     => $enabled,
+        ];
+
+        if ($ttl !== null) {
+            $payload['ttl'] = $ttl;
+        }
+
+        return $this->fetch_results( '/v2/api/site/' . $this->site . '/static-dns', $payload);
+    }
+
+    /**
+     * Delete a DNS record.
+     *
+     * @param string $record_id The ID of the DNS record to delete.
+     * @return bool True if the deletion was successful, false otherwise.
+     * @throws Exception If the request fails.
+     */
+    public function delete_dns_record(string $record_id): bool
+    {
+        $this->curl_method = 'DELETE';
+
+        return $this->fetch_results_boolean('/v2/api/site/' . $this->site . '/static-dns/' . $record_id);
     }
 
     /**
@@ -4115,7 +4167,7 @@ class Client
      * @param boolean $boolean optional, whether the method should return a boolean result, else return
      *                         the "data" array
      * @param boolean $login_required optional, whether the method requires to be logged in or not
-     * @return bool|array returns an array with the "data" array on success, else returns boolean if $boolean is true
+     * @return bool|array|object returns an array with the "data" array on success, returns boolean if $boolean is true
      * @throws Exception
      */
     protected function fetch_results(
