@@ -167,26 +167,26 @@ Sets the name for a specific client.
 
 ### List Active Clients
 ```php
-public function list_active_clients(bool $includeTrafficUsage = true, bool $includeUnifiDevices = true): array
+public function list_active_clients(bool $include_traffic_usage = true, bool $include_unifi_devices = true): array
 ```
 Lists all currently active clients.
 
 **Parameters:**
-- `$includeTrafficUsage` (bool): Whether to include traffic usage information (default: true)
-- `$includeUnifiDevices` (bool): Whether to include UniFi devices (default: true)
+- `$include_traffic_usage` (bool): Whether to include traffic usage information (default: true)
+- `$include_unifi_devices` (bool): Whether to include UniFi devices (default: true)
 
 **Returns:** array - Array of active client objects
 
 ### List Client History
 ```php
-public function list_clients_history(bool $onlyNonBlocked = true, bool $includeUnifiDevices = true, int $withinHours = 0): array
+public function list_clients_history(bool $only_non_blocked = true, bool $include_unifi_devices = true, int $within_hours = 0): array
 ```
 Lists historical client information.
 
 **Parameters:**
-- `$onlyNonBlocked` (bool): Whether to only show non-blocked clients (default: true)
-- `$includeUnifiDevices` (bool): Whether to include UniFi devices (default: true)
-- `$withinHours` (int): Hours of history to retrieve (default: 0)
+- `$only_non_blocked` (bool): Whether to only show non-blocked clients (default: true)
+- `$include_unifi_devices` (bool): Whether to include UniFi devices (default: true)
+- `$within_hours` (int): Hours of history to retrieve (default: 0)
 
 **Returns:** array - Array of historical client objects
 

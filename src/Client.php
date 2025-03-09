@@ -14,7 +14,7 @@ use UniFi_API\Exceptions\JsonDecodeException;
 use UniFi_API\Exceptions\LoginFailedException;
 use UniFi_API\Exceptions\LoginRequiredException;
 use UniFi_API\Exceptions\MethodDeprecatedException;
-use UniFi_API\Exceptions\NotAnOsConsoleException;
+use UniFi_API\Exceptions\NotAUnifiOsConsoleException;
 
 /**
  * The UniFi API client class.
@@ -34,7 +34,7 @@ use UniFi_API\Exceptions\NotAnOsConsoleException;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '2.0.3';
+    const CLASS_VERSION        = '2.0.5';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -85,7 +85,7 @@ class Client
      *
      * @param string $user username to use when connecting to the UniFi controller
      * @param string $password password to use when connecting to the UniFi controller
-     * @param string $baseurl base URL of the UniFi controller which *must* include an 'https://' prefix,
+     * @param string $baseurl base URL of the UniFi controller which *must* include a 'https://' prefix,
      *                        a port suffix (e.g. :8443) is required for non-UniFi OS controllers,
      *                        do not add trailing slashes, defaults to 'https://127.0.0.1:8443'
      * @param string|null $site short site name to access, defaults to 'default'
@@ -302,8 +302,8 @@ class Client
      * @param int|null $up optional, upload speed limit in kbps
      * @param int|null $down optional, download speed limit in kbps
      * @param int|null $megabytes optional, data transfer limit in MB
-     * @param string|null $ap_mac optional, AP MAC address to which client is connected, should result in faster
-     *                            authorization for the client device
+     * @param string|null $ap_mac optional, AP MAC address to which the client is connected
+     *                            (should result in faster authorization for the client device)
      * @return bool true upon success
      * @throws Exception
      */
@@ -725,8 +725,8 @@ class Client
      *       - only supported with UniFi controller versions 5.8.X and higher
      *       - make sure that the retention policy for 5-minute stats is set to the correct value in
      *         the controller settings
-     *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
-     *         section
+     *       - make sure that the "Clients Historical Data" option has been enabled in the UniFi controller settings in
+     *         the Maintenance section
      * @param string|null $mac optional, MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
@@ -1095,16 +1095,16 @@ class Client
     /**
      * Fetch active client devices
      *
-     * @param bool $includeTrafficUsage include the traffic usage of the client devices in the response
-     * @param bool $includeUnifiDevices include UniFi devices in the response
+     * @param bool $include_traffic_usage include the traffic usage of the client devices in the response
+     * @param bool $include_unifi_devices include UniFi devices in the response
      * @return array|bool returns an array of active client device objects, false upon error
      * @throws Exception
      */
-    public function list_active_clients(bool $includeTrafficUsage = true, bool $includeUnifiDevices = true)
+    public function list_active_clients(bool $include_traffic_usage = true, bool $include_unifi_devices = true)
     {
         $query = http_build_query([
-            'includeTrafficUsage' => $includeTrafficUsage,
-            'includeUnifiDevices' => $includeUnifiDevices,
+            'include_traffic_usage' => $include_traffic_usage,
+            'include_unifi_devices' => $include_unifi_devices,
         ]);
 
         return $this->fetch_results('/v2/api/site/' . $this->site . '/clients/active?' . $query);
@@ -1113,19 +1113,19 @@ class Client
     /**
      * Fetch client devices history (offline client devices)
      *
-     * @param bool $onlyNonBlocked include non-blocked client devices in the response
-     * @param bool $includeUnifiDevices include UniFi devices in the response
-     * @param int $withinHours the number of hours a device has been offline to be included in the response
+     * @param bool $only_non_blocked include non-blocked client devices in the response
+     * @param bool $include_unifi_devices include UniFi devices in the response
+     * @param int $within_hours the number of hours a device has been offline to be included in the response
      *                         (0 = no limit)
      * @return array|bool returns an array of (offline) client device objects, false upon error
      * @throws Exception
      */
-    public function list_clients_history(bool $onlyNonBlocked = true, bool $includeUnifiDevices = true, int $withinHours = 0)
+    public function list_clients_history(bool $only_non_blocked = true, bool $include_unifi_devices = true, int $within_hours = 0)
     {
         $query = http_build_query([
-            'onlyNonBlocked'      => $onlyNonBlocked,
-            'includeUnifiDevices' => $includeUnifiDevices,
-            'withinHours'         => $withinHours,
+            'only_non_blocked'      => $only_non_blocked,
+            'include_unifi_devices' => $include_unifi_devices,
+            'within_hours'          => $within_hours,
         ]);
 
         return $this->fetch_results('/v2/api/site/' . $this->site . '/clients/history?' . $query);
@@ -3268,7 +3268,7 @@ class Client
     public function get_update_os_console()
     {
         if (!$this->is_unifi_os) {
-            throw new NotAnOsConsoleException();
+            throw new NotAUnifiOsConsoleException();
         }
 
         return $this->fetch_results('/api/firmware/update', null, false, true, false);
@@ -3284,7 +3284,7 @@ class Client
     public function update_os_console(): bool
     {
         if (!$this->is_unifi_os) {
-            throw new NotAnOsConsoleException();
+            throw new NotAUnifiOsConsoleException();
         }
 
         $payload = ['persistFullData' => true];
@@ -4453,7 +4453,7 @@ class Client
     /**
      * Callback function for cURL to extract and store cookies as needed.
      *
-     * @param object|resource $ch the cURL instance (type hinting is unavailable for cURL resources)
+     * @param object|resource|false $ch the cURL instance (type hinting is unavailable for cURL resources)
      * @param string $header_line the response header line number
      * @return int length of the header line
      */
