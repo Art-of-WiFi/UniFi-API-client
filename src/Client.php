@@ -2045,7 +2045,8 @@ class Client
         string $password = '',
         bool   $readonly = false,
         bool   $device_adopt = false,
-        bool   $device_restart = false
+        bool   $device_restart = false,
+        bool   $is_super = null
     ): bool
     {
         $email = trim($email);
@@ -2074,6 +2075,10 @@ class Client
 
         if ($device_restart) {
             $payload['permissions'][] = 'API_DEVICE_RESTART';
+        }
+
+        if ($is_super) {
+            $payload['is_super'] = $is_super;
         }
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
@@ -2107,6 +2112,21 @@ class Client
     public function delete_admin(string $admin_id): bool
     {
         $payload = ['cmd' => 'revoke-super-admin', 'admin' => $admin_id];
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
+    }
+
+    /**
+     * Grant an admin super admin
+     *
+     * @param string $admin_id _id value of the admin to grant super admin, can be obtained using the
+     *                         list_all_admins() method/function
+     * @return bool true on success
+     * @throws Exception
+     */
+    public function grant_super_admin(string $admin_id): bool
+    {
+        $payload = ['cmd' => 'grant-super-admin', 'admin' => $admin_id];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
     }
