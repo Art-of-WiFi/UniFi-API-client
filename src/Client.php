@@ -2044,7 +2044,8 @@ class Client
         string $password = '',
         bool   $readonly = false,
         bool   $device_adopt = false,
-        bool   $device_restart = false
+        bool   $device_restart = false,
+        bool   $is_super = null
     ): bool
     {
         $email = trim($email);
@@ -2073,6 +2074,10 @@ class Client
 
         if ($device_restart) {
             $payload['permissions'][] = 'API_DEVICE_RESTART';
+        }
+
+        if ($is_super) {
+            $payload['is_super'] = $is_super;
         }
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
