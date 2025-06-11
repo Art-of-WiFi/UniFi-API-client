@@ -41,7 +41,7 @@ $site_id = 'default';
 /**
  * The new PPSK details.
  */
-$new_ppsk_password   = 'mysecretppsk'; // the password for the new PPSK, this password must be unique for the SSID
+$new_ppsk_password   = 'mysecretppsk'; // the password for the new PPSK, this password must be unique for the SSID, between 8-63 characters
 $new_ppsk_network_id = 'zzzzzzzzzzzzzzzzzzzzz'; // id for the required VLAN, taken from the output of list_networkconf()
 $new_ppsk_wlan_id    = 'xxxxxxxxxxxxxxxxxxxxx'; // id for the required WLAN, taken from the output of list_wlanconf()
 
