@@ -2116,6 +2116,21 @@ class Client
     }
 
     /**
+     * Grant an admin super admin
+     *
+     * @param string $admin_id _id value of the admin to grant super admin, can be obtained using the
+     *                         list_all_admins() method/function
+     * @return bool true on success
+     * @throws Exception
+     */
+    public function grant_super_admin(string $admin_id): bool
+    {
+        $payload = ['cmd' => 'grant-super-admin', 'admin' => $admin_id];
+
+        return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/sitemgr', $payload);
+    }
+
+    /**
      * Fetch WLAN groups.
      *
      * @return array|bool containing known wlan_groups
