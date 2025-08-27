@@ -292,6 +292,16 @@ If you would like to contribute to this project, please open an issue and includ
 your suggestions or code there or else create a pull request.
 
 
+## About Art of WiFi
+
+Art of WiFi develops software and tools that enhance the capabilities of UniFi networks. From captive portals and
+reporting solutions to device search utilities, our goal is to make UniFi deployments more powerful and easier to
+manage.
+
+If you're looking for a specific solution or just want to see what else we offer, feel free to explore our web site:
+- https://www.artofwifi.net
+
+
 ## Important Disclaimer
 
 Many of the functions in this API client class are not officially supported by Ubiquiti
