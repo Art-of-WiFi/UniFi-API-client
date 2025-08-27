@@ -435,7 +435,7 @@ public function set_site_ntp(string $ntp_id, $payload): bool
 Sets the NTP settings for the current site.
 
 **Parameters:**
-- `$ntp_id` (string): ID of the NTP settings
+- `$ntp_id` (string): _id of the NTP settings
 - `$payload` (mixed): NTP configuration data
 
 **Returns:** bool - true upon success
@@ -456,12 +456,12 @@ Sets the connectivity settings for the current site.
 
 ### List Networks
 ```php
-public function list_networks(?string $site_id = null): array
+public function list_networkconf(?string $network_id = '')
 ```
-Lists all networks or networks for a specific site.
+Lists all non-wireless networks for the current site. 
 
 **Parameters:**
-- `$site_id` (string|null): Site ID to use (default: current site)
+- `$network_id` (string|null): _id value of the network to get settings for
 
 **Returns:** array - Array of network objects
 

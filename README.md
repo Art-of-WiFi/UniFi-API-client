@@ -16,10 +16,10 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 ## Supported Versions
 
-| Software                             | Versions                                             |
-|--------------------------------------|------------------------------------------------------|
-| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.0.x (**9.0.101 is confirmed**) |
-| UniFi OS                             | 3.x, 4.1.x (**4.1.9 is confirmed**)                  |
+| Software                             | Versions                                          |
+|--------------------------------------|---------------------------------------------------|
+| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x (**9.3.45 is confirmed**) |
+| UniFi OS                             | 3.x, 4.1.x, 4.2.x (**4.2.23 is confirmed**)       |
 
 
 ## Requirements
@@ -30,14 +30,15 @@ easy inclusion in your projects. See the [installation instructions](#Installati
   - PHP json and PHP cURL modules enabled
 - direct network connectivity between this server and the host and port (usually TCP port 8443 or port 443 for 
   UniFi OS) where the UniFi Controller is running
-- you **must** use an **account with local access permissions** to access the UniFi Controller API through this class
-- do not use UniFi Cloud accounts and do not enable 2FA for the accounts that you use with this class
+- you **must** use an admin **account with local access permissions** to access the UniFi Controller API through this
+  class as explained here: https://artofwifi.net/blog/use-local-admin-account-unifi-api-captive-portal
+- do **not** use UniFi Cloud accounts and do not enable MFA/2FA for the accounts that you use with this class
 
 
 ## UniFi OS Support
 
-Besides the "software-based" UniFi controllers, this class also supports UniFi OS-based controllers starting from
-version **1.1.47**.
+Besides the classic "software-based" UniFi controllers, this class also supports UniFi OS-based controllers starting
+from version **1.1.47**.
 
 These devices/services have been verified to work:
 - UniFi Dream Router (UDR)
@@ -51,13 +52,15 @@ These devices/services have been verified to work:
 - UniFi CloudKey Enterprise (CK-Enterprise)
 - UniFi Enterprise Fortress Gateway (EFG)
 - Official UniFi Hosting, details [here](https://help.ui.com/hc/en-us/articles/4415364143511)
+- UniFi OS Server, announcement [here](https://blog.ui.com/article/introducing-unifi-os-server)
 
 The class automatically detects UniFi OS consoles and adjusts the URLs and several functions/methods accordingly.
 
-UniFi OS-based controllers require you to connect using port **443** instead of **8443** which is used for
-"software-based" controllers. If your own code implements strict validation of the URL that is passed to the
-constructor, please adapt your logic to allow URLs without a port suffix or with port 443 when working with a
-UniFi OS-based controller.
+UniFi OS-based consoles require you to connect using port **443** instead of **8443** which is used for
+the classic "software-based" controllers. When using **UniFi OS Server**, you are required to use port **11443**.
+
+If your own code implements strict validation of the URL that is passed to the constructor, please adapt your logic to
+allow URLs without a port suffix, with port 443 or port 11443 when working with a UniFi OS-based controller.
 
 
 ### Remote API access to UniFi OS-based controllers
