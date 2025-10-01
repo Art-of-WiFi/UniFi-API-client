@@ -28,19 +28,20 @@ easy inclusion in your projects. See the [installation instructions](#Installati
   - PHP **7.4.0** or higher (use version [1.1.83](https://github.com/Art-of-WiFi/UniFi-API-client/releases/tag/v1.1.83) 
     for PHP 7.3.x and lower)
   - PHP json and PHP cURL modules enabled
-- direct network connectivity between this server and the host and port (usually TCP port 8443 or port 443 for 
-  UniFi OS) where the UniFi Controller is running
-- you **must** use an admin **account with local access permissions** to access the UniFi Controller API through this
-  class as explained here: https://artofwifi.net/blog/use-local-admin-account-unifi-api-captive-portal
+- direct network connectivity between this server and the host and port (usually TCP port 8443, port 11443 for UniFi OS
+  Server, or port 443 for UniFi OS consoles) where the UniFi Network Application is running
+- you **must** use an admin **account with local access permissions** to access the API through this class as explained
+  here: https://artofwifi.net/blog/use-local-admin-account-unifi-api-captive-portal
 - do **not** use UniFi Cloud accounts and do not enable MFA/2FA for the accounts that you use with this class
 
 
 ## UniFi OS Support
 
-Besides the classic "software-based" UniFi controllers, this class also supports UniFi OS-based controllers starting
-from version **1.1.47**.
+Besides the classic "software-based" UniFi Network Application, this class also supports UniFi OS-based
+controllers starting from version **1.1.47**.
 
 These devices/services have been verified to work:
+- UniFi OS Server, announcement [here](https://blog.ui.com/article/introducing-unifi-os-server)
 - UniFi Dream Router (UDR)
 - UniFi Dream Machine (UDM)
 - UniFi Dream Machine Pro (UDM PRO)
@@ -52,7 +53,7 @@ These devices/services have been verified to work:
 - UniFi CloudKey Enterprise (CK-Enterprise)
 - UniFi Enterprise Fortress Gateway (EFG)
 - Official UniFi Hosting, details [here](https://help.ui.com/hc/en-us/articles/4415364143511)
-- UniFi OS Server, announcement [here](https://blog.ui.com/article/introducing-unifi-os-server)
+- HostiFi UniFi Cloud Hosting, details [here](https://hostifi.com/unifi)
 
 The class automatically detects UniFi OS consoles/servers and adjusts the URLs and several functions/methods
 accordingly.
