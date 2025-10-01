@@ -19,7 +19,7 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 | Software                             | Versions                                          |
 |--------------------------------------|---------------------------------------------------|
 | UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x (**9.3.45 is confirmed**) |
-| UniFi OS                             | 3.x, 4.1.x, 4.2.x (**4.2.23 is confirmed**)       |
+| UniFi OS                             | 3.x, 4.1.x, 4.2.x (**4.3.6 is confirmed**)        |
 
 
 ## Requirements
@@ -54,7 +54,8 @@ These devices/services have been verified to work:
 - Official UniFi Hosting, details [here](https://help.ui.com/hc/en-us/articles/4415364143511)
 - UniFi OS Server, announcement [here](https://blog.ui.com/article/introducing-unifi-os-server)
 
-The class automatically detects UniFi OS consoles and adjusts the URLs and several functions/methods accordingly.
+The class automatically detects UniFi OS consoles/servers and adjusts the URLs and several functions/methods
+accordingly.
 
 UniFi OS-based consoles require you to connect using port **443** instead of **8443** which is used for
 the classic "software-based" controllers. When using **UniFi OS Server**, you are required to use port **11443**.
@@ -76,7 +77,8 @@ The "custom firewall rule" approach described there is the recommended method.
 When upgrading from a version before **2.0.0**, please:
 - change your code to use the new Exceptions that are thrown by the class
 - test the client with your code for any breaking changes
-- make sure you are using [Composer](#composer) to install the class because the code is no longer held within a single file
+- make sure you are using [Composer](#composer) to install the class because the code is no longer held within a single
+  file
 - see the note [here](#looking-for-version-1xx) regarding the single file version (1.x.x) of the API client
 
 
