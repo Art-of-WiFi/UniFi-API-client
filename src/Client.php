@@ -311,14 +311,7 @@ class Client
      */
     public function authorize_guest(string $mac, int $minutes, ?int $up = null, ?int $down = null, ?int $megabytes = null, ?string $ap_mac = null): bool
     {
-        /** Check here whether the MAC address is empty or invalid and throw an Exception as needed */
-        if (empty($mac)) {
-            throw new MacAddressEmptyException();
-        }
-
-        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-            throw new MacAddressInvalidException();
-        }
+        $this->validateMacAddresses($mac);
 
         $payload = ['cmd' => 'authorize-guest', 'mac' => strtolower($mac), 'minutes' => $minutes];
 
@@ -351,13 +344,7 @@ class Client
      */
     public function unauthorize_guest(string $mac): bool
     {
-        if (empty($mac)) {
-            throw new MacAddressEmptyException();
-        }
-
-        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-            throw new MacAddressInvalidException();
-        }
+        $this->validateMacAddresses($mac);
 
         $payload = ['cmd' => 'unauthorize-guest', 'mac' => strtolower($mac)];
 
@@ -373,13 +360,7 @@ class Client
      */
     public function reconnect_sta(string $mac): bool
     {
-        if (empty($mac)) {
-            throw new MacAddressEmptyException();
-        }
-
-        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-            throw new MacAddressInvalidException();
-        }
+        $this->validateMacAddresses($mac);
 
         $payload = ['cmd' => 'kick-sta', 'mac' => strtolower($mac)];
 
@@ -395,13 +376,7 @@ class Client
      */
     public function block_sta(string $mac): bool
     {
-        if (empty($mac)) {
-            throw new MacAddressEmptyException();
-        }
-
-        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-            throw new MacAddressInvalidException();
-        }
+        $this->validateMacAddresses($mac);
 
         $payload = ['cmd' => 'block-sta', 'mac' => strtolower($mac)];
 
@@ -417,13 +392,7 @@ class Client
      */
     public function unblock_sta(string $mac): bool
     {
-        if (empty($mac)) {
-            throw new MacAddressEmptyException();
-        }
-
-        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-            throw new MacAddressInvalidException();
-        }
+        $this->validateMacAddresses($mac);
 
         $payload = ['cmd' => 'unblock-sta', 'mac' => strtolower($mac)];
 
@@ -443,19 +412,7 @@ class Client
     {
         $macs = (array)$mac;
 
-        if (empty($macs)) {
-            throw new MacAddressEmptyException();
-        }
-
-        foreach ($macs as $mac) {
-            if (empty($mac)) {
-                throw new MacAddressEmptyException();
-            }
-
-            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-                throw new MacAddressInvalidException();
-            }
-        }
+        $this->validateMacAddresses($macs);
 
         $payload = [
             'cmd'  => 'forget-sta',
@@ -488,13 +445,7 @@ class Client
         ?bool   $is_wired = null
     )
     {
-        if (empty($mac)) {
-            throw new MacAddressEmptyException();
-        }
-
-        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-            throw new MacAddressInvalidException();
-        }
+        $this->validateMacAddresses($mac);
 
         $new_user = ['mac' => strtolower($mac), 'usergroup_id' => $user_group_id];
 
@@ -1153,13 +1104,7 @@ class Client
     public function list_clients(?string $mac = null)
     {
         if (is_string($mac)) {
-            if (empty($mac)) {
-                throw new MacAddressEmptyException();
-            }
-
-            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-                throw new MacAddressInvalidException();
-            }
+            $this->validateMacAddresses($mac);
 
             $mac = strtolower(trim($mac));
         }
@@ -1215,13 +1160,7 @@ class Client
      */
     public function stat_client(string $mac)
     {
-        if (empty($mac)) {
-            throw new MacAddressEmptyException();
-        }
-
-        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-            throw new MacAddressInvalidException();
-        }
+        $this->validateMacAddresses($mac);
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/user/' . strtolower(trim($mac)));
     }
@@ -1615,13 +1554,7 @@ class Client
 
         if (!empty($mac_array)) {
             foreach ($mac_array as $mac) {
-                if (empty($mac)) {
-                    throw new MacAddressEmptyException();
-                }
-
-                if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-                    throw new MacAddressInvalidException();
-                }
+                $this->validateMacAddresses($mac);
             }
         }
 
@@ -2565,19 +2498,7 @@ class Client
     {
         $mac_array = (array)$macs;
 
-        if (empty($macs)) {
-            throw new MacAddressEmptyException();
-        }
-
-        foreach ($mac_array as $mac) {
-            if (empty($mac)) {
-                throw new MacAddressEmptyException();
-            }
-
-            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-                throw new MacAddressInvalidException();
-            }
-        }
+        $this->validateMacAddresses($mac_array);
 
         $payload = [
             'macs' => array_map('strtolower', $mac_array),
@@ -2610,13 +2531,7 @@ class Client
         bool   $ssh_key_verify = true
     ): bool
     {
-        if (empty($mac)) {
-            throw new MacAddressEmptyException();
-        }
-
-        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-            throw new MacAddressInvalidException();
-        }
+        $this->validateMacAddresses($mac);
 
         $payload = [
             'cmd'          => 'adv-adopt',
@@ -2644,19 +2559,7 @@ class Client
     {
         $mac_array = (array)$macs;
 
-        if (empty($mac_array)) {
-            throw new MacAddressEmptyException();
-        }
-
-        foreach ($mac_array as $mac) {
-            if (empty($mac)) {
-                throw new MacAddressEmptyException();
-            }
-
-            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-                throw new MacAddressInvalidException();
-            }
-        }
+        $this->validateMacAddresses($mac_array);
 
         $payload = [
             'cmd'        => 'migrate',
@@ -2678,19 +2581,7 @@ class Client
     {
         $mac_array = (array)$macs;
 
-        if (empty($mac_array)) {
-            throw new MacAddressEmptyException();
-        }
-
-        foreach ($mac_array as $mac) {
-            if (empty($mac)) {
-                throw new MacAddressEmptyException();
-            }
-
-            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-                throw new MacAddressInvalidException();
-            }
-        }
+        $this->validateMacAddresses($mac_array);
 
         $payload = [
             'cmd'  => 'cancel-migrate',
@@ -2716,19 +2607,7 @@ class Client
     {
         $mac_array = (array)$macs;
 
-        if (empty($mac_array)) {
-            throw new MacAddressEmptyException();
-        }
-
-        foreach ($mac_array as $mac) {
-            if (empty($mac)) {
-                throw new MacAddressEmptyException();
-            }
-
-            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-                throw new MacAddressInvalidException();
-            }
-        }
+        $this->validateMacAddresses($mac_array);
 
         $payload = [
             'cmd'  => 'restart',
@@ -2846,13 +2725,7 @@ class Client
      */
     public function locate_ap(string $mac, bool $enable): bool
     {
-        if (empty($mac)) {
-            throw new MacAddressEmptyException();
-        }
-
-        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-            throw new MacAddressInvalidException();
-        }
+        $this->validateMacAddresses($mac);
 
         $cmd = $enable ? 'set-locate' : 'unset-locate';
 
@@ -3074,13 +2947,7 @@ class Client
      */
     public function move_device(string $mac, string $site_id): bool
     {
-        if (empty($mac)) {
-            throw new MacAddressEmptyException();
-        }
-
-        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-            throw new MacAddressInvalidException();
-        }
+        $this->validateMacAddresses($mac);
 
         $payload = [
             'cmd'  => 'move-device',
@@ -3100,13 +2967,7 @@ class Client
      */
     public function delete_device(string $mac): bool
     {
-        if (empty($mac)) {
-            throw new MacAddressEmptyException();
-        }
-
-        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-            throw new MacAddressInvalidException();
-        }
+        $this->validateMacAddresses($mac);
 
         $payload = [
             'cmd' => 'delete-device',
@@ -3579,19 +3440,7 @@ class Client
     {
         $mac_array = (array)$macs;
 
-        if (empty($mac_array)) {
-            throw new MacAddressEmptyException();
-        }
-
-        foreach ($mac_array as $mac) {
-            if (empty($mac)) {
-                throw new MacAddressEmptyException();
-            }
-
-            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
-                throw new MacAddressInvalidException();
-            }
-        }
+        $this->validateMacAddresses($mac_array);
 
         $payload = [
             'url'  => filter_var($firmware_url, FILTER_SANITIZE_URL),
@@ -4625,6 +4474,40 @@ class Client
 
         return true;
     }
+
+
+    /**
+     * Validate one or more MAC addresses.
+     *
+     * @param string|array $macs a single MAC address as a string or an array of MAC addresses
+     * @return void
+     * @throws MacAddressEmptyException when no MAC address is provided
+     * @throws MacAddressInvalidException when an invalid MAC address is provided
+     */
+    protected function validateMacAddresses($macs): void
+    {
+        if (empty($macs)) {
+            throw new MacAddressEmptyException();
+        }
+
+        if (is_array($macs)) {
+            foreach ($macs as $mac) {
+                if (empty($mac)) {
+                    throw new MacAddressEmptyException();
+                }
+                if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+                    throw new MacAddressInvalidException();
+                }
+            }
+        } else {
+            if (!filter_var($macs, FILTER_VALIDATE_MAC)) {
+                throw new MacAddressInvalidException();
+            }
+        }
+    }
+
+
+
 
     /**
      * Check the (short) site name.
