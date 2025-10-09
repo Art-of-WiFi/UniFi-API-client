@@ -13,6 +13,8 @@ use UniFi_API\Exceptions\InvalidSiteNameException;
 use UniFi_API\Exceptions\JsonDecodeException;
 use UniFi_API\Exceptions\LoginFailedException;
 use UniFi_API\Exceptions\LoginRequiredException;
+use UniFi_API\Exceptions\MacAddressEmptyException;
+use UniFi_API\Exceptions\MacAddressInvalidException;
 use UniFi_API\Exceptions\MethodDeprecatedException;
 use UniFi_API\Exceptions\NotAUnifiOsConsoleException;
 
@@ -34,7 +36,7 @@ use UniFi_API\Exceptions\NotAUnifiOsConsoleException;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '2.0.5';
+    const CLASS_VERSION        = '2.0.6';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -305,13 +307,22 @@ class Client
      * @param string|null $ap_mac optional, AP MAC address to which the client is connected
      *                            (should result in faster authorization for the client device)
      * @return bool true upon success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function authorize_guest(string $mac, int $minutes, ?int $up = null, ?int $down = null, ?int $megabytes = null, ?string $ap_mac = null): bool
     {
+        /** Check here whether the MAC address is empty or invalid and throw an Exception as needed */
+        if (empty($mac)) {
+            throw new MacAddressEmptyException();
+        }
+
+        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+            throw new MacAddressInvalidException();
+        }
+
         $payload = ['cmd' => 'authorize-guest', 'mac' => strtolower($mac), 'minutes' => $minutes];
 
-        /** append received values for up/down/megabytes/ap_mac to the payload array to be submitted */
+        /** Append received values for up/down/megabytes/ap_mac to the payload array to be submitted */
         if (!empty($up)) {
             $payload['up'] = $up;
         }
@@ -336,10 +347,18 @@ class Client
      *
      * @param string $mac client MAC address
      * @return bool true upon success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function unauthorize_guest(string $mac): bool
     {
+        if (empty($mac)) {
+            throw new MacAddressEmptyException();
+        }
+
+        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+            throw new MacAddressInvalidException();
+        }
+
         $payload = ['cmd' => 'unauthorize-guest', 'mac' => strtolower($mac)];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/stamgr', $payload);
@@ -350,10 +369,18 @@ class Client
      *
      * @param string $mac client MAC address
      * @return bool true upon success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function reconnect_sta(string $mac): bool
     {
+        if (empty($mac)) {
+            throw new MacAddressEmptyException();
+        }
+
+        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+            throw new MacAddressInvalidException();
+        }
+
         $payload = ['cmd' => 'kick-sta', 'mac' => strtolower($mac)];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/stamgr', $payload);
@@ -364,10 +391,18 @@ class Client
      *
      * @param string $mac client MAC address
      * @return bool true upon success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function block_sta(string $mac): bool
     {
+        if (empty($mac)) {
+            throw new MacAddressEmptyException();
+        }
+
+        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+            throw new MacAddressInvalidException();
+        }
+
         $payload = ['cmd' => 'block-sta', 'mac' => strtolower($mac)];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/stamgr', $payload);
@@ -378,10 +413,18 @@ class Client
      *
      * @param string $mac client MAC address
      * @return bool true upon success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function unblock_sta(string $mac): bool
     {
+        if (empty($mac)) {
+            throw new MacAddressEmptyException();
+        }
+
+        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+            throw new MacAddressInvalidException();
+        }
+
         $payload = ['cmd' => 'unblock-sta', 'mac' => strtolower($mac)];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/stamgr', $payload);
@@ -394,13 +437,29 @@ class Client
      *       slow (up to 5 minutes) on larger controllers
      * @param array|string $mac array of client MAC addresses (strings) or a single MAC address string
      * @return bool true upon success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function forget_sta($mac): bool
     {
+        $macs = (array)$mac;
+
+        if (empty($macs)) {
+            throw new MacAddressEmptyException();
+        }
+
+        foreach ($macs as $mac) {
+            if (empty($mac)) {
+                throw new MacAddressEmptyException();
+            }
+
+            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+                throw new MacAddressInvalidException();
+            }
+        }
+
         $payload = [
             'cmd'  => 'forget-sta',
-            'macs' => array_map('strtolower', (array)$mac)
+            'macs' => array_map('strtolower', $macs)
         ];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/stamgr', $payload);
@@ -418,7 +477,7 @@ class Client
      * @param bool|null $is_wired optional, defines whether the new user/client-device is wired or not
      * @return array|bool returns an array with a single object containing details of the new user/client-device on
      *                    success, else returns false
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function create_user(
         string  $mac,
@@ -429,6 +488,14 @@ class Client
         ?bool   $is_wired = null
     )
     {
+        if (empty($mac)) {
+            throw new MacAddressEmptyException();
+        }
+
+        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+            throw new MacAddressInvalidException();
+        }
+
         $new_user = ['mac' => strtolower($mac), 'usergroup_id' => $user_group_id];
 
         if (!empty($name)) {
@@ -1081,11 +1148,19 @@ class Client
      *                         made
      * @return array|bool returns an array of online client device objects, or in case of a single device request, returns a
      *                    single client device object, false upon error
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function list_clients(?string $mac = null)
     {
         if (is_string($mac)) {
+            if (empty($mac)) {
+                throw new MacAddressEmptyException();
+            }
+
+            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+                throw new MacAddressInvalidException();
+            }
+
             $mac = strtolower(trim($mac));
         }
 
@@ -1136,10 +1211,18 @@ class Client
      *
      * @param string $mac client device MAC address
      * @return array|bool returns an object with the client device information
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function stat_client(string $mac)
     {
+        if (empty($mac)) {
+            throw new MacAddressEmptyException();
+        }
+
+        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+            throw new MacAddressInvalidException();
+        }
+
         return $this->fetch_results('/api/s/' . $this->site . '/stat/user/' . strtolower(trim($mac)));
     }
 
@@ -1524,11 +1607,25 @@ class Client
      *                           to filter by. May also be a (lowercase) string containing a single MAC address
      * @return array|bool an array containing known UniFi device objects, optionally filtered by the <macs>
      *                    parameter, false upon error
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function list_devices($macs = [])
     {
-        $payload = ['macs' => array_map('strtolower', (array)$macs)];
+        $mac_array = (array)$macs;
+
+        if (!empty($mac_array)) {
+            foreach ($mac_array as $mac) {
+                if (empty($mac)) {
+                    throw new MacAddressEmptyException();
+                }
+
+                if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+                    throw new MacAddressInvalidException();
+                }
+            }
+        }
+
+        $payload = ['macs' => array_map('strtolower', $mac_array)];
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/device', $payload);
     }
@@ -2462,12 +2559,28 @@ class Client
      *
      * @param string|array $macs device MAC address or an array of MAC addresses
      * @return bool true on success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function adopt_device($macs): bool
     {
+        $mac_array = (array)$macs;
+
+        if (empty($macs)) {
+            throw new MacAddressEmptyException();
+        }
+
+        foreach ($mac_array as $mac) {
+            if (empty($mac)) {
+                throw new MacAddressEmptyException();
+            }
+
+            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+                throw new MacAddressInvalidException();
+            }
+        }
+
         $payload = [
-            'macs' => array_map('strtolower', (array)$macs),
+            'macs' => array_map('strtolower', $mac_array),
             'cmd' => 'adopt'
         ];
 
@@ -2485,7 +2598,7 @@ class Client
      * @param int $port optional, SSH port
      * @param bool $ssh_key_verify optional, if true, verify the SSH key for the device
      * @return bool true on success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function advanced_adopt_device(
         string $mac,
@@ -2497,6 +2610,14 @@ class Client
         bool   $ssh_key_verify = true
     ): bool
     {
+        if (empty($mac)) {
+            throw new MacAddressEmptyException();
+        }
+
+        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+            throw new MacAddressInvalidException();
+        }
+
         $payload = [
             'cmd'          => 'adv-adopt',
             'mac'          => strtolower($mac),
@@ -2517,14 +2638,30 @@ class Client
      * @param string|array $macs single device MAC address string or an array of MAC addresses
      * @param string $inform_url inform URL to point the device to (e.g., http://10.1.0.10:9080/inform)
      * @return bool true on success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function migrate_device($macs, string $inform_url): bool
     {
+        $mac_array = (array)$macs;
+
+        if (empty($mac_array)) {
+            throw new MacAddressEmptyException();
+        }
+
+        foreach ($mac_array as $mac) {
+            if (empty($mac)) {
+                throw new MacAddressEmptyException();
+            }
+
+            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+                throw new MacAddressInvalidException();
+            }
+        }
+
         $payload = [
             'cmd'        => 'migrate',
             'inform_url' => $inform_url,
-            'macs'       => array_map('strtolower', (array)$macs)
+            'macs'       => array_map('strtolower', $mac_array)
         ];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
@@ -2535,13 +2672,29 @@ class Client
      *
      * @param string|array $macs single device MAC address string or an array of MAC addresses
      * @return bool true on success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function cancel_migrate_device($macs): bool
     {
+        $mac_array = (array)$macs;
+
+        if (empty($mac_array)) {
+            throw new MacAddressEmptyException();
+        }
+
+        foreach ($mac_array as $mac) {
+            if (empty($mac)) {
+                throw new MacAddressEmptyException();
+            }
+
+            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+                throw new MacAddressInvalidException();
+            }
+        }
+
         $payload = [
             'cmd'  => 'cancel-migrate',
-            'macs' => array_map('strtolower', (array)$macs)
+            'macs' => array_map('strtolower', $mac_array)
         ];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr', $payload);
@@ -2557,13 +2710,29 @@ class Client
      *                              capable ports. Keep in mind that a 'hard' reboot
      *                            - does *NOT* trigger a factory-reset.
      * @return bool true on success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function restart_device($macs, string $reboot_type = 'soft'): bool
     {
+        $mac_array = (array)$macs;
+
+        if (empty($mac_array)) {
+            throw new MacAddressEmptyException();
+        }
+
+        foreach ($mac_array as $mac) {
+            if (empty($mac)) {
+                throw new MacAddressEmptyException();
+            }
+
+            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+                throw new MacAddressInvalidException();
+            }
+        }
+
         $payload = [
             'cmd'  => 'restart',
-            'macs' => array_map('strtolower', (array)$macs)
+            'macs' => array_map('strtolower', $mac_array)
         ];
 
         if (!empty($reboot_type) && in_array($reboot_type, ['soft', 'hard'])) {
@@ -2583,9 +2752,25 @@ class Client
      */
     public function force_provision($mac): bool
     {
+        $mac_array = (array)$mac;
+
+        if (empty($mac_array)) {
+            throw new MacAddressEmptyException();
+        }
+
+        foreach ($mac_array as $mac) {
+            if (empty($mac)) {
+                throw new MacAddressEmptyException();
+            }
+
+            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+                throw new MacAddressInvalidException();
+            }
+        }
+
         $payload = [
             'cmd'  => 'force-provision',
-            'macs' => array_map('strtolower', (array)$mac)
+            'macs' => array_map('strtolower', $mac_array)
         ];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/', $payload);
@@ -2651,16 +2836,24 @@ class Client
     }
 
     /**
-     * Toggle flashing LED of an access point for locating purposes.
+     * Toggle the flashing LED of an access point for locating purposes.
      *
      * @note replaces the old set_locate_ap() and unset_locate_ap() methods/functions
      * @param string $mac device MAC address
      * @param bool $enable true enables flashing LED, false disables flashing LED
      * @return bool true on success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function locate_ap(string $mac, bool $enable): bool
     {
+        if (empty($mac)) {
+            throw new MacAddressEmptyException();
+        }
+
+        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+            throw new MacAddressInvalidException();
+        }
+
         $cmd = $enable ? 'set-locate' : 'unset-locate';
 
         $payload = ['cmd' => $cmd, 'mac' => strtolower($mac)];
@@ -2877,10 +3070,18 @@ class Client
      * @param string $mac MAC address of the device to move
      * @param string $site_id _id (24 char string) of the site to move the device to
      * @return bool true on success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function move_device(string $mac, string $site_id): bool
     {
+        if (empty($mac)) {
+            throw new MacAddressEmptyException();
+        }
+
+        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+            throw new MacAddressInvalidException();
+        }
+
         $payload = [
             'cmd'  => 'move-device',
             'site' => $site_id,
@@ -2895,10 +3096,18 @@ class Client
      *
      * @param string $mac MAC address of the device to delete
      * @return bool true on success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function delete_device(string $mac): bool
     {
+        if (empty($mac)) {
+            throw new MacAddressEmptyException();
+        }
+
+        if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+            throw new MacAddressInvalidException();
+        }
+
         $payload = [
             'cmd' => 'delete-device',
             'mac' => strtolower($mac)
@@ -3364,13 +3573,29 @@ class Client
      * @param string $firmware_url URL for the firmware file to upgrade the device to
      * @param string|array $macs MAC address of the device to upgrade or an array of MAC addresses
      * @return bool true upon success
-     * @throws Exception
+     * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
      */
     public function upgrade_device_external(string $firmware_url, $macs): bool
     {
+        $mac_array = (array)$macs;
+
+        if (empty($mac_array)) {
+            throw new MacAddressEmptyException();
+        }
+
+        foreach ($mac_array as $mac) {
+            if (empty($mac)) {
+                throw new MacAddressEmptyException();
+            }
+
+            if (!filter_var($mac, FILTER_VALIDATE_MAC)) {
+                throw new MacAddressInvalidException();
+            }
+        }
+
         $payload = [
             'url'  => filter_var($firmware_url, FILTER_SANITIZE_URL),
-            'macs' => array_map('strtolower', (array)$macs)
+            'macs' => array_map('strtolower', $mac_array)
         ];
 
         return $this->fetch_results_boolean('/api/s/' . $this->site . '/cmd/devmgr/upgrade-external', $payload);
