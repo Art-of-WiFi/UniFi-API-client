@@ -19,7 +19,7 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 | Software                             | Versions                                          |
 |--------------------------------------|---------------------------------------------------|
 | UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x (**9.5.21 is confirmed**) |
-| UniFi OS                             | 3.x, 4.1.x, 4.2.x (**4.3.6 is confirmed**)        |
+| UniFi OS                             | 3.x, 4.x (**4.4.3 is confirmed**)                 |
 
 
 ## Requirements
@@ -40,7 +40,7 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 Besides the classic "software-based" UniFi Network Application, this class also supports UniFi OS-based
 controllers starting from version **1.1.47**.
 
-These devices/services have been verified to work:
+These applications/devices/services have been verified to work:
 - UniFi OS Server, announcement [here](https://blog.ui.com/article/introducing-unifi-os-server)
 - UniFi Dream Router (UDR)
 - UniFi Dream Machine (UDM)
