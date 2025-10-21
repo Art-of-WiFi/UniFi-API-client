@@ -36,7 +36,7 @@ use UniFi_API\Exceptions\NotAUnifiOsConsoleException;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '2.0.6';
+    const CLASS_VERSION        = '2.0.7';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -3837,6 +3837,19 @@ class Client
         $this->curl_method = 'DELETE';
 
         return $this->fetch_results_boolean('/v2/api/site/' . $this->site . '/static-dns/' . $record_id);
+    }
+
+    /**
+     * Get a list of all UniFi device models present in the current site.
+     *
+     * @note This endpoint is available in Network Application/Controller version 9.2.x onwards.
+     * @return object|null An object, or null on failure. The `model_list` property of the results object contains an
+     *                     array of device models.
+     * @throws Exception
+     */
+    public function list_models(): ?object
+    {
+        return $this->fetch_results('/v2/api/site/' . $this->site . '/models');
     }
 
     /**

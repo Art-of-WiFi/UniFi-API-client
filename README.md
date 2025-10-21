@@ -18,7 +18,7 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 | Software                             | Versions                                          |
 |--------------------------------------|---------------------------------------------------|
-| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x (**9.3.45 is confirmed**) |
+| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x (**9.5.21 is confirmed**) |
 | UniFi OS                             | 3.x, 4.1.x, 4.2.x (**4.3.6 is confirmed**)        |
 
 
