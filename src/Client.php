@@ -36,7 +36,7 @@ use UniFi_API\Exceptions\NotAUnifiOsConsoleException;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '2.0.7';
+    const CLASS_VERSION        = '2.0.8';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -237,7 +237,7 @@ class Client
             return $this->is_logged_in = true;
         }
 
-        throw new LoginFailedException('HTTP response: ' . $http_code);
+        throw new LoginFailedException('HTTP response: ' . $http_code, $http_code);
     }
 
     /**
@@ -4741,10 +4741,10 @@ class Client
                     return $this->exec_curl($path, $payload);
                 }
 
-                throw new LoginFailedException('Cookie/Token has expired and re-login failed.');
+                throw new LoginFailedException('Cookie/Token has expired and re-login failed.', $http_code);
             }
 
-            throw new LoginFailedException('Login failed, check the credentials.');
+            throw new LoginFailedException('Login failed, check the credentials.', $http_code);
         }
 
         if ($this->debug) {

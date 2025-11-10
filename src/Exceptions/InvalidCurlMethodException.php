@@ -2,9 +2,12 @@
 
 namespace UniFi_API\Exceptions;
 
-use Exception;
-
-class InvalidCurlMethodException extends Exception
+/**
+ * Thrown when an unsupported or invalid cURL method is requested by the client.
+ *
+ * @package UniFi_Controller_API_Client_Class
+ */
+class InvalidCurlMethodException extends UnifiApiException
 {
     public function __construct()
     {

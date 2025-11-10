@@ -2,9 +2,15 @@
 
 namespace UniFi_API\Exceptions;
 
-use Exception;
-
-class CurlTimeoutException extends Exception
+/**
+ * Thrown when a cURL request times out.
+ *
+ * @property-read mixed $httpResponseCode HTTP response code if available
+ * @property-read mixed $curlGetinfoResults Result of curl_getinfo() when available
+ *
+ * @package UniFi_Controller_API_Client_Class
+ */
+class CurlTimeoutException extends UnifiApiException
 {
     /** @var mixed $_http_response_code */
     private $_http_response_code;
@@ -17,7 +23,7 @@ class CurlTimeoutException extends Exception
         $this->_http_response_code   = $http_response_code;
         $this->_curl_getinfo_results = $curl_getinfo_results;
 
-        parent::__construct($message);
+        parent::__construct($message, $http_response_code);
     }
 
     /**

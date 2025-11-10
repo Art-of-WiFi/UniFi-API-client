@@ -2,9 +2,14 @@
 
 namespace UniFi_API\Exceptions;
 
-use Exception;
-
-class EmailInvalidException extends Exception
+/**
+ * Thrown when an invalid email address is provided to the client.
+ *
+ * This is used for input validation where a properly formatted email is required.
+ *
+ * @package UniFi_Controller_API_Client_Class
+ */
+class EmailInvalidException extends UnifiApiException
 {
     public function __construct()
     {

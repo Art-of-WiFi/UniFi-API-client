@@ -2,9 +2,15 @@
 
 namespace UniFi_API\Exceptions;
 
-use Exception;
-
-class CurlGeneralErrorException extends Exception
+/**
+ * Thrown when a general cURL error occurs while calling the UniFi API.
+ *
+ * @property-read mixed $httpResponseCode HTTP response code if available
+ * @property-read mixed $curlGetinfoResults Results from curl_getinfo() if available
+ *
+ * @package UniFi_Controller_API_Client_Class
+ */
+class CurlGeneralErrorException extends UnifiApiException
 {
     /** @var mixed $_http_response_code */
     private $_http_response_code;
@@ -17,7 +23,7 @@ class CurlGeneralErrorException extends Exception
         $this->_http_response_code   = $http_response_code;
         $this->_curl_getinfo_results = $_curl_getinfo_results;
 
-        parent::__construct($message);
+        parent::__construct($message, $http_response_code);
     }
 
     /**

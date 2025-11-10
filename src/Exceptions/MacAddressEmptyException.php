@@ -2,9 +2,12 @@
 
 namespace UniFi_API\Exceptions;
 
-use Exception;
-
-class MacAddressEmptyException extends Exception
+/**
+ * Thrown when a MAC address was expected, but none was provided (empty/null).
+ *
+ * @package UniFi_Controller_API_Client_Class
+ */
+class MacAddressEmptyException extends UnifiApiException
 {
     public function __construct()
     {

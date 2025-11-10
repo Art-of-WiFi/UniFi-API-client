@@ -16,10 +16,10 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 ## Supported Versions
 
-| Software                             | Versions                                          |
-|--------------------------------------|---------------------------------------------------|
-| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x (**9.5.21 is confirmed**) |
-| UniFi OS                             | 3.x, 4.x (**4.4.3 is confirmed**)                 |
+| Software                             | Versions                                                  |
+|--------------------------------------|-----------------------------------------------------------|
+| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x, 10.x (**10.0.140 is confirmed**) |
+| UniFi OS                             | 3.x, 4.x, 5.x (**5.0.4 is confirmed**)                    |
 
 
 ## Requirements
@@ -159,7 +159,10 @@ $results          = $unifi_connection->list_alarms(); // returns a PHP array con
 The class now throws **Exceptions** for various error conditions instead of using PHP's `trigger_error()` function. This
 allows for more granular error handling in your application code.
 
-Here is an example of how to catch these Exceptions:
+You can also choose to catch the `UniFi_API\Exceptions\UnifiApiException` Exception to catch all Exceptions that
+might be thrown by the API Client class.
+
+Here is an example of how to catch each of the Exceptions individually:
 ```php
 <?php
 /**

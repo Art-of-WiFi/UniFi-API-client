@@ -2,9 +2,13 @@
 
 namespace UniFi_API\Exceptions;
 
-use Exception;
-
-class MacAddressInvalidException extends Exception
+/**
+ * Thrown when a provided MAC address does not match expected formatting or
+ * validation rules.
+ *
+ * @package UniFi_Controller_API_Client_Class
+ */
+class MacAddressInvalidException extends UnifiApiException
 {
     public function __construct()
     {

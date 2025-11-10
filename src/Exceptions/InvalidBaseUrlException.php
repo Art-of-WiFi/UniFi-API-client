@@ -2,9 +2,12 @@
 
 namespace UniFi_API\Exceptions;
 
-use Exception;
-
-class InvalidBaseUrlException extends Exception
+/**
+ * Thrown when the provided base URL for the UniFi controller is invalid.
+ *
+ * @package UniFi_Controller_API_Client_Class
+ */
+class InvalidBaseUrlException extends UnifiApiException
 {
     public function __construct()
     {

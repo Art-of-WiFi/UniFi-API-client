@@ -2,9 +2,15 @@
 
 namespace UniFi_API\Exceptions;
 
-use Exception;
-
-class CurlExtensionNotLoadedException extends Exception
+/**
+ * Thrown when the required PHP cURL extension is not loaded in the runtime.
+ *
+ * Consumers can catch this to provide an installation hint or to disable any
+ * functionality that requires cURL.
+ *
+ * @package UniFi_Controller_API_Client_Class
+ */
+class CurlExtensionNotLoadedException extends UnifiApiException
 {
     public function __construct()
     {
