@@ -268,7 +268,7 @@ Whenever necessary, we will make sure to update the **version_1** branch with th
 There is still work to be done to add functionality and further improve the usability of
 this class, so all suggestions/comments are welcome. Please use the GitHub
 [Issues section](https://github.com/Art-of-WiFi/UniFi-API-client/issues) or the Ubiquiti
-Community forums (https://community.ubnt.com/t5/UniFi-Wireless/PHP-class-to-access-the-UniFi-controller-API-updates-and/td-p/1512870)
+Community forums (https://community.ui.com/questions/PHP-client-class-to-access-the-UniFi-controller-API-updates-and-discussion-part-2/a793904e-6023-4a7f-bcae-340db2a03fc1)
 to share your suggestions and questions.
 
 
