@@ -5,8 +5,8 @@ namespace UniFi_API\Exceptions;
 /**
  * Thrown when the required PHP cURL extension is not loaded in the runtime.
  *
- * Consumers can catch this to provide an installation hint or to disable any
- * functionality that requires cURL.
+ * @note Consumers can catch this to provide an installation hint or to disable any
+ *       functionality that requires cURL.
  *
  * @package UniFi_Controller_API_Client_Class
  */

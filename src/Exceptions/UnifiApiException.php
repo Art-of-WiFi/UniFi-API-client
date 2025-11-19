@@ -8,9 +8,9 @@ use Throwable;
 /**
  * Base exception for the UniFi API client.
  *
- * All custom exceptions in this library extend this class so consumers can
- * catch a single type (\UniFi_API\Exceptions\UnifiApiException) when they
- * want to handle all client errors uniformly.
+ * @note All custom exceptions in this library extend this class so consumers can
+ *       catch a single type (\UniFi_API\Exceptions\UnifiApiException) when they
+ *       want to handle all client errors uniformly.
  *
  * @package UniFi_Controller_API_Client_Class
  */

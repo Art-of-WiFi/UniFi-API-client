@@ -5,8 +5,8 @@ namespace UniFi_API\Exceptions;
 /**
  * Thrown when the client fails to authenticate with the UniFi controller.
  *
- * This can indicate invalid credentials, connectivity problems, or a change
- * in the controller's authentication mechanism (e.g., MFA).
+ * @note This can indicate invalid credentials, connectivity problems, or a change
+ *       in the controller's authentication mechanism (e.g., MFA).
  *
  * @property-read mixed $httpResponseCode HTTP response code if available
  *

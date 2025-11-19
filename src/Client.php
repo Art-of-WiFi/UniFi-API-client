@@ -3917,6 +3917,7 @@ class Client
      ****************************************************************/
 
     /**
+     * @deprecated Use list_devices() instead
      * @throws MethodDeprecatedException
      */
     public function list_aps()
@@ -3925,6 +3926,7 @@ class Client
     }
 
     /**
+     * @deprecated Use locate_ap() instead
      * @throws MethodDeprecatedException
      */
     public function set_locate_ap()
@@ -3933,6 +3935,7 @@ class Client
     }
 
     /**
+     * @deprecated Use locate_ap() instead
      * @throws MethodDeprecatedException
      */
     public function unset_locate_ap(): bool
@@ -3941,6 +3944,7 @@ class Client
     }
 
     /**
+     * @deprecated Use site_leds() instead
      * @throws MethodDeprecatedException
      */
     public function site_ledson(): bool
@@ -3949,6 +3953,7 @@ class Client
     }
 
     /**
+     * @deprecated Use site_leds() instead
      * @throws MethodDeprecatedException
      */
     public function site_ledsoff(): bool
@@ -3957,6 +3962,7 @@ class Client
     }
 
     /**
+     * @deprecated Use restart_device() instead
      * @throws MethodDeprecatedException
      */
     public function restart_ap(): bool

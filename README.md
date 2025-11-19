@@ -18,8 +18,8 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 | Software                             | Versions                                                  |
 |--------------------------------------|-----------------------------------------------------------|
-| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x, 10.x (**10.0.140 is confirmed**) |
-| UniFi OS                             | 3.x, 4.x, 5.x (**5.0.4 is confirmed**)                    |
+| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x, 10.x (**10.0.154 is confirmed**) |
+| UniFi OS                             | 3.x, 4.x, 5.x (**5.0.5 is confirmed**)                    |
 
 
 ## Requirements
@@ -27,11 +27,12 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 - a server with:
   - PHP **7.4.0** or higher (use version [1.1.83](https://github.com/Art-of-WiFi/UniFi-API-client/releases/tag/v1.1.83) 
     for PHP 7.3.x and lower)
-  - PHP json and PHP cURL modules enabled
-- direct network connectivity between this server and the host and port (usually TCP port 8443, port 11443 for UniFi OS
-  Server, or port 443 for UniFi OS consoles) where the UniFi Network Application is running
+  - PHP cURL (`php-curl`) module enabled
+  - direct network connectivity between this server and the host and port (usually TCP port 8443, port 11443 for UniFi OS
+    Server, or port 443 for UniFi OS consoles) where the UniFi Network Application is running
 - you **must** use an admin **account with local access permissions** to access the API through this class as explained
-  here: https://artofwifi.net/blog/use-local-admin-account-unifi-api-captive-portal
+  here:  
+  https://artofwifi.net/blog/use-local-admin-account-unifi-api-captive-portal
 - do **not** use UniFi Cloud accounts and do not enable MFA/2FA for the accounts that you use with this class
 
 
@@ -58,19 +59,18 @@ These applications/devices/services have been verified to work:
 The class automatically detects UniFi OS consoles/servers and adjusts the URLs and several functions/methods
 accordingly.
 
-UniFi OS-based consoles require you to connect using port **443** instead of **8443** which is used for
-the classic "software-based" controllers. When using **UniFi OS Server**, you are required to use port **11443**.
-
-If your own code implements strict validation of the URL that is passed to the constructor, please adapt your logic to
-allow URLs without a port suffix, with port 443 or port 11443 when working with a UniFi OS-based controller.
+UniFi OS-based consoles require you to connect using port **443** while **8443** which is used for
+the self-hosted/software-based controllers. When connecting to **UniFi OS Server**, you are required to use port
+**11443**.
 
 
 ### Remote API access to UniFi OS-based controllers
 When connecting to a UniFi OS-based gateway through the WAN interface, you need to create a specific firewall rule to
-allow this. See this blog post on the Art of WiFi website for more details:
+allow this. See this blog post on the Art of WiFi website for more details when using the **"Classic"** firewall:  
 https://artofwifi.net/blog/how-to-access-the-unifi-controller-by-wan-ip-or-hostname-on-a-udm-pro
 
-The "custom firewall rule" approach described there is the recommended method.
+See this blog post when using the **Zone-Based firewall** (ZBF):  
+https://artofwifi.net/blog/how-to-access-the-unifi-controller-by-wan-ip-or-hostname-on-a-udm-pro-using-zbf
 
 
 ## Upgrading from previous versions
@@ -132,6 +132,9 @@ $unifi_connection = new UniFi_API\Client($controller_user, $controller_password,
 $login            = $unifi_connection->login();
 $results          = $unifi_connection->list_alarms(); // returns a PHP array containing alarm objects
 ```
+
+More examples are available in the `examples/` directory.
+
 
 #### IMPORTANT NOTES:
 
@@ -218,7 +221,7 @@ try {
 ```
 
 Although the PHP DocBlocks for most public methods/functions contain `@throws Exception`, it is recommended to catch
-other specific Exceptions that can be thrown by the API Client class to provide more detailed error messages to your
+specific Exceptions that can be thrown by the API Client class to provide more detailed error messages to your
 application code.
 
 In most cases, the class will let Exceptions bubble up to the calling code, but in some cases it will catch them and
