@@ -14,6 +14,19 @@ The package can be installed manually or by using
 composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for
 easy inclusion in your projects. See the [installation instructions](#Installation) below for more details.
 
+
+## Why use this API client?
+
+- Easy to use: clear docs, comprehensive method coverage, and helpful examples.
+- Broad coverage: exposes many UniFi endpoints not available in the official APIs.
+- Composer-friendly: installable via [Composer](https://getcomposer.org) and works with modern PHP projects.
+- Lightweight and dependency-free: no external libraries required; uses cURL.
+- Secure: communicates over TLS and supports optional SSL certificate validation.
+- Flexible and extensible: includes `custom_api_request()` for calling any API endpoint.
+- Robust error handling: throws named Exceptions for precise try/catch handling.
+- Actively maintained: regular updates and compatibility with recent UniFi versions.
+
+
 ## Supported Versions
 
 | Software                             | Versions                                                  |
@@ -64,9 +77,10 @@ the self-hosted/software-based controllers. When connecting to **UniFi OS Server
 **11443**.
 
 
-### Remote API access to UniFi OS-based controllers
+### Remote API access to UniFi OS-based gateways
 When connecting to a UniFi OS-based gateway through the WAN interface, you need to create a specific firewall rule to
-allow this. See this blog post on the Art of WiFi website for more details when using the **"Classic"** firewall:  
+allow this. See this blog post on the Art of WiFi website for detailed instructions when using the **"Classic"**
+firewall:  
 https://artofwifi.net/blog/how-to-access-the-unifi-controller-by-wan-ip-or-hostname-on-a-udm-pro
 
 See this blog post when using the **Zone-Based firewall** (ZBF):  
