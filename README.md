@@ -51,10 +51,8 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 ## UniFi OS Support
 
-Besides the classic "software-based" UniFi Network Application, this class also supports UniFi OS-based
-controllers starting from version **1.1.47**.
-
-These applications/devices/services have been verified to work:
+Starting from version **1.1.47**, this API client also supports UniFi OS-based controllers. These
+applications/devices/services have been verified to work:
 - UniFi OS Server, announcement [here](https://blog.ui.com/article/introducing-unifi-os-server)
 - UniFi Dream Router (UDR)
 - UniFi Dream Machine (UDM)
@@ -69,8 +67,7 @@ These applications/devices/services have been verified to work:
 - Official UniFi Hosting, details [here](https://help.ui.com/hc/en-us/articles/4415364143511)
 - HostiFi UniFi Cloud Hosting, details [here](https://hostifi.com/unifi)
 
-The class automatically detects UniFi OS consoles/servers and adjusts the URLs and several functions/methods
-accordingly.
+The class automatically detects UniFi OS consoles/servers and adjusts URLs and several functions/methods accordingly.
 
 UniFi OS-based consoles require you to connect using port **443** while **8443** which is used for
 the self-hosted/software-based controllers. When connecting to **UniFi OS Server**, you are required to use port
