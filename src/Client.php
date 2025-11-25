@@ -233,7 +233,9 @@ class Client
 
         /** If the HTTP response code is 200, we are logged in. */
         if ($http_code === 200) {
-            curl_close($ch);
+            if(PHP_VERSION_ID < 80500){
+                curl_close($ch);
+            }
             return $this->is_logged_in = true;
         }
 
@@ -283,7 +285,9 @@ class Client
             throw new CurlGeneralErrorException(curl_error($ch), curl_getinfo($ch, CURLINFO_RESPONSE_CODE), curl_getinfo($ch));
         }
 
-        curl_close($ch);
+        if(PHP_VERSION_ID < 80500){
+            curl_close($ch);
+        }
 
         $this->is_logged_in       = false;
         $this->cookies            = '';
@@ -4736,7 +4740,9 @@ class Client
                 $this->cookies_created_at = 0;
                 $this->exec_retries++;
 
-                curl_close($ch);
+                if(PHP_VERSION_ID < 80500){
+                    curl_close($ch);
+                }
 
                 /** Re-login, and if successful, execute the same cURL request again. */
                 if ($this->login()) {
@@ -4771,7 +4777,9 @@ class Client
             print '</pre>' . PHP_EOL;
         }
 
-        curl_close($ch);
+        if(PHP_VERSION_ID < 80500){
+            curl_close($ch);
+        }
 
         /** Set the method back to the default value, just in case. */
         $this->curl_method = self::DEFAULT_CURL_METHOD;
