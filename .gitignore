@@ -14,3 +14,6 @@
 
 # ignore PHPStorm files
 .idea/*
+
+# ignore the TODO list
+TODO.md

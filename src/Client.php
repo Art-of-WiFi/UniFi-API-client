@@ -36,7 +36,7 @@ use UniFi_API\Exceptions\NotAUnifiOsConsoleException;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '2.0.8';
+    const CLASS_VERSION        = '2.0.9';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -236,6 +236,7 @@ class Client
             if(PHP_VERSION_ID < 80500){
                 curl_close($ch);
             }
+
             return $this->is_logged_in = true;
         }
 
