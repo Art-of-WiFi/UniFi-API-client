@@ -37,12 +37,12 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 ## Requirements
 
-- a server with:
+- a server or desktop with:
   - PHP **7.4.0** or higher (use version [1.1.83](https://github.com/Art-of-WiFi/UniFi-API-client/releases/tag/v1.1.83) 
     for PHP 7.3.x and lower)
   - PHP cURL (`php-curl`) module enabled
-  - direct network connectivity between this server and the host and port (usually TCP port 8443, port 11443 for UniFi OS
-    Server, or port 443 for UniFi OS consoles) where the UniFi Network Application is running
+  - direct network connectivity between this server/desktop and the host and port where the UniFi Network Application is
+    running (usually TCP port 8443, port 11443 for UniFi OS Server, or port 443 for UniFi OS consoles)
 - you **must** use an admin **account with local access permissions** to access the API through this class as explained
   here:  
   https://artofwifi.net/blog/use-local-admin-account-unifi-api-captive-portal
@@ -127,7 +127,7 @@ require_once 'vendor/autoload.php';
 
 ## Example usage
 
-A basic example of how to use the class:
+A quick and basic example of how to use the class:
 
 ```php
 /**
@@ -143,8 +143,6 @@ $unifi_connection = new UniFi_API\Client($controller_user, $controller_password,
 $login            = $unifi_connection->login();
 $results          = $unifi_connection->list_alarms(); // returns a PHP array containing alarm objects
 ```
-
-More examples are available in the `examples/` directory.
 
 
 #### IMPORTANT NOTES:
@@ -167,6 +165,9 @@ More examples are available in the `examples/` directory.
    [issue](https://github.com/Art-of-WiFi/UniFi-API-browser/issues/94) for an example where the WPA2 password isn't
    visible for **read-only** administrator accounts.
 
+### Code Examples:
+
+More code examples are available in the [`examples/`](examples/) directory.
 
 ## Exception handling
 
@@ -251,16 +252,30 @@ their purpose, and their respective parameters.
 If you are using an advanced IDE such as PHPStorm or VS Code, you can use its code completion and other
 features to explore the available functions/methods thanks to the extensive PHP DocBlocks throughout the code.
 
-For a quick overview of the available functions/methods, you can also check the API Reference here:
-
+For a quick overview of the available functions/methods, you can also check the API Reference here:  
 [API Reference](API_REFERENCE.md)
+
+
+## Need help or have suggestions?
+
+There is still work to be done to add functionality and further improve the usability of
+this class, so all suggestions/comments are welcome. Please use the GitHub
+[Issues section](https://github.com/Art-of-WiFi/UniFi-API-client/issues) or the Ubiquiti
+Community forums (https://community.ui.com/questions/PHP-client-class-to-access-the-UniFi-controller-API-updates-and-discussion-part-2/a793904e-6023-4a7f-bcae-340db2a03fc1)
+to share your suggestions and questions.
+
+
+#### IMPORTANT NOTE:
+When encountering issues with the UniFi API using other libraries, cURL or Postman, please do **not** open an Issue.
+Such issues will be closed immediately. Please use the [Discussions](https://github.com/Art-of-WiFi/UniFi-API-client/discussions) section instead.
 
 
 ## Looking for version 1.x.x?
 
 With versions 1.x.x of the API client, the entire client was contained within a single file which can be useful in
 specific cases.
-This has changed with version 2.0.0 where the code is now split across multiple files and is managed using composer.
+This has changed with version 2.0.0 where the code is now split across multiple files and inclusion in your project is
+managed using composer.
 
 If you are looking for the version 1.x.x code, you can tell composer to install that version by using the following
 syntax in your `composer.json` file:
@@ -276,19 +291,6 @@ syntax in your `composer.json` file:
 Alternatively, you can download the latest 1.x.x code from the [releases page](https://github.com/Art-of-WiFi/UniFi-API-client/releases).
 
 Whenever necessary, we will make sure to update the **version_1** branch with the latest 1.x.x code.
-
-## Need help or have suggestions?
-
-There is still work to be done to add functionality and further improve the usability of
-this class, so all suggestions/comments are welcome. Please use the GitHub
-[Issues section](https://github.com/Art-of-WiFi/UniFi-API-client/issues) or the Ubiquiti
-Community forums (https://community.ui.com/questions/PHP-client-class-to-access-the-UniFi-controller-API-updates-and-discussion-part-2/a793904e-6023-4a7f-bcae-340db2a03fc1)
-to share your suggestions and questions.
-
-
-#### IMPORTANT NOTE:
-When encountering issues with the UniFi API using other libraries, cURL or Postman, please do **not** open an Issue. Such issues will be closed immediately.
-Please use the [Discussions](https://github.com/Art-of-WiFi/UniFi-API-client/discussions) section instead.
 
 
 ## Credits
