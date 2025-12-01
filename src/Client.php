@@ -3848,7 +3848,7 @@ class Client
      * Get a list of all UniFi device models present in the current site.
      *
      * @note This endpoint is available in Network Application/Controller version 9.2.x onwards.
-     * @return object|null An object, or null on failure. The `model_list` property of the results object contains an
+     * @return object|null An object, or null on failure. The `model_list` property of the `results` object contains an
      *                     array of device models.
      * @throws Exception
      */
