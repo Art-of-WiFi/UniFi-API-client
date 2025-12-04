@@ -107,8 +107,7 @@ class Client
         ?string $version = '8.0.28',
         bool    $ssl_verify = false,
         string  $unificookie_name = 'unificookie'
-    )
-    {
+    ) {
         if (!extension_loaded('curl')) {
             throw new CurlExtensionNotLoadedException();
         }
@@ -233,7 +232,7 @@ class Client
 
         /** If the HTTP response code is 200, we are logged in. */
         if ($http_code === 200) {
-            if(PHP_VERSION_ID < 80500){
+            if (PHP_VERSION_ID < 80500) {
                 curl_close($ch);
             }
 
@@ -286,7 +285,7 @@ class Client
             throw new CurlGeneralErrorException(curl_error($ch), curl_getinfo($ch, CURLINFO_RESPONSE_CODE), curl_getinfo($ch));
         }
 
-        if(PHP_VERSION_ID < 80500){
+        if (PHP_VERSION_ID < 80500) {
             curl_close($ch);
         }
 
@@ -448,8 +447,7 @@ class Client
         ?string $note = null,
         ?bool   $is_guest = null,
         ?bool   $is_wired = null
-    )
-    {
+    ) {
         $this->validateMacAddresses($mac);
 
         $new_user = ['mac' => strtolower($mac), 'usergroup_id' => $user_group_id];
@@ -1811,8 +1809,10 @@ class Client
     {
         $this->curl_method = 'PUT';
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/country/' . trim($country_id),
-            $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/rest/setting/country/' . trim($country_id),
+            $payload
+        );
     }
 
     /**
@@ -1832,8 +1832,10 @@ class Client
     {
         $this->curl_method = 'PUT';
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/locale/' . trim($locale_id),
-            $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/rest/setting/locale/' . trim($locale_id),
+            $payload
+        );
     }
 
     /**
@@ -1884,8 +1886,10 @@ class Client
     {
         $this->curl_method = 'PUT';
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/guest_access/' . trim($guest_access_id),
-            $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/rest/setting/guest_access/' . trim($guest_access_id),
+            $payload
+        );
     }
 
     /**
@@ -1919,8 +1923,10 @@ class Client
     {
         $this->curl_method = 'PUT';
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/connectivity/' . trim($connectivity_id),
-            $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/rest/setting/connectivity/' . trim($connectivity_id),
+            $payload
+        );
     }
 
     /**
@@ -1975,8 +1981,7 @@ class Client
         bool   $readonly = false,
         bool   $device_adopt = false,
         bool   $device_restart = false
-    ): bool
-    {
+    ): bool {
         $email = trim($email);
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -2029,8 +2034,7 @@ class Client
         bool   $readonly = false,
         bool   $device_adopt = false,
         bool   $device_restart = false
-    ): bool
-    {
+    ): bool {
         $payload = [
             'cmd'         => 'grant-admin',
             'admin'       => trim($admin_id),
@@ -2081,9 +2085,8 @@ class Client
         bool   $readonly = false,
         bool   $device_adopt = false,
         bool   $device_restart = false,
-        bool   $is_super = null
-    ): bool
-    {
+        ?bool   $is_super = null
+    ): bool {
         $email = trim($email);
 
         if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
@@ -2112,7 +2115,7 @@ class Client
             $payload['permissions'][] = 'API_DEVICE_RESTART';
         }
 
-        if ($is_super) {
+        if (!is_null($is_super)) {
             $payload['is_super'] = $is_super;
         }
 
@@ -2321,8 +2324,7 @@ class Client
         ?int   $up = null,
         ?int   $down = null,
         ?int   $megabytes = null
-    )
-    {
+    ) {
         $payload = [
             'cmd'    => 'create-voucher',
             'expire' => $minutes,
@@ -2534,8 +2536,7 @@ class Client
         string $url,
         int    $port = 22,
         bool   $ssh_key_verify = true
-    ): bool
-    {
+    ): bool {
         $this->validateMacAddresses($mac);
 
         $payload = [
@@ -2829,8 +2830,7 @@ class Client
         int    $expire_number,
         int    $expire_unit,
         string $section_id
-    ): bool
-    {
+    ): bool {
         $payload = [
             'portal_enabled'    => $portal_enabled,
             'portal_customized' => $portal_customized,
@@ -2842,8 +2842,10 @@ class Client
             '_id'               => $section_id,
         ];
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/guest_access/' . $section_id,
-            $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/set/setting/guest_access/' . $section_id,
+            $payload
+        );
     }
 
     /**
@@ -3021,8 +3023,10 @@ class Client
     {
         $this->curl_method = 'PUT';
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/dynamicdns/' . trim($dynamicdns_id),
-            $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/rest/dynamicdns/' . trim($dynamicdns_id),
+            $payload
+        );
     }
 
     /**
@@ -3066,8 +3070,10 @@ class Client
     {
         $this->curl_method = 'PUT';
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id),
-            $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/rest/networkconf/' . trim($network_id),
+            $payload
+        );
     }
 
     /**
@@ -3141,8 +3147,7 @@ class Client
         array   $schedule = [],
         ?array  $ap_group_ids = null,
         array   $payload = []
-    ): bool
-    {
+    ): bool {
         $payload = array_merge($payload, [
             'name'             => trim($name),
             'usergroup_id'     => trim($usergroup_id),
@@ -3631,8 +3636,7 @@ class Client
         ?int    $tunnel_type = null,
         ?int    $tunnel_medium_type = null,
         ?string $vlan = null
-    )
-    {
+    ) {
         $tunnel_type_values        = [null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
         $tunnel_medium_type_values = [null, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15];
 
@@ -3827,7 +3831,7 @@ class Client
             $payload['ttl'] = $ttl;
         }
 
-        return $this->fetch_results( '/v2/api/site/' . $this->site . '/static-dns', $payload);
+        return $this->fetch_results('/v2/api/site/' . $this->site . '/static-dns', $payload);
     }
 
     /**
@@ -4325,12 +4329,11 @@ class Client
      */
     protected function fetch_results(
         string $path,
-               $payload = null,
+        $payload = null,
         bool   $boolean = false,
         bool   $login_required = true,
         bool   $prefix_path = true
-    )
-    {
+    ) {
         /** Guard clause to check if logged in when needed. */
         if ($login_required && !$this->is_logged_in) {
             throw new LoginRequiredException();
@@ -4418,11 +4421,10 @@ class Client
      */
     protected function fetch_results_boolean(
         string $path,
-               $payload = null,
+        $payload = null,
         bool   $login_required = true,
         bool   $prefix_path = true
-    ): bool
-    {
+    ): bool {
         return $this->fetch_results($path, $payload, true, $login_required, $prefix_path);
     }
 
@@ -4741,7 +4743,7 @@ class Client
                 $this->cookies_created_at = 0;
                 $this->exec_retries++;
 
-                if(PHP_VERSION_ID < 80500){
+                if (PHP_VERSION_ID < 80500) {
                     curl_close($ch);
                 }
 
@@ -4778,7 +4780,7 @@ class Client
             print '</pre>' . PHP_EOL;
         }
 
-        if(PHP_VERSION_ID < 80500){
+        if (PHP_VERSION_ID < 80500) {
             curl_close($ch);
         }
 
