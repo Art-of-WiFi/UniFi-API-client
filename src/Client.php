@@ -233,7 +233,7 @@ class Client
 
         /** If the HTTP response code is 200, we are logged in. */
         if ($http_code === 200) {
-            if(PHP_VERSION_ID < 80500){
+            if(PHP_VERSION_ID < 80500) {
                 curl_close($ch);
             }
 
@@ -286,7 +286,7 @@ class Client
             throw new CurlGeneralErrorException(curl_error($ch), curl_getinfo($ch, CURLINFO_RESPONSE_CODE), curl_getinfo($ch));
         }
 
-        if(PHP_VERSION_ID < 80500){
+        if(PHP_VERSION_ID < 80500) {
             curl_close($ch);
         }
 
@@ -1811,8 +1811,10 @@ class Client
     {
         $this->curl_method = 'PUT';
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/country/' . trim($country_id),
-            $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/rest/setting/country/' . trim($country_id),
+            $payload
+        );
     }
 
     /**
@@ -1832,8 +1834,10 @@ class Client
     {
         $this->curl_method = 'PUT';
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/locale/' . trim($locale_id),
-            $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/rest/setting/locale/' . trim($locale_id),
+            $payload
+        );
     }
 
     /**
@@ -1850,7 +1854,10 @@ class Client
     {
         $this->curl_method = 'PUT';
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/snmp/' . trim($snmp_id), $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/rest/setting/snmp/' . trim($snmp_id),
+            $payload
+        );
     }
 
     /**
@@ -1867,7 +1874,10 @@ class Client
     {
         $this->curl_method = 'PUT';
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/mgmt/' . trim($mgmt_id), $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/rest/setting/mgmt/' . trim($mgmt_id),
+            $payload
+        );
     }
 
     /**
@@ -1884,8 +1894,10 @@ class Client
     {
         $this->curl_method = 'PUT';
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/guest_access/' . trim($guest_access_id),
-            $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/rest/setting/guest_access/' . trim($guest_access_id),
+            $payload
+        );
     }
 
     /**
@@ -1902,7 +1914,10 @@ class Client
     {
         $this->curl_method = 'PUT';
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/ntp/' . trim($ntp_id), $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/rest/setting/ntp/' . trim($ntp_id),
+            $payload
+        );
     }
 
     /**
@@ -1919,8 +1934,10 @@ class Client
     {
         $this->curl_method = 'PUT';
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/setting/connectivity/' . trim($connectivity_id),
-            $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/rest/setting/connectivity/' . trim($connectivity_id),
+            $payload
+        );
     }
 
     /**
@@ -2081,7 +2098,7 @@ class Client
         bool   $readonly = false,
         bool   $device_adopt = false,
         bool   $device_restart = false,
-        bool   $is_super = null
+        ?bool  $is_super = null
     ): bool
     {
         $email = trim($email);
@@ -2112,7 +2129,7 @@ class Client
             $payload['permissions'][] = 'API_DEVICE_RESTART';
         }
 
-        if ($is_super) {
+        if (!is_null($is_super)) {
             $payload['is_super'] = $is_super;
         }
 
@@ -2716,7 +2733,10 @@ class Client
 
         $payload = ['led_override' => $override_mode];
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/rest/device/' . trim($device_id), $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/rest/device/' . trim($device_id),
+            $payload
+        );
     }
 
     /**
@@ -2862,7 +2882,10 @@ class Client
             $section_id = '/' . $section_id;
         }
 
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/guest_access' . $section_id, $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/set/setting/guest_access' . $section_id,
+            $payload
+        );
     }
 
     /**
@@ -2892,7 +2915,10 @@ class Client
      */
     public function set_super_mgmt_settings_base(string $settings_id, $payload): bool
     {
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/super_mgmt/' . trim($settings_id), $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/set/setting/super_mgmt/' . trim($settings_id),
+            $payload
+        );
     }
 
     /**
@@ -2908,7 +2934,10 @@ class Client
      */
     public function set_super_smtp_settings_base(string $settings_id, $payload): bool
     {
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/super_smtp/' . trim($settings_id), $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/set/setting/super_smtp/' . trim($settings_id),
+            $payload
+        );
     }
 
     /**
@@ -2924,7 +2953,10 @@ class Client
      */
     public function set_super_identity_settings_base(string $settings_id, $payload): bool
     {
-        return $this->fetch_results_boolean('/api/s/' . $this->site . '/set/setting/super_identity/' . trim($settings_id), $payload);
+        return $this->fetch_results_boolean(
+            '/api/s/' . $this->site . '/set/setting/super_identity/' . trim($settings_id),
+            $payload
+        );
     }
 
     /**
@@ -4741,7 +4773,7 @@ class Client
                 $this->cookies_created_at = 0;
                 $this->exec_retries++;
 
-                if(PHP_VERSION_ID < 80500){
+                if(PHP_VERSION_ID < 80500) {
                     curl_close($ch);
                 }
 
@@ -4778,7 +4810,7 @@ class Client
             print '</pre>' . PHP_EOL;
         }
 
-        if(PHP_VERSION_ID < 80500){
+        if(PHP_VERSION_ID < 80500) {
             curl_close($ch);
         }
 
