@@ -407,8 +407,7 @@ class Client
     /**
      * Forget one or more client devices.
      *
-     * @note only supported with controller versions 5.9.X and higher, can be
-     *       slow (up to 5 minutes) on larger controllers
+     * @note can be slow (up to 5 minutes) on larger controllers
      * @param array|string $mac array of client MAC addresses (strings) or a single MAC address string
      * @return bool true upon success
      * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
@@ -510,7 +509,6 @@ class Client
      * Fetch 5-minute site stats.
      *
      * @note - defaults to the past 12 hours
-     *       - this function/method is only supported on controller versions 5.5.* and later
      *       - make sure that the retention policy for 5 minutes stats is set to the correct value in
      *         the controller settings
      * @param int|null $start optional, Unix timestamp in milliseconds
@@ -536,11 +534,8 @@ class Client
     /**
      * Fetch hourly site stats.
      *
-     * TODO: add support for optional attrib parameter
-     *       airtime_avg
-     *
+     * @todo add support for optional attrib parameter: airtime_avg
      * @note - defaults to the past 7*24 hours
-     *       - "bytes" are no longer returned with controller version 4.9.1 and later
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs optional, array of attributes to collect.
@@ -562,7 +557,6 @@ class Client
      * Fetch daily site stats.
      *
      * @note - defaults to the past 52*7*24 hours
-     *       - "bytes" are no longer returned with controller version 4.9.1 and later
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs optional, array of attributes to collect.
@@ -584,7 +578,6 @@ class Client
      * Fetch monthly site stats.
      *
      * @note - defaults to the past 52 weeks (52*7*24 hours)
-     *       - "bytes" are no longer returned with controller version 4.9.1 and later
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs optional, array of attributes to collect.
@@ -606,37 +599,18 @@ class Client
      * Fetch 5-minutes stats for a single access point or all access points.
      *
      * @note - defaults to the past 12 hours
-     *       - this function/method is only supported on controller versions 5.5.* and later
      *       - make sure that the retention policy for 5 minutes stats is set to the correct value in
      *         the controller settings
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|null $mac optional, AP MAC address to return stats for, when empty,
      *                      stats for all APs are returned
-     * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time). Example values:
-     *                       'bytes',
-     *                       'num_sta',
-     *                       'time',
-     *                       'wifi_tx_attempts',
-     *                       'tx_retries',
-     *                       'wifi_tx_dropped',
-     *                       'mac_filter_rejections',
-     *                       'user-wlan-num_sta_connected',
-     *                       'user-wlan-num_sta_disconnected',
-     *                       'na-wifi_tx_attempts',
-     *                       'ng-wifi_tx_attempts',
-     *                       'na-wifi_tx_dropped',
-     *                       'ng-wifi_tx_dropped',
-     *                       'na-tx_retries',
-     *                       'ng-tx_retries',
-     *                       'na-tx_packets',
-     *                       'ng-tx_packets',
-     *                       'na-tx_bytes',
-     *                       'ng-tx_bytes',
-     *                       'na-rx_packets',
-     *                       'ng-rx_packets',
-     *                       'na-rx_bytes',
-     *                       'ng-rx_bytes',
+     * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time). Valid values:
+     *                            bytes, num_sta, time, wifi_tx_attempts, tx_retries, wifi_tx_dropped,
+     *                            mac_filter_rejections, user-wlan-num_sta_connected, user-wlan-num_sta_disconnected,
+     *                            na-wifi_tx_attempts, ng-wifi_tx_attempts, na-wifi_tx_dropped, ng-wifi_tx_dropped,
+     *                            na-tx_retries, ng-tx_retries, na-tx_packets, ng-tx_packets, na-tx_bytes,
+     *                            ng-tx_bytes, na-rx_packets, ng-rx_packets, na-rx_bytes, ng-rx_bytes
      * @return array|bool returns an array of 5-minute stats objects
      * @throws Exception
      */
@@ -663,7 +637,7 @@ class Client
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|null $mac optional, AP MAC address to return stats for, when empty,
-     *                       stats for all APs are returned
+     *                         stats for all APs are returned
      * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time).
      * @return array|bool returns an array of hourly stats objects
      * @throws Exception
@@ -745,7 +719,6 @@ class Client
      * Fetch 5-minutes stats for a single user/client device or all user/client devices.
      *
      * @note - defaults to the past 12 hours
-     *       - only supported with UniFi controller versions 5.8.X and higher
      *       - make sure that the retention policy for 5-minute stats is set to the correct value in
      *         the controller settings
      *       - make sure that the "Clients Historical Data" option has been enabled in the UniFi controller settings in
@@ -774,7 +747,6 @@ class Client
      * Fetch hourly stats for a single user/client device or all user/client devices.
      *
      * @note - defaults to the past 7*24 hours
-     *       - only supported with UniFi controller versions 5.8.X and higher
      *       - make sure that the retention policy for hourly stats is set to the correct value in
      *         the controller settings
      *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
@@ -805,7 +777,6 @@ class Client
      * Fetch daily stats for a single user/client device or all user/client devices.
      *
      * @note - defaults to the past 7*24 hours
-     *       - only supported with UniFi controller versions 5.8.X and higher
      *       - make sure that the retention policy for daily stats is set to the correct value in
      *         the controller settings
      *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
@@ -836,7 +807,6 @@ class Client
      * Fetch monthly stats for a single user/client device or all user/client devices.
      *
      * @note - defaults to the past 13 weeks (52*7*24 hours)
-     *       - only supported with UniFi controller versions 5.8.X and higher
      *       - make sure that the retention policy for monthly stats is set to the correct value in
      *         the controller settings
      *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
@@ -867,7 +837,6 @@ class Client
      * Fetch 5-minute gateway stats.
      *
      * @note - defaults to the past 12 hours
-     *       - this function/method is only supported on controller versions 5.5.* and later
      *       - make sure that the retention policy for 5 minutes stats is set to the correct value in
      *         the controller settings
      *       - requires a UniFi gateway
@@ -980,7 +949,6 @@ class Client
      *
      * @note - defaults to the past 24 hours
      *       - requires a UniFi gateway
-     *       - supported in UniFi controller versions 5.9.X and higher
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param int|null $limit optional, maximum number of events to return, defaults to 10000
@@ -1085,8 +1053,7 @@ class Client
      * Fetch guest devices
      *
      * @note defaults to the past 7*24 hours
-     * @param int $within optional, time frame in hours to go back to list guests with valid access (default = 24*365
-     *                    hours)
+     * @param int $within optional, time frame in hours to go back to list guests with valid access (default = 24*365 hours)
      * @return array|bool returns an array of guest device objects with valid access
      * @throws Exception
      */
@@ -1100,8 +1067,7 @@ class Client
     /**
      * Fetch online client device(s)
      *
-     * @param string|null $mac optional, the MAC address of a single online client device for which the call must be
-     *                         made
+     * @param string|null $mac optional, the MAC address of a single online client device for which the call must be made
      * @return array|bool returns an array of online client device objects, or in case of a single device request, returns a
      *                    single client device object, false upon error
      * @throws Exception|MacAddressEmptyException|MacAddressInvalidException
@@ -1511,8 +1477,8 @@ class Client
      * Fetch dashboard metrics.
      *
      * @param boolean $five_minutes when true, return stats based on 5 minute intervals,
-     *                              returns hourly stats by default (supported on controller versions 5.5.* and higher)
-     * @return array|bool containing dashboard metric objects (available since controller version 4.9.1.alpha)
+     *                              returns hourly stats by default
+     * @return array|bool containing dashboard metric objects
      * @throws Exception
      */
     public function list_dashboard(bool $five_minutes = false)
@@ -1571,7 +1537,6 @@ class Client
     /**
      * Fetch (device) tags (using REST).
      *
-     * @note this endpoint was introduced with controller versions 5.5.X
      * @return array|bool containing known device tag objects
      * @throws Exception
      */
@@ -1583,7 +1548,6 @@ class Client
     /**
      * Create a (device) tag (using REST).
      *
-     * @note this endpoint was introduced with controller versions 5.5.X
      * @param string $name required, the tag name to add
      * @param array|null $macs optional, an array of the MAC address(es) for the device(s) to tag with the new tag
      * @return bool return true on success
@@ -1603,7 +1567,6 @@ class Client
     /**
      * Set tagged devices (using REST).
      *
-     * @note this endpoint was introduced with controller versions 5.5.X
      * @param array $macs required, an array of the MAC address(es) for the device(s) to tag
      * @param string $tag_id required, the _id value of the tag to set
      * @return bool return true on success
@@ -1621,7 +1584,6 @@ class Client
     /**
      * Get a (device) tag (using REST).
      *
-     * @note this endpoint was introduced with controller versions 5.5.X
      * @param string $tag_id required, the _id value of the tag to retrieve
      * @return array|bool containing matching tag objects
      * @throws Exception
@@ -1636,7 +1598,6 @@ class Client
     /**
      * Delete a (device) tag (using REST).
      *
-     * @note this endpoint was introduced with controller versions 5.5.X
      * @param string $tag_id required, the _id value of the tag to set
      * @return bool return true on success
      * @throws Exception
@@ -1743,7 +1704,6 @@ class Client
     /**
      * Fetch sites stats.
      *
-     * @note this endpoint was introduced with controller version 5.2.9
      * @return array|bool statistics for all sites hosted on this controller
      * @throws Exception
      */
@@ -1977,11 +1937,9 @@ class Client
      *                       permissions, default value is false which gives the new admin
      *                       Administrator permissions
      * @param bool $device_adopt optional, whether the new admin has permissions to
-     *                           adopt devices, default value is false. With versions < 5.9.X this only applies
-     *                           when readonly is true.
+     *                           adopt devices, default value is false.
      * @param bool $device_restart optional, whether the new admin has permissions to
-     *                             restart devices, default value is false. With versions < 5.9.X this only applies
-     *                             when readonly is true.
+     *                             restart devices, default value is false.
      * @return bool true on success
      * @throws EmailInvalidException|Exception
      */
@@ -2028,16 +1986,13 @@ class Client
      * Assign an existing admin to the current site.
      *
      * @param string $admin_id _id value of the admin user to assign, can be obtained using the
-     *                               list_all_admins() method/function
+     *                         list_all_admins() method/function
      * @param bool $readonly optional, whether the new admin has readonly
-     *                               permissions, default value is false which gives the new admin
-     *                               Administrator permissions
+     *                       permissions, default value is false which gives the new admin Administrator permissions
      * @param bool $device_adopt optional, whether the new admin has permissions to
-     *                               adopt devices, default value is false. With versions < 5.9.X this only applies
-     *                               when readonly is true.
+     *                           adopt devices, default value is false.
      * @param bool $device_restart optional, whether the new admin has permissions to
-     *                               restart devices, default value is false. With versions < 5.9.X this only applies
-     *                               when readonly is true.
+     *                             restart devices, default value is false.
      * @return bool true on success
      * @throws Exception
      */
@@ -2082,11 +2037,9 @@ class Client
      *                       permissions, default value is false which gives the new admin
      *                       Administrator permissions
      * @param bool $device_adopt optional, whether the new admin has permissions to
-     *                           adopt devices, default value is false. With versions < 5.9.X this only applies
-     *                           when readonly is true.
+     *                           adopt devices, default value is false.
      * @param bool $device_restart optional, whether the new admin has permissions to
-     *                             restart devices, default value is false. With versions < 5.9.X this only applies
-     *                             when readonly is true.
+     *                             restart devices, default value is false.
      * @return bool true on success
      * @throws EmailInvalidException|Exception
      */
@@ -2321,7 +2274,7 @@ class Client
      * @param int $minutes minutes the voucher is valid after activation (expiration time)
      * @param int $count number of vouchers to create, default value is 1
      * @param int $quota single-use or multi-use vouchers, value '0' is for multi-use, '1' is for single-use,
-     *                          'n' is for multi-use n times
+     *                   'n' is for multi-use n times
      * @param string $note note text to add to voucher when printing
      * @param int|null $up upload speed limit in kbps
      * @param int|null $down download speed limit in kbps
@@ -2696,8 +2649,6 @@ class Client
      *
      * @note - a disabled device is excluded from the dashboard status and device count and its LED and WLAN are turned off
      *       - appears to only be supported for access points
-     *       - available since controller versions 5.2.X
-     *
      * @param string $ap_id value of _id for the access point which can be obtained from the device list
      * @param bool $disable true disables the device, false enables the device
      * @return bool true on success
@@ -2715,7 +2666,6 @@ class Client
     /**
      * Override LED mode for a device (using REST).
      *
-     * @note available since controller versions 5.2.X
      * @param string $device_id value of _id for the device which can be obtained from the device list
      * @param string $override_mode off/on/default; "off" disables the LED of the device,
      *                              "on" enables the LED of the device,
@@ -2802,7 +2752,7 @@ class Client
     }
 
     /**
-     * Assign access point to another WLAN group.
+     * Assign an access point to another WLAN group.
      *
      * @param string $type_id WLAN type, can be either 'ng' (for WLANs 2G (11n/b/g)) or 'na' (WLANs 5G (11n/a/ac))
      * @param string $device_id _id value of the access point to be modified
@@ -3389,7 +3339,7 @@ class Client
      * Get the recent firmware update for an UniFi-OS console
      *
      * @return array|bool returns an array with a single object containing details of the current known latest
-     *                     UniFi OS version info on success, else returns false
+     *                    UniFi OS version info on success, else returns false
      * @throws Exception
      */
     public function get_update_os_console()
@@ -3467,7 +3417,7 @@ class Client
      * Upgrade a device to a specific firmware file.
      *
      * @note - updates the device to the firmware file at the given URL
-     *       - please take great care to select a valid firmware file for the device!
+     *       - take great care to select a valid firmware file for the device!
      * @param string $firmware_url URL for the firmware file to upgrade the device to
      * @param string|array $macs MAC address of the device to upgrade or an array of MAC addresses
      * @return bool true upon success
@@ -3596,7 +3546,6 @@ class Client
     /**
      * Fetch Radius profiles (using REST).
      *
-     * @note this function/method is only supported on controller versions 5.5.19 and later
      * @return array|bool objects containing all Radius profiles for the current site
      * @throws Exception
      */
@@ -3608,7 +3557,6 @@ class Client
     /**
      * Fetch Radius user accounts (using REST).
      *
-     * @note this function/method is only supported on controller versions 5.5.19 and later
      * @return array|bool objects containing all Radius accounts for the current site
      * @throws Exception
      */
@@ -3620,41 +3568,40 @@ class Client
     /**
      * Create a Radius user account (using REST).
      *
-     * @note this function/method is only supported on controller versions 5.5.19 and later
      * @param string $name name for the new account
      * @param string $x_password password for the new account
      * @param int|null $tunnel_type optional, must be one of the following values:
-     *                                    1      Point-to-Point Tunneling Protocol (PPTP)
-     *                                    2      Layer Two Forwarding (L2F)
-     *                                    3      Layer Two Tunneling Protocol (L2TP)
-     *                                    4      Ascend Tunnel Management Protocol (ATMP)
-     *                                    5      Virtual Tunneling Protocol (VTP)
-     *                                    6      IP Authentication Header in the Tunnel-mode (AH)
-     *                                    7      IP-in-IP Encapsulation (IP-IP)
-     *                                    8      Minimal IP-in-IP Encapsulation (MIN-IP-IP)
-     *                                    9      IP Encapsulating Security Payload in the Tunnel-mode (ESP)
-     *                                    10     Generic Route Encapsulation (GRE)
-     *                                    11     Bay Dial Virtual Services (DVS)
-     *                                    12     IP-in-IP Tunneling
-     *                                    13     Virtual LANs (VLAN)
+     *                              1      Point-to-Point Tunneling Protocol (PPTP)
+     *                              2      Layer Two Forwarding (L2F)
+     *                              3      Layer Two Tunneling Protocol (L2TP)
+     *                              4      Ascend Tunnel Management Protocol (ATMP)
+     *                              5      Virtual Tunneling Protocol (VTP)
+     *                              6      IP Authentication Header in the Tunnel-mode (AH)
+     *                              7      IP-in-IP Encapsulation (IP-IP)
+     *                              8      Minimal IP-in-IP Encapsulation (MIN-IP-IP)
+     *                              9      IP Encapsulating Security Payload in the Tunnel-mode (ESP)
+     *                              10     Generic Route Encapsulation (GRE)
+     *                              11     Bay Dial Virtual Services (DVS)
+     *                              12     IP-in-IP Tunneling
+     *                              13     Virtual LANs (VLAN)
      * @param int|null $tunnel_medium_type optional, must be one of the following values:
-     *                                    1      IPv4 (IP version 4)
-     *                                    2      IPv6 (IP version 6)
-     *                                    3      NSAP
-     *                                    4      HDLC (8-bit multidrop)
-     *                                    5      BBN 1822
-     *                                    6      802 (includes all 802 media plus Ethernet "canonical format")
-     *                                    7      E.163 (POTS)
-     *                                    8      E.164 (SMDS, Frame Relay, ATM)
-     *                                    9      F.69 (Telex)
-     *                                    10     X.121 (X.25, Frame Relay)
-     *                                    11     IPX
-     *                                    12     Appletalk
-     *                                    13     Decnet IV
-     *                                    14     Banyan Vines
-     *                                    15     E.164 with NSAP format subaddress
+     *                                     1      IPv4 (IP version 4)
+     *                                     2      IPv6 (IP version 6)
+     *                                     3      NSAP
+     *                                     4      HDLC (8-bit multidrop)
+     *                                     5      BBN 1822
+     *                                     6      802 (includes all 802 media plus Ethernet "canonical format")
+     *                                     7      E.163 (POTS)
+     *                                     8      E.164 (SMDS, Frame Relay, ATM)
+     *                                     9      F.69 (Telex)
+     *                                     10     X.121 (X.25, Frame Relay)
+     *                                     11     IPX
+     *                                     12     Appletalk
+     *                                     13     Decnet IV
+     *                                     14     Banyan Vines
+     *                                     15     E.164 with NSAP format subaddress
      * @param string|null $vlan optional, VLAN to assign to the account
-     * @return bool|array                 containing a single object for the newly created account upon success, else returns false
+     * @return bool|array containing a single object for the newly created account upon success, else returns false
      * @throws Exception
      */
     public function create_radius_account(
@@ -3699,7 +3646,6 @@ class Client
     /**
      * Update a Radius account, base (using REST).
      *
-     * @note this function/method is only supported on controller versions 5.5.19 and later
      * @param string $account_id _id of the account which can be found with the list_radius_accounts() function
      * @param object|array $payload stdClass object or associative array containing the new profile to apply to the
      *                              account, must be a (partial) object/array structured in the same manner as is
@@ -3717,7 +3663,6 @@ class Client
     /**
      * Delete a Radius account (using REST).
      *
-     * @note this function/method is only supported on controller versions 5.5.19 and later
      * @param string $account_id _id of the account which can be found with the list_radius_accounts() function
      * @return bool true on success
      * @throws Exception
