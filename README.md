@@ -18,7 +18,7 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 ## Why use this API client?
 
 - Easy to use: clear docs, comprehensive method coverage, and helpful examples.
-- Broad coverage: exposes many UniFi endpoints not available in the official APIs.
+- Broad coverage: exposes many UniFi endpoints not (yet) available in the official APIs.
 - Composer-friendly: installable via [Composer](https://getcomposer.org) and works with modern PHP projects.
 - Lightweight and dependency-free: no external libraries required; uses cURL.
 - Secure: communicates over TLS and supports optional SSL certificate validation.
