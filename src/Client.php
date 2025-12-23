@@ -36,7 +36,7 @@ use UniFi_API\Exceptions\NotAUnifiOsConsoleException;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '2.0.10';
+    const CLASS_VERSION        = '2.0.11';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 

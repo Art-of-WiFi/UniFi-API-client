@@ -1944,6 +1944,7 @@ Makes a custom API request to the controller.
 - `$path` (string): API endpoint path
 - `$method` (string): HTTP method: 'GET', 'POST', 'PUT', 'DELETE', 'PATCH' (default: 'GET')
 - `$payload` (mixed): Request payload for POST/PUT/PATCH requests
+- `$prefix_path` (bool): Whether to prefix the path with the controller API base URL (default: true)
 - `$return` (string): Return type: 'array', 'json', 'boolean' (default: 'array')
 
 **Returns:** mixed - Response in the specified format
