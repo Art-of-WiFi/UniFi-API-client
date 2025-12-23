@@ -3868,10 +3868,11 @@ class Client
      * @param object|array|null $payload optional, stdClass object or associative array containing the payload to pass
      * @param string $return optional, string; determines how to return results, when "boolean" the method must
      *                       return a boolean result or "array" when the method must return an array (default)
+     * @param bool $prefix_path optional, determines if the path should be prefixed for UniFi OS consoles
      * @return bool|array returns results as requested, returns false on incorrect parameters
      * @throws Exception
      */
-    public function custom_api_request(string $path, string $method = 'GET', $payload = null, string $return = 'array')
+    public function custom_api_request(string $path, string $method = 'GET', $payload = null, string $return = 'array', bool $prefix_path = true)
     {
         if (!in_array($method, self::CURL_METHODS_ALLOWED)) {
             return false;
@@ -3884,11 +3885,11 @@ class Client
         $this->curl_method = $method;
 
         if ($return === 'array') {
-            return $this->fetch_results($path, $payload);
+            return $this->fetch_results($path, $payload, false, true, $prefix_path);
         }
 
         if ($return === 'boolean') {
-            return $this->fetch_results_boolean($path, $payload);
+            return $this->fetch_results_boolean($path, $payload, true, $prefix_path);
         }
 
         return false;
@@ -4297,6 +4298,7 @@ class Client
      * @param boolean $boolean optional, whether the method should return a boolean result, else return
      *                         the "data" array
      * @param boolean $login_required optional, whether the method requires to be logged in or not
+     * @param bool $prefix_path optional, determines if the path should be prefixed for UniFi OS consoles
      * @return bool|array|object returns an array with the "data" array on success, returns boolean if $boolean is true
      * @throws Exception
      */
@@ -4390,6 +4392,7 @@ class Client
      * @param object|array|null $payload optional, PHP associative array or stdClass Object, payload to pass with the
      *                                   request
      * @param bool $login_required optional, whether the method requires to be logged in or not
+     * @param bool $prefix_path optional, determines if the path should be prefixed for UniFi OS consoles
      * @return bool [description]
      * @throws Exception
      */
@@ -4621,6 +4624,7 @@ class Client
      *
      * @param string $path path for the request
      * @param object|array|null $payload optional, payload to pass with the request
+     * @param bool $prefix_path optional, determines if the path should be prefixed for UniFi OS consoles
      * @return bool|string response returned by the controller API
      * @throws CurlGeneralErrorException|CurlTimeoutException|InvalidCurlMethodException|LoginFailedException
      */
