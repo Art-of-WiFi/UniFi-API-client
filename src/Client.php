@@ -3336,7 +3336,7 @@ class Client
     }
 
     /**
-     * Get the recent firmware update for an UniFi-OS console
+     * Get the recent firmware update for an UniFi-OS console.
      *
      * @return array|bool returns an array with a single object containing details of the current known latest
      *                    UniFi OS version info on success, else returns false
@@ -3352,7 +3352,7 @@ class Client
     }
 
     /**
-     * Update the OS for an UniFi-OS console
+     * Update the OS for an UniFi-OS console.
      *
      * @note triggers an UniFi OS Update in Control Plane > Updates > UniFi OS
      * @return bool true upon success
@@ -3367,6 +3367,23 @@ class Client
         $payload = ['persistFullData' => true];
 
         return $this->fetch_results_boolean('/api/firmware/update', $payload, true, false);
+    }
+
+    /**
+     * Reboot an UniFi-OS console.
+     *
+     * @return bool true upon success
+     * @throws Exception
+     */
+    public function reboot_os_console(): bool
+    {
+        if (!$this->is_unifi_os) {
+            throw new NotAUnifiOsConsoleException();
+        }
+
+        $this->curl_method = 'POST';
+
+        return $this->fetch_results_boolean('/api/system/reboot', null, true, false);
     }
 
     /**
