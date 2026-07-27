@@ -37,7 +37,7 @@ use UniFi_API\Exceptions\NotAUnifiOsConsoleException;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '2.2.0';
+    const CLASS_VERSION        = '2.2.1';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -626,8 +626,10 @@ class Client
      *         the controller settings
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
-     * @param string|null $mac optional, AP MAC address to return stats for, when empty,
-     *                      stats for all APs are returned
+     * @param string|array|null $mac optional, a single AP MAC address to return stats for, or an array of AP
+     *                      MAC addresses. When empty, stats for all APs are returned, but note that the
+     *                      controller caps such a response at 10 APs; pass an array of MAC addresses to
+     *                      work around this limit
      * @param array|null $attribs optional, array of attributes to collect, default: ['bytes', 'num_sta', 'time'].
      *                            Valid values:
      *                            bytes, num_sta, time, wifi_tx_attempts, tx_retries, wifi_tx_dropped,
@@ -639,7 +641,7 @@ class Client
      * @return array|bool returns an array of 5-minute stats objects
      * @throws Exception
      */
-    public function stat_5minutes_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null)
+    public function stat_5minutes_aps(?int $start = null, ?int $end = null, $mac = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (12 * 3600 * 1000) : $start;
@@ -647,7 +649,11 @@ class Client
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         if (!empty($mac)) {
-            $payload['mac'] = strtolower($mac);
+            if (is_array($mac)) {
+                $payload['macs'] = array_values(array_map('strtolower', $mac));
+            } else {
+                $payload['mac'] = strtolower($mac);
+            }
         }
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/5minutes.ap', $payload);
@@ -661,14 +667,16 @@ class Client
      *         the controller settings
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
-     * @param string|null $mac optional, AP MAC address to return stats for, when empty,
-     *                         stats for all APs are returned
+     * @param string|array|null $mac optional, a single AP MAC address to return stats for, or an array of AP
+     *                         MAC addresses. When empty, stats for all APs are returned, but note that the
+     *                         controller caps such a response at 10 APs; pass an array of MAC addresses to
+     *                         work around this limit
      * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time).
      * @return array|bool returns an array of hourly stats objects
      * @throws Exception
      * @see stat_5minutes_aps() for supported attribs
      */
-    public function stat_hourly_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null)
+    public function stat_hourly_aps(?int $start = null, ?int $end = null, $mac = null, ?array $attribs = null)
     {
         $end     = empty($end) ? (time() * 1000) : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -676,7 +684,11 @@ class Client
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         if (!empty($mac)) {
-            $payload['mac'] = strtolower($mac);
+            if (is_array($mac)) {
+                $payload['macs'] = array_values(array_map('strtolower', $mac));
+            } else {
+                $payload['mac'] = strtolower($mac);
+            }
         }
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/hourly.ap', $payload);
@@ -690,14 +702,16 @@ class Client
      *         the controller settings
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
-     * @param string|null $mac optional, AP MAC address to return stats for, when empty,
-     *                         stats for all APs are returned
+     * @param string|array|null $mac optional, a single AP MAC address to return stats for, or an array of AP
+     *                         MAC addresses. When empty, stats for all APs are returned, but note that the
+     *                         controller caps such a response at 10 APs; pass an array of MAC addresses to
+     *                         work around this limit
      * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time).
      * @return array|bool returns an array of daily stats objects
      * @throws Exception
      * @see stat_5minutes_aps() for supported attribs
      */
-    public function stat_daily_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null)
+    public function stat_daily_aps(?int $start = null, ?int $end = null, $mac = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (7 * 24 * 3600 * 1000) : $start;
@@ -705,7 +719,11 @@ class Client
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         if (!empty($mac)) {
-            $payload['mac'] = strtolower($mac);
+            if (is_array($mac)) {
+                $payload['macs'] = array_values(array_map('strtolower', $mac));
+            } else {
+                $payload['mac'] = strtolower($mac);
+            }
         }
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/daily.ap', $payload);
@@ -719,14 +737,16 @@ class Client
      *         the controller settings
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
-     * @param string|null $mac optional, AP MAC address to return stats for, when empty,
-     *                         stats for all APs are returned
+     * @param string|array|null $mac optional, a single AP MAC address to return stats for, or an array of AP
+     *                         MAC addresses. When empty, stats for all APs are returned, but note that the
+     *                         controller caps such a response at 10 APs; pass an array of MAC addresses to
+     *                         work around this limit
      * @param array|null $attribs optional, array of attributes to collect, default: (bytes, num_sta, time).
      * @return array|bool returns an array of monthly stats objects
      * @throws Exception
      * @see stat_5minutes_aps() for supported attribs
      */
-    public function stat_monthly_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null)
+    public function stat_monthly_aps(?int $start = null, ?int $end = null, $mac = null, ?array $attribs = null)
     {
         $end     = empty($end) ? time() * 1000 : $end;
         $start   = empty($start) ? $end - (52 * 7 * 24 * 3600 * 1000) : $start;
@@ -734,7 +754,11 @@ class Client
         $payload = ['attrs' => $attribs, 'start' => $start, 'end' => $end];
 
         if (!empty($mac)) {
-            $payload['mac'] = strtolower($mac);
+            if (is_array($mac)) {
+                $payload['macs'] = array_values(array_map('strtolower', $mac));
+            } else {
+                $payload['mac'] = strtolower($mac);
+            }
         }
 
         return $this->fetch_results('/api/s/' . $this->site . '/stat/report/monthly.ap', $payload);

@@ -2030,20 +2030,35 @@ Retrieves site statistics at different time intervals.
 
 ### Access Point Statistics
 ```php
-public function stat_5minutes_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null): array
-public function stat_hourly_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null): array
-public function stat_daily_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null): array
-public function stat_monthly_aps(?int $start = null, ?int $end = null, ?string $mac = null, ?array $attribs = null): array
+public function stat_5minutes_aps(?int $start = null, ?int $end = null, $mac = null, ?array $attribs = null): array
+public function stat_hourly_aps(?int $start = null, ?int $end = null, $mac = null, ?array $attribs = null): array
+public function stat_daily_aps(?int $start = null, ?int $end = null, $mac = null, ?array $attribs = null): array
+public function stat_monthly_aps(?int $start = null, ?int $end = null, $mac = null, ?array $attribs = null): array
 ```
 Retrieves access point statistics at different time intervals.
 
 **Parameters:**
 - `$start` (int|null): Start time in Unix timestamp
 - `$end` (int|null): End time in Unix timestamp
-- `$mac` (string|null): MAC address of specific AP
+- `$mac` (string|array|null): MAC address of a specific AP, or an array of AP MAC addresses
 - `$attribs` (array|null): Array of attributes to retrieve
 
 **Returns:** array - Array containing AP statistics
+
+> **Note on the 10-AP limit:** when `$mac` is omitted, the controller caps the response at **10 access
+> points**, silently omitting the rest. Which APs are dropped varies per interval, so this is easy to
+> mistake for pagination. Passing an array of MAC addresses lifts the cap (the client then sends them as
+> the `macs` payload key):
+>
+> ```php
+> $aps  = array_filter($client->list_devices(), fn($d) => ($d->type ?? '') === 'uap');
+> $macs = array_values(array_map(fn($d) => $d->mac, $aps));
+>
+> $stats = $client->stat_hourly_aps(null, null, $macs);
+> ```
+>
+> MAC addresses are lowercased for you. Note that a filtered request may return one fewer time bucket per
+> AP at the range boundary than an unfiltered one.
 
 ### User Statistics
 ```php
@@ -2393,7 +2408,7 @@ public function get_class_version(): string
 ```
 Retrieves the version of this API client class.
 
-**Returns:** string - Class version (currently '2.2.0')
+**Returns:** string - Class version (currently '2.2.1')
 
 ---
 
@@ -2410,6 +2425,6 @@ Retrieves the version of this API client class.
 
 ## Version Information
 
-This documentation corresponds to UniFi API Client version **2.2.0**.
+This documentation corresponds to UniFi API Client version **2.2.1**.
 
 For more examples and usage information, visit the [GitHub repository](https://github.com/Art-of-WiFi/UniFi-API-client).
