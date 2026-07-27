@@ -1,5 +1,7 @@
-# Ignore personal config file
+# Ignore personal config files (these hold controller credentials/API keys)
 /examples/config.php
+/examples/site_provisioning_example/config.php
+/examples/site_provisioning_example/settings.php
 
 # ignore accidentally generated vendor directory and composer.lock file, just in case...
 /vendor/

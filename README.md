@@ -31,8 +31,8 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 | Software                             | Versions                                                 |
 |--------------------------------------|----------------------------------------------------------|
-| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x, 10.x (**10.2.97 is confirmed**) |
-| UniFi OS                             | 3.x, 4.x, 5.x (**5.1.3 is confirmed**)                   |
+| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x, 10.x (**10.5.62 is confirmed**) |
+| UniFi OS                             | 3.x, 4.x, 5.x (**5.1.26 is confirmed**)                   |
 
 
 ## Requirements
@@ -41,6 +41,8 @@ easy inclusion in your projects. See the [installation instructions](#Installati
   - PHP **7.4.0** or higher (use version [1.1.83](https://github.com/Art-of-WiFi/UniFi-API-client/releases/tag/v1.1.83)
     for PHP 7.3.x and lower)
   - PHP cURL (`php-curl`) module enabled
+  - PHP JSON (`php-json`) module enabled (always available on PHP 8.0 and later, but it can be
+    disabled at compile time on PHP 7.4)
   - direct network connectivity between this server/desktop and the host and port where the UniFi Network Application is
     running (usually TCP port 8443, port 11443 for UniFi OS Server, or port 443 for UniFi OS consoles)
 - **authentication** — you need one of the following:
@@ -73,8 +75,8 @@ applications/devices/services have been verified to work:
 The API Client automatically detects UniFi OS consoles/servers and adjusts URLs and several functions/methods
 accordingly.
 
-UniFi OS-based consoles require you to connect using port **443** while **8443** which is used for
-the self-hosted/software-based controllers. When connecting to **UniFi OS Server**, you are required to use port
+UniFi OS-based consoles require you to connect using port **443**, whereas port **8443** is used for the
+self-hosted/software-based controllers. When connecting to **UniFi OS Server**, you are required to use port
 **11443**.
 
 
@@ -131,7 +133,7 @@ require_once 'vendor/autoload.php';
 
 ## Authentication
 
-The API client supports two authentication methods. Choose the one that fits your setup.
+The API client supports three authentication methods. Choose the one that fits your setup.
 
 ### Option 1: API Key (recommended for UniFi OS)
 
