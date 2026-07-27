@@ -1,6 +1,6 @@
 ## UniFi Controller API client class
 
-[![License](https://img.shields.io/github/license/Art-of-WiFi/UniFi-API-client)](https://github.com/Art-of-WiFi/UniFi-API-client/blob/main/LICENSE)
+[![License](https://img.shields.io/github/license/Art-of-WiFi/UniFi-API-client)](https://github.com/Art-of-WiFi/UniFi-API-client/blob/main/LICENSE.md)
 [![Packagist Version](https://img.shields.io/packagist/v/art-of-wifi/unifi-api-client)](https://packagist.org/packages/art-of-wifi/unifi-api-client)
 [![Downloads](https://img.shields.io/packagist/dt/art-of-wifi/unifi-api-client)](https://packagist.org/packages/art-of-wifi/unifi-api-client)
 [![PHP Version](https://img.shields.io/packagist/php-v/art-of-wifi/unifi-api-client)](https://packagist.org/packages/art-of-wifi/unifi-api-client)
