@@ -103,7 +103,7 @@ Creates a Client instance configured for Site Manager proxy mode. All API reques
 **Returns:** Client instance configured for proxy mode
 
 **Throws:**
-- `\InvalidArgumentException` when `$console_id` or `$api_key` is empty
+- `InvalidArgumentException` when `$console_id` or `$api_key` is empty
 - `CurlExtensionNotLoadedException`
 - `InvalidSiteNameException`
 
@@ -124,7 +124,7 @@ Enables Site Manager proxy mode on an existing client instance. When enabled, al
 - `$api_key` (string): Site Manager API key
 
 **Throws:**
-- `\InvalidArgumentException` when `$console_id` or `$api_key` is empty
+- `InvalidArgumentException` when `$console_id` or `$api_key` is empty
 
 ### Disable Site Manager Proxy
 ```php
@@ -2341,7 +2341,7 @@ Enables API key authentication. When set, the client uses stateless API key auth
 **Returns (get_api_key):** string - Current API key, empty string if not set
 
 **Throws (set_api_key):**
-- `\InvalidArgumentException` when an empty API key is provided
+- `InvalidArgumentException` when an empty API key is provided
 
 **Notes:**
 - Calling `set_api_key()` automatically sets the UniFi OS flag to `true` and marks the client as ready for requests
@@ -2408,9 +2408,37 @@ public function get_class_version(): string
 ```
 Retrieves the version of this API client class.
 
-**Returns:** string - Class version (currently '2.2.1')
+**Returns:** string - Class version (currently '2.3.0')
 
 ---
+
+## Exceptions
+
+All Exceptions live in the `UniFi_API\Exceptions` namespace and implement `UnifiApiExceptionInterface`. All except `InvalidArgumentException` extend the `UnifiApiException` base class, which in turn extends `\Exception`.
+
+| Exception | Extends | Thrown when |
+|---|---|---|
+| `ControllerErrorException` | `UnifiApiException` | the controller returns an error in its response body (classic `meta.rc = 'error'`, v2 `errorCode`, UniFi OS `code`). Methods: `getApiErrorCode()`, `getResponse()` |
+| `ConsoleOfflineException` | `UnifiApiException` | the Site Manager proxy reports the console as offline (HTTP 408) |
+| `CurlExtensionNotLoadedException` | `UnifiApiException` | the PHP cURL extension is not loaded |
+| `CurlGeneralErrorException` | `UnifiApiException` | cURL reports an error. Methods: `getHttpResponseCode()`, `getCurlGetinfoResults()` |
+| `CurlTimeoutException` | `UnifiApiException` | the cURL request timed out. Methods: `getHttpResponseCode()`, `getCurlGetinfoResults()` |
+| `EmailInvalidException` | `UnifiApiException` | an invalid email address is provided |
+| `InvalidArgumentException` | `\InvalidArgumentException` | an invalid argument is provided (empty API key, empty console ID, unsupported DNS record type) |
+| `InvalidBaseUrlException` | `UnifiApiException` | the base URL is invalid |
+| `InvalidCurlMethodException` | `UnifiApiException` | an unsupported HTTP method is provided |
+| `InvalidSiteNameException` | `UnifiApiException` | the site name is invalid |
+| `JsonDecodeException` | `UnifiApiException` | the response could not be decoded as JSON |
+| `LoginFailedException` | `UnifiApiException` | login failed. Methods: `getHttpResponseCode()` |
+| `LoginRequiredException` | `UnifiApiException` | a method requiring login is called before `login()` |
+| `MacAddressEmptyException` | `UnifiApiException` | an empty MAC address is provided |
+| `MacAddressInvalidException` | `UnifiApiException` | an invalid MAC address is provided |
+| `MethodDeprecatedException` | `UnifiApiException` | a deprecated method is called |
+| `NotAUnifiOsConsoleException` | `UnifiApiException` | a UniFi OS-only method is called against a classic controller |
+
+`UnifiApiException` exposes `getHttpResponseCode()`, which returns the HTTP status code for cURL/login errors and `0` otherwise.
+
+Where a method's **Throws** list only mentions `UnifiApiException`, the method delegates to the internal request helper and may throw `LoginRequiredException`, `ControllerErrorException`, `JsonDecodeException`, `CurlGeneralErrorException`, `CurlTimeoutException`, `LoginFailedException` or `ConsoleOfflineException`.
 
 ## Notes
 
@@ -2425,6 +2453,6 @@ Retrieves the version of this API client class.
 
 ## Version Information
 
-This documentation corresponds to UniFi API Client version **2.2.1**.
+This documentation corresponds to UniFi API Client version **2.3.0**.
 
 For more examples and usage information, visit the [GitHub repository](https://github.com/Art-of-WiFi/UniFi-API-client).

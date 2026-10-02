@@ -13,6 +13,7 @@
 use UniFi_API\Exceptions\CurlExtensionNotLoadedException;
 use UniFi_API\Exceptions\CurlGeneralErrorException;
 use UniFi_API\Exceptions\CurlTimeoutException;
+use UniFi_API\Exceptions\InvalidArgumentException;
 use UniFi_API\Exceptions\InvalidBaseUrlException;
 use UniFi_API\Exceptions\InvalidSiteNameException;
 use UniFi_API\Exceptions\JsonDecodeException;
@@ -63,7 +64,7 @@ try {
     echo 'CurlGeneralErrorException: ' . $e->getMessage() . PHP_EOL;
 } catch (CurlTimeoutException $e) {
     echo 'CurlTimeoutException: ' . $e->getMessage() . PHP_EOL;
-} catch (\InvalidArgumentException $e) {
+} catch (InvalidArgumentException $e) {
     echo 'InvalidArgumentException: ' . $e->getMessage() . PHP_EOL;
 } catch (Exception $e) {
     /** catch any other Exceptions that might be thrown */
