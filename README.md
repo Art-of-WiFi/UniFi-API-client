@@ -92,6 +92,16 @@ https://artofwifi.net/blog/how-to-access-the-unifi-controller-by-wan-ip-or-hostn
 
 ## Upgrading from previous versions
 
+When upgrading to **2.3.0** or later, please note:
+- errors returned by the controller (e.g. `api.err.NoSiteContext`) are now thrown as
+  `UniFi_API\Exceptions\ControllerErrorException` instead of a plain `\Exception`. Code that catches `\Exception`
+  keeps working, but code that catches `UnifiApiException` first and relies on controller errors falling through to a
+  later `catch (\Exception $e)` block will now see them in the `UnifiApiException` block
+- `set_api_key()`, `enable_site_manager_proxy()`, `connect_via_site_manager()` and `create_dns_record()` now throw
+  `UniFi_API\Exceptions\InvalidArgumentException`, which extends PHP's `\InvalidArgumentException`, so existing
+  `catch (\InvalidArgumentException $e)` blocks continue to work
+- see the [Exception handling](#exception-handling) section for details
+
 When upgrading from a version before **2.0.0**, please:
 - change your code to use the new Exceptions that are thrown by the API Client class
 - test the client with your code for any breaking changes
@@ -322,8 +332,31 @@ More code examples are available in the [`examples/`](examples/) directory.
 The API Client class throws **Exceptions** for various error conditions instead of using PHP's `trigger_error()`
 function. This allows for more granular error handling in your application code.
 
-You can also choose to catch the `UniFi_API\Exceptions\UnifiApiException` Exception to catch all Exceptions that
-might be thrown by the API Client class.
+All Exceptions thrown by the API Client class implement the `UniFi_API\Exceptions\UnifiApiExceptionInterface`
+interface, and all but one extend the `UniFi_API\Exceptions\UnifiApiException` base class. Catch the interface (or the
+base class) when you want to handle all client errors uniformly.
+
+The following Exceptions can be thrown:
+
+| Exception                         | Thrown when                                                                                                      |
+|-----------------------------------|------------------------------------------------------------------------------------------------------------------|
+| `ControllerErrorException`        | the controller returns an error in its response, e.g. `api.err.Invalid`; see `getApiErrorCode()`/`getResponse()` |
+| `ConsoleOfflineException`         | the console is offline when using the Site Manager proxy (HTTP 408)                                              |
+| `CurlExtensionNotLoadedException` | the PHP cURL extension is not loaded                                                                             |
+| `CurlGeneralErrorException`       | cURL reports an error; see `getHttpResponseCode()`/`getCurlGetinfoResults()`                                     |
+| `CurlTimeoutException`            | the cURL request timed out                                                                                       |
+| `EmailInvalidException`           | an invalid email address is passed to a method                                                                   |
+| `InvalidArgumentException`        | an invalid argument is passed to a method (extends PHP's `\InvalidArgumentException`, not `UnifiApiException`)   |
+| `InvalidBaseUrlException`         | the base URL passed to the constructor is invalid                                                                |
+| `InvalidCurlMethodException`      | an unsupported HTTP method is passed to `set_curl_method()`                                                      |
+| `InvalidSiteNameException`        | the site name is invalid                                                                                         |
+| `JsonDecodeException`             | the controller response could not be decoded as JSON                                                             |
+| `LoginFailedException`            | login failed; see `getHttpResponseCode()`                                                                        |
+| `LoginRequiredException`          | a method that requires login is called before `login()`                                                          |
+| `MacAddressEmptyException`        | an empty MAC address is passed to a method                                                                       |
+| `MacAddressInvalidException`      | an invalid MAC address is passed to a method                                                                     |
+| `MethodDeprecatedException`       | a deprecated method is called                                                                                    |
+| `NotAUnifiOsConsoleException`     | a UniFi OS-only method is called against a classic controller                                                    |
 
 Here is an example of how to catch each of the Exceptions individually:
 ```php
@@ -332,6 +365,7 @@ Here is an example of how to catch each of the Exceptions individually:
  * PHP API usage example with Exception handling
  */
 use UniFi_API\Exceptions\ConsoleOfflineException;
+use UniFi_API\Exceptions\ControllerErrorException;
 use UniFi_API\Exceptions\CurlExtensionNotLoadedException;
 use UniFi_API\Exceptions\CurlGeneralErrorException;
 use UniFi_API\Exceptions\CurlTimeoutException;
@@ -340,6 +374,7 @@ use UniFi_API\Exceptions\InvalidSiteNameException;
 use UniFi_API\Exceptions\JsonDecodeException;
 use UniFi_API\Exceptions\LoginFailedException;
 use UniFi_API\Exceptions\LoginRequiredException;
+use UniFi_API\Exceptions\UnifiApiExceptionInterface;
 
 /**
  * load the class using the composer autoloader
@@ -377,18 +412,21 @@ try {
     echo 'CurlTimeoutException: ' . $e->getMessage(). PHP_EOL;
 } catch (LoginFailedException $e) {
     echo 'LoginFailedException: ' . $e->getMessage(). PHP_EOL;
+} catch (ControllerErrorException $e) {
+    echo 'ControllerErrorException: ' . $e->getMessage() . ' (' . $e->getApiErrorCode() . ')' . PHP_EOL;
+} catch (UnifiApiExceptionInterface $e) {
+    /** catch any other Exceptions thrown by the API client */
+    echo 'UniFi API client Exception: ' . $e->getMessage(). PHP_EOL;
 } catch (Exception $e) {
     /** catch any other Exceptions that might be thrown */
     echo 'General Exception: ' . $e->getMessage(). PHP_EOL;
 }
 ```
 
-Although the PHP DocBlocks for most public methods/functions contain `@throws Exception`, it is recommended to catch
-specific Exceptions that can be thrown by the API Client class to provide more detailed error messages to your
-application code.
-
-In most cases, the class will let Exceptions bubble up to the calling code, but in some cases it will catch them and
-throw a new Exception with a more specific message.
+The PHP DocBlocks for most public methods contain `@throws UnifiApiException`, which covers the Exceptions that the
+internal request helper can raise (`LoginRequiredException`, `ControllerErrorException`, `JsonDecodeException`, the
+cURL Exceptions and `LoginFailedException`). It is recommended to catch specific Exceptions where your application
+needs to respond differently to them.
 
 The `list_alarms.php` example in the `examples/` directory is a good starting point to see how you can implement
 Exception handling.
