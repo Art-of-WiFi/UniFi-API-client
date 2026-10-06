@@ -39,7 +39,7 @@ use UniFi_API\Exceptions\UnifiApiException;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '2.3.0';
+    const CLASS_VERSION        = '2.3.1';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
@@ -4785,6 +4785,24 @@ class Client
     }
 
     /**
+     * Decompress a response body that is gzip-compressed without a Content-Encoding header, as delivered by the
+     * Site Manager connector for a UniFi OS Server that compresses its replies. Any other body is returned as is.
+     *
+     * @param string $response the raw response body
+     * @return string the decompressed body, or the original body when it is not a gzip stream
+     */
+    protected function decode_gzip_body(string $response): string
+    {
+        if (substr($response, 0, 2) !== "\x1f\x8b") {
+            return $response;
+        }
+
+        $decoded = @gzdecode($response);
+
+        return $decoded === false ? $response : $decoded;
+    }
+
+    /**
      * Callback function for cURL to extract and store cookies as needed.
      *
      * @param object|resource|false $ch the cURL instance (type hinting is unavailable for cURL resources)
@@ -4933,6 +4951,15 @@ class Client
             }
 
             throw new CurlGeneralErrorException('cURL error: ' . curl_error($ch), $http_code, curl_getinfo($ch));
+        }
+
+        /**
+         * The Site Manager connector passes the console's body through unchanged. Some UniFi OS Servers compress
+         * their JSON replies and the connector drops the Content-Encoding header, so cURL cannot decode them.
+         * Decompress such gzip bodies ourselves, in proxy mode only.
+         */
+        if ($this->is_site_manager_proxy && is_string($response)) {
+            $response = $this->decode_gzip_body($response);
         }
 
         /** In proxy mode, HTTP 408 means the console is offline or unreachable. */
