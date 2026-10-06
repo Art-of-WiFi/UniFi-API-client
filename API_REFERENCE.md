@@ -2408,7 +2408,7 @@ public function get_class_version(): string
 ```
 Retrieves the version of this API client class.
 
-**Returns:** string - Class version (currently '2.3.0')
+**Returns:** string - Class version (currently '2.3.1')
 
 ---
 
@@ -2453,6 +2453,6 @@ Where a method's **Throws** list only mentions `UnifiApiException`, the method d
 
 ## Version Information
 
-This documentation corresponds to UniFi API Client version **2.3.0**.
+This documentation corresponds to UniFi API Client version **2.3.1**.
 
 For more examples and usage information, visit the [GitHub repository](https://github.com/Art-of-WiFi/UniFi-API-client).
