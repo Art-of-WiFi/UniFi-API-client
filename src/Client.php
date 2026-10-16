@@ -43,6 +43,9 @@ class Client
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
+    /** Periods accepted by stat_series() (Network Application 11.x statistics engine). */
+    const STAT_SERIES_PERIODS = ['HOUR', 'DAY', 'WEEK', 'MONTH'];
+
     /** Site Manager proxy base URL. */
     protected const SITE_MANAGER_BASE_URL = 'https://api.ui.com';
 
@@ -536,6 +539,8 @@ class Client
      * @note - defaults to the past 12 hours
      *       - make sure that the retention policy for 5 minutes stats is set to the correct value in
      *         the controller settings
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs optional, array of attributes to collect. Default values:
@@ -561,6 +566,8 @@ class Client
      *
      * @todo add support for optional attrib parameter: airtime_avg
      * @note - defaults to the past 7*24 hours
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs optional, array of attributes to collect.
@@ -582,6 +589,8 @@ class Client
      * Fetch daily site stats.
      *
      * @note - defaults to the past 52*7*24 hours
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs optional, array of attributes to collect.
@@ -603,6 +612,8 @@ class Client
      * Fetch monthly site stats.
      *
      * @note - defaults to the past 52 weeks (52*7*24 hours)
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs optional, array of attributes to collect.
@@ -626,6 +637,8 @@ class Client
      * @note - defaults to the past 12 hours
      *       - make sure that the retention policy for 5 minutes stats is set to the correct value in
      *         the controller settings
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|array|null $mac optional, a single AP MAC address to return stats for, or an array of AP
@@ -667,6 +680,8 @@ class Client
      * @note - defaults to the past 7*24 hours
      *       - make sure that the retention policy for hourly stats is set to the correct value in
      *         the controller settings
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|array|null $mac optional, a single AP MAC address to return stats for, or an array of AP
@@ -702,6 +717,8 @@ class Client
      * @note - defaults to the past 7*24 hours
      *       - make sure that the retention policy for hourly stats is set to the correct value in
      *         the controller settings
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|array|null $mac optional, a single AP MAC address to return stats for, or an array of AP
@@ -737,6 +754,8 @@ class Client
      * @note - defaults to the past 52 weeks (52*7*24 hours)
      *       - make sure that the retention policy for hourly stats is set to the correct value in
      *         the controller settings
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param string|array|null $mac optional, a single AP MAC address to return stats for, or an array of AP
@@ -774,6 +793,8 @@ class Client
      *         the controller settings
      *       - make sure that the "Clients Historical Data" option has been enabled in the UniFi controller settings in
      *         the Maintenance section
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param string|null $mac optional, MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
@@ -802,6 +823,8 @@ class Client
      *         the controller settings
      *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
      *         section
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param string|null $mac optional, MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
@@ -832,6 +855,8 @@ class Client
      *         the controller settings
      *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
      *         section
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param string|null $mac optional, MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
@@ -862,6 +887,8 @@ class Client
      *         the controller settings
      *       - make sure that "Clients Historical Data" has been enabled in the UniFi controller settings in the Maintenance
      *         section
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param string|null $mac optional, MAC address of the user/client device to return stats for
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
@@ -891,6 +918,8 @@ class Client
      *       - make sure that the retention policy for 5 minutes stats is set to the correct value in
      *         the controller settings
      *       - requires a UniFi gateway
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned, valid values are:
@@ -915,6 +944,8 @@ class Client
      *
      * @note - defaults to the past 7*24 hours
      *       - requires a UniFi gateway
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned
@@ -937,6 +968,8 @@ class Client
      *
      * @note - defaults to the past 52 weeks (52*7*24 hours)
      *       - requires a UniFi gateway
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned
@@ -959,6 +992,8 @@ class Client
      *
      * @note - defaults to the past 52 weeks (52*7*24 hours)
      *       - requires a UniFi gateway
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param array|null $attribs array containing attributes (strings) to be returned
@@ -981,6 +1016,8 @@ class Client
      *
      * @note - defaults to the past 24 hours
      *       - requires a UniFi gateway
+     *       - Network Application 11.x no longer populates this endpoint, it always returns an empty array there.
+     *         Use stat_series() instead and see get_stats_source() to detect which one to call
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @return array|bool returns an array of speed test result objects
@@ -996,10 +1033,168 @@ class Client
     }
 
     /**
+     * Fetch the statistics source of the controller.
+     *
+     * @note - Network Application 11.0 moved all time-series statistics to a new statistics engine. This endpoint
+     *         reports which one the controller uses: 'LEGACY' (10.x, the stat/report/* endpoints are populated)
+     *         or 'MODERN' (11.x and later, the stat/report/* endpoints always return empty results and
+     *         stat_series() must be used instead)
+     *       - controllers older than 10.x do not have this endpoint and answer with an HTML 404 page, which
+     *         surfaces as a JsonDecodeException; treat that as 'LEGACY'
+     * @return string|bool 'LEGACY' or 'MODERN'
+     * @throws UnifiApiException
+     */
+    public function get_stats_source()
+    {
+        return $this->fetch_results('/v2/api/stats/source');
+    }
+
+    /**
+     * Fetch the statistics schemas supported by stat_series().
+     *
+     * @note - requires Network Application 11.0 or later, older versions answer with an HTML 404 page which
+     *         surfaces as a JsonDecodeException
+     *       - each schema object contains the schema 'name', its 'keys' (e.g. siteId, deviceMac, clientId), its
+     *         'values' (the value fields a bucket can contain) and its 'nested' groups (each with their own
+     *         'name', 'keys' and 'values'), e.g. byRadioBand, byVap, byWlan
+     * @return array|bool returns an array of schema objects
+     * @throws UnifiApiException
+     */
+    public function list_stat_schemas()
+    {
+        return $this->fetch_results('/v2/api/stats/schemas');
+    }
+
+    /**
+     * Fetch a statistics time series from the Network Application 11.x statistics engine.
+     *
+     * @note - requires Network Application 11.0 or later (see get_stats_source()), older versions answer with an
+     *         HTML 404 page which surfaces as a JsonDecodeException
+     *       - the data store starts at the moment the controller was upgraded to 11.x, older history is not
+     *         available
+     *       - exactly one of $period and $start must be provided. With $period the window is the period ending at
+     *         $end and the bucket size follows the period: 'HOUR' and 'DAY' use 5-minute buckets, 'WEEK' hourly
+     *         buckets and 'MONTH' 8-hour buckets. With $start (Network Application 11.0.89 and later) the window
+     *         is $start to $end and the controller picks the bucket size from the span. Network Application 11.0.83
+     *         ignores $start, so prefer $period and move $end back to page through history
+     *       - $filter uses the same grammar as the official Network API, e.g. "siteId.eq('<site _id>')",
+     *         "deviceMac.in('aa:bb:cc:dd:ee:ff','11:22:33:44:55:66')", "clientId.eq('<client mac>')" or
+     *         "and(siteId.eq('…'),unitId.isNull())". Without a filter the results contain every key (all sites,
+     *         devices or clients). The site key is the site '_id' as returned by stat_sites() or list_sites(), not
+     *         the short site name
+     *       - $projection selects the fields to return and is a comma-separated list of "values(field,…)" for the
+     *         top-level value fields and "nested(group)" or "nested(group(values(field,…)))" for nested groups,
+     *         e.g. "values(rxBytes,txBytes),nested(byRadioBand)". Without a projection all top-level values and no
+     *         nested groups are returned
+     *       - the response is an array of key objects (e.g. with 'siteId' and/or 'deviceMac'), each with a 'series'
+     *         array of bucket objects containing 'timestamp' (Unix timestamp in milliseconds), 'duration'
+     *         (milliseconds) and the requested values. Values are floats averaged per bucket
+     * @param string $schema schema name, see list_stat_schemas(), e.g. 'wanBySite', 'wirelessBySiteByDevice',
+     *                       'activityBySiteByClient', 'clientCountBySite', 'systemBySiteByDevice'
+     * @param string|null $period optional, one of 'HOUR', 'DAY', 'WEEK' or 'MONTH', defaults to 'DAY' when $start is
+     *                            also null
+     * @param int|null $end optional, end of the window as a Unix timestamp in milliseconds, defaults to now
+     * @param int|null $start optional, start of the window as a Unix timestamp in milliseconds, mutually exclusive
+     *                        with $period, requires Network Application 11.0.89 or later
+     * @param string|null $filter optional, filter expression
+     * @param string|null $projection optional, projection expression
+     * @param bool $no_gaps optional, when true the series contains a bucket for every interval in the window, the
+     *                      ones without data only carry 'timestamp' and 'duration'; by default such buckets are omitted
+     * @return array|bool returns an array of key objects, each containing a 'series' array of bucket objects
+     * @throws UnifiApiException|InvalidArgumentException
+     */
+    public function stat_series(
+        string  $schema,
+        ?string $period = null,
+        ?int    $end = null,
+        ?int    $start = null,
+        ?string $filter = null,
+        ?string $projection = null,
+        bool    $no_gaps = false
+    ) {
+        $schema = trim($schema);
+
+        if ($schema === '') {
+            throw new InvalidArgumentException('Schema cannot be empty');
+        }
+
+        if ($period !== null && $start !== null) {
+            throw new InvalidArgumentException('Provide either a period or a start timestamp, not both');
+        }
+
+        if ($period === null && $start === null) {
+            $period = 'DAY';
+        }
+
+        if ($period !== null) {
+            $period = strtoupper(trim($period));
+
+            if (!in_array($period, self::STAT_SERIES_PERIODS, true)) {
+                throw new InvalidArgumentException('Invalid period: ' . $period . ', expected one of ' . implode(', ', self::STAT_SERIES_PERIODS));
+            }
+        }
+
+        $query = ['schema' => $schema];
+
+        if ($period !== null) {
+            $query['period'] = $period;
+        }
+
+        if ($start !== null) {
+            $query['start'] = $start;
+        }
+
+        $query['end'] = empty($end) ? time() * 1000 : $end;
+
+        if (!empty($filter)) {
+            $query['filter'] = $filter;
+        }
+
+        if (!empty($projection)) {
+            $query['projection'] = $projection;
+        }
+
+        if ($no_gaps) {
+            $query['noGaps'] = 'true';
+        }
+
+        return $this->fetch_results('/v2/api/stats/recent/series?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986));
+    }
+
+    /**
+     * Fetch the aggregated dashboard data.
+     *
+     * @note - requires Network Application 10.x or later, this is the data source of the dashboard in the
+     *         Network Application UI and the replacement for list_dashboard() which Network Application 11.x
+     *         removed
+     *       - returns a single object with one property per dashboard widget, e.g. 'wan_activity', 'wifi_activity',
+     *         'radio_activity', 'wan_history', 'speed_test', 'isp_metrics', 'wifi_connectivity',
+     *         'most_active_apps_aps_clients' (top applications, APs and clients by traffic, as a 'usage_by' array
+     *         discriminated by 'type') and 'most_common_client_fingerprints' (fingerprint counters, resolve the
+     *         ids with list_fingerprint_devices()). The 'dashboard_meta' property lists the widgets present,
+     *         which depend on the site (e.g. no gateway widgets without a UniFi gateway)
+     *       - history widgets contain 5-minute buckets covering the past $history_seconds seconds
+     * @param int $history_seconds optional, length of the history window in seconds, default value is 86400
+     *                             (24 hours)
+     * @return object|bool returns the aggregated dashboard object
+     * @throws UnifiApiException|InvalidArgumentException
+     */
+    public function list_aggregated_dashboard(int $history_seconds = 86400)
+    {
+        if ($history_seconds <= 0) {
+            throw new InvalidArgumentException('History seconds must be a positive integer');
+        }
+
+        return $this->fetch_results('/v2/api/site/' . $this->site . '/aggregated-dashboard?historySeconds=' . $history_seconds);
+    }
+
+    /**
      * Fetch IPS/IDS events.
      *
      * @note - defaults to the past 24 hours
      *       - requires a UniFi gateway
+     *       - Network Application 11.x removed this endpoint, the controller answers with HTTP 404 (api.err.NotFound)
+     *         and this method throws a ControllerErrorException. Use get_system_log('threat-alert') instead
      * @param int|null $start optional, Unix timestamp in milliseconds
      * @param int|null $end optional, Unix timestamp in milliseconds
      * @param int|null $limit optional, maximum number of events to return, defaults to 10000
@@ -1527,6 +1722,8 @@ class Client
     /**
      * Fetch dashboard metrics.
      *
+     * @note Network Application 11.x removed this endpoint, the controller answers with HTTP 404 (api.err.NotFound)
+     *       and this method throws a ControllerErrorException. Use list_aggregated_dashboard() instead.
      * @param boolean $five_minutes when true, return stats based on 5 minute intervals,
      *                              returns hourly stats by default
      * @return array|bool containing dashboard metric objects
@@ -3305,6 +3502,9 @@ class Client
     /**
      * Fetch events.
      *
+     * @note Network Application 11.x removed this endpoint, the controller answers with HTTP 404 (api.err.NotFound)
+     *       and this method throws a ControllerErrorException. Use get_system_log('all') instead, optionally
+     *       filtered by category through the $custom_payload parameter.
      * @param integer $historyhours optional, hours to go back, default value is 720 hours
      * @param integer $start optional, which event number to start with (useful for paging of results), default
      *                       value is 0
@@ -3328,6 +3528,8 @@ class Client
     /**
      * Fetch alarms.
      *
+     * @note Network Application 11.x removed this endpoint, the controller answers with HTTP 400 (api.err.InvalidObject)
+     *       and this method throws a ControllerErrorException. Use get_system_log('critical') instead.
      * @param array $payload optional, array of flags to filter by
      *                       Example: ["archived" => false, "key" => "EVT_GW_WANTransition"]
      *                       return only unarchived for a specific key
@@ -3342,6 +3544,9 @@ class Client
     /**
      * Count alarms.
      *
+     * @note Network Application 11.x removed this endpoint, the controller answers with HTTP 400 (api.err.InvalidObject)
+     *       and this method throws a ControllerErrorException. Use get_system_log('critical') and its
+     *       'total_element_count' instead.
      * @param bool|null $archived optional, if true all alarms are counted, if false only non-archived (active) alarms are
      *                            counted, by default all alarms are counted
      * @return array|bool containing the alarm count
@@ -3357,6 +3562,8 @@ class Client
     /**
      * Archive alarms(s).
      *
+     * @note Network Application 11.x removed the alarm endpoints (see list_alarms()), expect this method to fail there
+     *       as well.
      * @param string $alarm_id optional, _id of the alarm to archive which can be found with the list_alarms() function,
      *                         by default all alarms are archived
      * @return bool true on success
@@ -3376,7 +3583,10 @@ class Client
     /**
      * Check controller update.
      *
-     * @note triggers an update of the controller's cached, latest known version.
+     * @note - triggers an update of the controller's cached, latest known version.
+     *       - Network Application 11.x removed this endpoint, the controller answers with HTTP 404 (api.err.NotFound)
+     *         and this method throws a ControllerErrorException. The 'update_available' and 'update_downloaded'
+     *         properties returned by stat_sysinfo() remain available
      * @return array|bool returns an array with a single object containing details of the current known latest
      *                    controller version info on success, else returns false
      * @throws UnifiApiException
@@ -3780,9 +3990,16 @@ class Client
      *
      * @note - defaults to the past 7*24 hours
      *       - results are paged; use $page_number to iterate over pages and $page_size to set page size
+     *       - 'all' returns every entry regardless of class and can be narrowed with a 'categories' array in
+     *         $custom_payload, e.g. ['categories' => ['CLIENT_DEVICES', 'INTERNET_AND_WAN']]; known categories are
+     *         'AUDIT', 'CLIENT_DEVICES', 'SOFTWARE_UPDATES', 'INTERNET_AND_WAN'. Entries carry 'category',
+     *         'key', 'severity', 'message_raw', 'parameters' and 'timestamp' (milliseconds)
+     *       - on Network Application 11.x 'all' replaces list_events(), 'threat-alert' replaces stat_ips_events()
+     *         and 'critical' replaces list_alarms(); the 'triggers' class no longer exists there (HTTP 404)
      * @param string $class optional, class of the system log entries to fetch, known valid values:
-     *                      'device-alert', 'next-ai-alert', 'vpn-alert', 'admin-activity', 'update-alert',
-     *                      'client-alert', 'threat-alert', 'triggers', default value is 'device-alert'
+     *                      'all', 'critical', 'device-alert', 'next-ai-alert', 'vpn-alert', 'admin-activity',
+     *                      'update-alert', 'client-alert', 'threat-alert', 'triggers' (Network Application 10.x and
+     *                      older only), default value is 'device-alert'
      * @param ?int $start optional, start time in milliseconds since the Unix epoch
      * @param ?int $end optional, end time in milliseconds since the Unix epoch
      * @param int $page_number optional, page number to fetch, default value is 0 (first page)

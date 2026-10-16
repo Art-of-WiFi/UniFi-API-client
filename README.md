@@ -31,8 +31,26 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 | Software                             | Versions                                                 |
 |--------------------------------------|----------------------------------------------------------|
-| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x, 10.x (**10.5.62 is confirmed**) |
-| UniFi OS                             | 3.x, 4.x, 5.x (**5.1.26 is confirmed**)                   |
+| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x, 10.x, 11.x (**11.0.89 is confirmed**) |
+| UniFi OS                             | 3.x, 4.x, 5.x, 6.x (**6.0.13 is confirmed**)             |
+
+### Network Application 11.x
+
+Network Application 11.0 (UniFi OS 6.0+ only, no longer available for the self-hosted Network Server) moved all
+time-series statistics to a new statistics engine and dropped several legacy endpoints. Existing methods keep
+working as before on 10.x and older, but on 11.x:
+
+- the interval report methods (`stat_5minutes_site()` … `stat_monthly_gateway()`, `stat_speedtest_results()`)
+  always return an empty array; use the new `stat_series()` method instead, with `list_stat_schemas()` for the
+  available schemas and `get_stats_source()` to detect which engine a controller uses (`LEGACY` or `MODERN`)
+- `list_dashboard()`, `list_events()`, `stat_ips_events()`, `list_alarms()`, `count_alarms()` and
+  `check_controller_update()` throw a `ControllerErrorException` because the endpoints were removed; use
+  `list_aggregated_dashboard()` and `get_system_log()` (classes `all`, `threat-alert`, `critical`) instead
+- sessions, guests, authorizations, vouchers, devices, clients, health and all configuration endpoints are
+  unaffected
+
+The new methods are documented in the [API Reference](API_REFERENCE.md#statistics). Statistics history is not
+migrated by the controller: the new store starts at the moment of the 11.x upgrade.
 
 
 ## Requirements
