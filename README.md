@@ -61,8 +61,12 @@ migrated by the controller: the new store starts at the moment of the 11.x upgra
   - PHP cURL (`php-curl`) module enabled
   - PHP JSON (`php-json`) module enabled (always available on PHP 8.0 and later, but it can be
     disabled at compile time on PHP 7.4)
-  - direct network connectivity between this server/desktop and the host and port where the UniFi Network Application is
-    running (usually TCP port 8443, port 11443 for UniFi OS Server, or port 443 for UniFi OS consoles)
+  - network connectivity to the UniFi Network Application, either:
+    - **direct**, between this server/desktop and the host and port where the UniFi Network Application is
+      running (usually TCP port 8443, port 11443 for UniFi OS Server, or port 443 for UniFi OS consoles), or
+    - **through the Site Manager proxy** at unifi.ui.com, which only requires outbound HTTPS (TCP port 443) from
+      this server/desktop to the internet; the console itself must be online and connected to UI.com
+      (see [Option 3: Site Manager Proxy](#option-3-site-manager-proxy) below)
 - **authentication** — you need one of the following:
   - an admin **account with local access permissions** as explained
     here: https://artofwifi.net/blog/use-local-admin-account-unifi-api-captive-portal
