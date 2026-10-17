@@ -1075,8 +1075,10 @@ class Client
      *       - exactly one of $period and $start must be provided. With $period the window is the period ending at
      *         $end and the bucket size follows the period: 'HOUR' and 'DAY' use 5-minute buckets, 'WEEK' hourly
      *         buckets and 'MONTH' 8-hour buckets. With $start (Network Application 11.0.89 and later) the window
-     *         is $start to $end and the controller picks the bucket size from the span. Network Application 11.0.83
-     *         ignores $start, so prefer $period and move $end back to page through history
+     *         is $start to $end and the controller picks the bucket size from the span: up to 1 day 5-minute
+     *         buckets, up to 7 days hourly, up to 60 days 8-hour buckets, beyond that calendar months. There is no
+     *         daily bucket size; derive daily values from the three 8-hour buckets per day. Network Application
+     *         11.0.83 ignores $start, so prefer $period and move $end back to page through history
      *       - $filter uses the same grammar as the official Network API, e.g. "siteId.eq('<site _id>')",
      *         "deviceMac.in('aa:bb:cc:dd:ee:ff','11:22:33:44:55:66')", "clientId.eq('<client mac>')" or
      *         "and(siteId.eq('…'),unitId.isNull())". Without a filter the results contain every key (all sites,
