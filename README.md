@@ -12,7 +12,33 @@ This class is used by our API Browser tool, which can be found
 
 The package can be installed manually or by using
 composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for
-easy inclusion in your projects. See the [installation instructions](#Installation) below for more details.
+easy inclusion in your projects. See the [installation instructions](#installation) below for more details.
+
+## Contents
+
+- [Why use this API client?](#why-use-this-api-client)
+- [Supported Versions](#supported-versions)
+  - [Network Application 11.x](#network-application-11x)
+- [Requirements](#requirements)
+- [UniFi OS Support](#unifi-os-support)
+  - [Remote API access to UniFi OS-based gateways](#remote-api-access-to-unifi-os-based-gateways)
+- [Upgrading from previous versions](#upgrading-from-previous-versions)
+- [Installation](#installation)
+- [Authentication](#authentication)
+  - [Option 1: API Key (recommended for UniFi OS)](#option-1-api-key-recommended-for-unifi-os)
+  - [Option 2: Username/Password](#option-2-usernamepassword)
+  - [Option 3: Site Manager Proxy](#option-3-site-manager-proxy)
+  - [When to use which method?](#when-to-use-which-method)
+  - [Migrating from username/password to API keys](#migrating-from-usernamepassword-to-api-keys)
+  - [Code Examples](#code-examples)
+- [Exception handling](#exception-handling)
+- [Functions/methods supported](#functionsmethods-supported)
+- [Need help or have suggestions?](#need-help-or-have-suggestions)
+- [Looking for version 1.x.x?](#looking-for-version-1xx)
+- [Credits](#credits)
+- [Contributors](#contributors)
+- [About Art of WiFi](#about-art-of-wifi)
+- [Important Disclaimer](#important-disclaimer)
 
 
 ## Why use this API client?
@@ -31,8 +57,26 @@ easy inclusion in your projects. See the [installation instructions](#Installati
 
 | Software                             | Versions                                                 |
 |--------------------------------------|----------------------------------------------------------|
-| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x, 10.x (**10.5.62 is confirmed**) |
-| UniFi OS                             | 3.x, 4.x, 5.x (**5.1.26 is confirmed**)                   |
+| UniFi Network Application/controller | 5.x, 6.x, 7.x, 8.x, 9.x, 10.x, 11.x (**11.0.89 is confirmed**) |
+| UniFi OS                             | 3.x, 4.x, 5.x, 6.x (**6.0.13 is confirmed**)             |
+
+### Network Application 11.x
+
+Network Application 11.0 (UniFi OS 6.0+ only, no longer available for the self-hosted Network Server) moved all
+time-series statistics to a new statistics engine and dropped several legacy endpoints. Existing methods keep
+working as before on 10.x and older, but on 11.x:
+
+- the interval report methods (`stat_5minutes_site()` … `stat_monthly_gateway()`, `stat_speedtest_results()`)
+  always return an empty array; use the new `stat_series()` method instead, with `list_stat_schemas()` for the
+  available schemas and `get_stats_source()` to detect which engine a controller uses (`LEGACY` or `MODERN`)
+- `list_dashboard()`, `list_events()`, `stat_ips_events()`, `list_alarms()`, `count_alarms()` and
+  `check_controller_update()` throw a `ControllerErrorException` because the endpoints were removed; use
+  `list_aggregated_dashboard()` and `get_system_log()` (classes `all`, `threat-alert`, `critical`) instead
+- sessions, guests, authorizations, vouchers, devices, clients, health and all configuration endpoints are
+  unaffected
+
+The new methods are documented in the [API Reference](API_REFERENCE.md#statistics). Statistics history is not
+migrated by the controller: the new store starts at the moment of the 11.x upgrade.
 
 
 ## Requirements
@@ -43,8 +87,12 @@ easy inclusion in your projects. See the [installation instructions](#Installati
   - PHP cURL (`php-curl`) module enabled
   - PHP JSON (`php-json`) module enabled (always available on PHP 8.0 and later, but it can be
     disabled at compile time on PHP 7.4)
-  - direct network connectivity between this server/desktop and the host and port where the UniFi Network Application is
-    running (usually TCP port 8443, port 11443 for UniFi OS Server, or port 443 for UniFi OS consoles)
+  - network connectivity to the UniFi Network Application, either:
+    - **direct**, between this server/desktop and the host and port where the UniFi Network Application is
+      running (usually TCP port 8443, port 11443 for UniFi OS Server, or port 443 for UniFi OS consoles), or
+    - **through the Site Manager proxy** at unifi.ui.com, which only requires outbound HTTPS (TCP port 443) from
+      this server/desktop to the internet; the console itself must be online and connected to UI.com
+      (see [Option 3: Site Manager Proxy](#option-3-site-manager-proxy) below)
 - **authentication** — you need one of the following:
   - an admin **account with local access permissions** as explained
     here: https://artofwifi.net/blog/use-local-admin-account-unifi-api-captive-portal

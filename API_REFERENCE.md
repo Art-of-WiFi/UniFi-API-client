@@ -1012,6 +1012,8 @@ Lists dashboard information.
 
 **Returns:** array - Array containing dashboard information
 
+> **Network Application 11.x:** endpoint removed (HTTP 404, `ControllerErrorException`). Use `list_aggregated_dashboard()`.
+
 ## Device Management
 
 ### List Devices Basic
@@ -1220,6 +1222,8 @@ Checks for controller software updates.
 
 **Returns:** array - Update information
 
+> **Network Application 11.x:** endpoint removed (HTTP 404, `ControllerErrorException`). `stat_sysinfo()` still reports `update_available` and `update_downloaded`.
+
 ### Get UniFi OS Console Update
 ```php
 public function get_update_os_console(): array
@@ -1404,6 +1408,8 @@ Lists system events.
 
 **Returns:** array - Array of event objects
 
+> **Network Application 11.x:** endpoint removed (HTTP 404, `ControllerErrorException`). Use `get_system_log('all')`, optionally with `['categories' => [...]]` in `$custom_payload`.
+
 ### List Alarms
 ```php
 public function list_alarms(array $payload = []): array
@@ -1414,6 +1420,8 @@ Lists alarms.
 - `$payload` (array): Optional filter parameters
 
 **Returns:** array - Array of alarm objects
+
+> **Network Application 11.x:** endpoint removed (HTTP 400 `api.err.InvalidObject`, `ControllerErrorException`). Use `get_system_log('critical')`.
 
 ### Count Alarms
 ```php
@@ -1426,6 +1434,8 @@ Counts alarms.
 
 **Returns:** int - Number of alarms
 
+> **Network Application 11.x:** endpoint removed (HTTP 400 `api.err.InvalidObject`, `ControllerErrorException`). Use the `total_element_count` of `get_system_log('critical')`.
+
 ### Archive Alarm
 ```php
 public function archive_alarm(string $alarm_id = ''): bool
@@ -1436,6 +1446,8 @@ Archives an alarm.
 - `$alarm_id` (string): ID of the alarm to archive (empty to archive all)
 
 **Returns:** bool - true upon success
+
+> **Network Application 11.x:** the alarm endpoints were removed, expect this method to fail there as well.
 
 ## Backup Management
 
@@ -1970,14 +1982,16 @@ public function get_system_log(
 Retrieves system logs.
 
 **Parameters:**
-- `$class` (string): Log class to retrieve (default: 'device-alert')
-- `$start` (int|null): Start timestamp
-- `$end` (int|null): End timestamp
+- `$class` (string): Log class to retrieve: `'all'`, `'critical'`, `'device-alert'`, `'next-ai-alert'`, `'vpn-alert'`, `'admin-activity'`, `'update-alert'`, `'client-alert'`, `'threat-alert'`, `'triggers'` (10.x and older only) (default: 'device-alert')
+- `$start` (int|null): Start timestamp in milliseconds
+- `$end` (int|null): End timestamp in milliseconds
 - `$page_number` (int): Page number for pagination (default: 0)
 - `$page_size` (int): Number of entries per page (default: 100)
-- `$custom_payload` (array): Additional custom parameters
+- `$custom_payload` (array): Additional custom parameters, e.g. `['categories' => ['CLIENT_DEVICES', 'INTERNET_AND_WAN']]` to narrow `'all'`
 
-**Returns:** array - Array of log entries
+**Returns:** array - Object with `data` (log entries carrying `category`, `key`, `severity`, `message_raw`, `parameters`, `timestamp`), `page_number`, `total_element_count` and `total_page_count`
+
+> **Network Application 11.x:** `'all'` replaces `list_events()`, `'threat-alert'` replaces `stat_ips_events()` and `'critical'` replaces `list_alarms()`; the `'triggers'` class no longer exists (HTTP 404).
 
 ### List Models
 ```php
@@ -2012,6 +2026,88 @@ Makes a custom API request to the controller.
 
 ## Statistics
 
+> **Network Application 11.x:** the controller moved all time-series statistics to a new statistics engine
+> and no longer populates the `stat/report/*` endpoints behind the Site, Access Point, User, Gateway and
+> Speed Test methods below. On 11.x those methods still answer, but always with an empty array. Use
+> `get_stats_source()` to detect which engine a controller uses (`LEGACY` on 10.x, `MODERN` on 11.x, a
+> `JsonDecodeException` on 9.x and older which lack the endpoint) and call `stat_series()` on `MODERN`
+> controllers. History does not carry over: the new store starts at the moment of the 11.x upgrade.
+
+### Statistics Source
+```php
+public function get_stats_source(): string
+```
+Returns which statistics engine the controller uses. Requires Network Application 10.x or later.
+
+**Returns:** string - `'LEGACY'` (10.x, `stat/report/*` populated) or `'MODERN'` (11.x and later, use `stat_series()`)
+
+**Throws:** `JsonDecodeException` on controllers older than 10.x (the endpoint does not exist and the controller answers with an HTML page)
+
+### Statistics Schemas
+```php
+public function list_stat_schemas(): array
+```
+Lists the schemas accepted by `stat_series()`. Requires Network Application 11.x.
+
+**Returns:** array - Array of schema objects with `name`, `keys` (e.g. `siteId`, `deviceMac`, `clientId`), `values` (the value fields a bucket can contain) and `nested` groups (each with `name`, `keys` and `values`)
+
+Schemas on 11.0.83/11.0.89: `activityBySiteByClient`, `applicationTrafficBySite`, `applicationTrafficBySiteByClient`, `bridgeBySiteByDevice`, `clientCountBySite`, `clientCountBySiteByDevice`, `countryTrafficBySite`, `lteBySiteByDevice`, `metricsBySiteByWanByIsp`, `outletBySiteByDevice`, `portBySiteByDevice`, `portTrafficBySiteByDevice`, `roamBySiteByClient`, `roamBySiteByDevice`, `systemBySiteByDevice`, `trafficFlowBySiteBase`, `trafficFlowBySiteExtended`, `vpnActivityBySiteByClient`, `wanBySite`, `wanBySiteByDevice`, `wanTrafficBySiteByClient`, `wirelessAnalyticsBySiteByDevice`, `wirelessBySite`, `wirelessBySiteByDevice`, `wirelessClientCountBySite`, `wirelessConnectivityAnalyticsBySiteByDevice`, `wirelessConnectivityBySite`, `wirelessTrafficBySiteByDevice`.
+
+### Statistics Series
+```php
+public function stat_series(
+    string $schema,
+    ?string $period = null,
+    ?int $end = null,
+    ?int $start = null,
+    ?string $filter = null,
+    ?string $projection = null,
+    bool $no_gaps = false
+): array
+```
+Retrieves a statistics time series from the Network Application 11.x statistics engine.
+
+**Parameters:**
+- `$schema` (string): Schema name, see `list_stat_schemas()`
+- `$period` (string|null): `'HOUR'`, `'DAY'`, `'WEEK'` or `'MONTH'`; the window is the period ending at `$end`. `HOUR` and `DAY` return 5-minute buckets, `WEEK` hourly buckets, `MONTH` 8-hour buckets. Defaults to `'DAY'` when `$start` is also null
+- `$end` (int|null): End of the window, Unix timestamp in **milliseconds** (default: now). Move it back to page through history
+- `$start` (int|null): Start of the window, Unix timestamp in **milliseconds**. Mutually exclusive with `$period`; honoured from Network Application 11.0.89 (11.0.83 ignores it), the controller then picks the bucket size from the span: ≤1 day 5-minute, ≤7 days hourly, ≤60 days 8-hour, longer spans calendar months. There is no daily bucket size; derive daily values from the three 8-hour buckets per day
+- `$filter` (string|null): Filter expression using the official Network API grammar, e.g. `"siteId.eq('<site _id>')"`, `"deviceMac.in('aa:bb:cc:dd:ee:ff','11:22:33:44:55:66')"`, `"clientId.eq('<client mac>')"`, `"and(siteId.eq('…'),unitId.isNull())"`. Without a filter every key (all sites/devices/clients) is returned. The site key is the site `_id` (see `stat_sites()`), not the short name
+- `$projection` (string|null): Comma-separated list of `values(field,…)` for top-level value fields and `nested(group)` or `nested(group(values(field,…)))` for nested groups, e.g. `"values(rxBytes,txBytes),nested(byRadioBand)"`. Without a projection all top-level values and no nested groups are returned
+- `$no_gaps` (bool): When true every interval in the window gets a bucket, empty ones only carry `timestamp` and `duration` (default: false)
+
+**Returns:** array - Array of key objects (e.g. `siteId`, `deviceMac`), each with a `series` array of bucket objects holding `timestamp` (ms), `duration` (ms) and the requested values. Values are floats averaged per bucket
+
+**Throws:** `InvalidArgumentException` for an empty schema, an unknown period, or when both `$period` and `$start` are given; `JsonDecodeException` on controllers without the statistics engine (10.x and older)
+
+```php
+$site_uid = $client->stat_sites()[0]->_id;
+
+// WAN bytes for the last 24 hours, 5-minute buckets
+$wan = $client->stat_series('wanBySite', 'DAY', null, null, "siteId.eq('$site_uid')", 'values(rxBytes,txBytes)', true);
+
+// per-SSID client count and traffic for every AP, last hour
+$vaps = $client->stat_series('wirelessAnalyticsBySiteByDevice', 'HOUR', null, null, "siteId.eq('$site_uid')", 'nested(byVap(values(avgClientCount,rxBytes,txBytes)))');
+
+// a single client's activity for the last week, hourly buckets
+$client_series = $client->stat_series('activityBySiteByClient', 'WEEK', null, null, "clientId.eq('aa:bb:cc:dd:ee:ff')", 'values(durationMs,rxBytes,txBytes)');
+```
+
+Mapping from the legacy report methods: `stat_*_site()` → `wanBySite` / `wirelessBySite` / `clientCountBySite`; `stat_*_aps()` → `wirelessBySiteByDevice` (filter `deviceMac.eq()`/`deviceMac.in()`, no 10-AP cap observed); `stat_*_user()` → `activityBySiteByClient` (filter `clientId.eq('<mac>')`); `stat_*_gateway()` → `systemBySiteByDevice` + `wanBySiteByDevice`.
+
+### Aggregated Dashboard
+```php
+public function list_aggregated_dashboard(int $history_seconds = 86400): object
+```
+Retrieves the data behind the Network Application dashboard. Requires Network Application 10.x or later; replaces `list_dashboard()` on 11.x.
+
+**Parameters:**
+- `$history_seconds` (int): Length of the history window in seconds (default: 86400)
+
+**Returns:** object - One property per dashboard widget, e.g. `wan_activity`, `wifi_activity`, `radio_activity`, `wan_history`, `speed_test`, `isp_metrics`, `most_active_apps_aps_clients` (a `usage_by` array of `type` `client`/`ap`/`app` entries ranked by bytes; clients carry `display_name`, apps carry numeric `application`/`category` ids) and `most_common_client_fingerprints` (resolve the ids with `list_fingerprint_devices()`). `dashboard_meta.widgets` lists the widgets present for the site
+
+**Throws:** `InvalidArgumentException` when `$history_seconds` is not positive
+
 ### Site Statistics
 ```php
 public function stat_5minutes_site(?int $start = null, ?int $end = null, ?array $attribs = null): array
@@ -2027,6 +2123,8 @@ Retrieves site statistics at different time intervals.
 - `$attribs` (array|null): Array of attributes to retrieve
 
 **Returns:** array - Array containing site statistics
+
+> **Network Application 11.x:** no longer populated, always returns an empty array. Use `stat_series()` (see the note at the top of this section).
 
 ### Access Point Statistics
 ```php
@@ -2044,6 +2142,8 @@ Retrieves access point statistics at different time intervals.
 - `$attribs` (array|null): Array of attributes to retrieve
 
 **Returns:** array - Array containing AP statistics
+
+> **Network Application 11.x:** no longer populated, always returns an empty array. Use `stat_series()` (see the note at the top of this section).
 
 > **Note on the 10-AP limit:** when `$mac` is omitted, the controller caps the response at **10 access
 > points**, silently omitting the rest. Which APs are dropped varies per interval, so this is easy to
@@ -2077,6 +2177,8 @@ Retrieves user statistics at different time intervals.
 
 **Returns:** array - Array containing user statistics
 
+> **Network Application 11.x:** no longer populated, always returns an empty array. Use `stat_series()` (see the note at the top of this section).
+
 ### Gateway Statistics
 ```php
 public function stat_5minutes_gateway(?int $start = null, ?int $end = null, ?array $attribs = null): array
@@ -2093,6 +2195,8 @@ Retrieves gateway statistics at different time intervals.
 
 **Returns:** array - Array containing gateway statistics
 
+> **Network Application 11.x:** no longer populated, always returns an empty array. Use `stat_series()` (see the note at the top of this section).
+
 ### Speed Test Results
 ```php
 public function stat_speedtest_results(?int $start = null, ?int $end = null): array
@@ -2104,6 +2208,8 @@ Retrieves speed test results.
 - `$end` (int|null): End time in Unix timestamp
 
 **Returns:** array - Array containing speed test results
+
+> **Network Application 11.x:** no longer populated, always returns an empty array. The latest result is in `list_aggregated_dashboard()->speed_test`; ISP metrics are in the `metricsBySiteByWanByIsp` schema of `stat_series()`.
 
 ### IPS Events
 ```php
@@ -2117,6 +2223,8 @@ Retrieves IPS (Intrusion Prevention System) events.
 - `$limit` (int|null): Maximum number of events to retrieve
 
 **Returns:** array - Array containing IPS events
+
+> **Network Application 11.x:** endpoint removed (HTTP 404, `ControllerErrorException`). Use `get_system_log('threat-alert')`.
 
 ### Sessions
 ```php
@@ -2408,7 +2516,7 @@ public function get_class_version(): string
 ```
 Retrieves the version of this API client class.
 
-**Returns:** string - Class version (currently '2.3.1')
+**Returns:** string - Class version (currently '2.4.0')
 
 ---
 
@@ -2453,6 +2561,6 @@ Where a method's **Throws** list only mentions `UnifiApiException`, the method d
 
 ## Version Information
 
-This documentation corresponds to UniFi API Client version **2.3.1**.
+This documentation corresponds to UniFi API Client version **2.4.0**.
 
 For more examples and usage information, visit the [GitHub repository](https://github.com/Art-of-WiFi/UniFi-API-client).
