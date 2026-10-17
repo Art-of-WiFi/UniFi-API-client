@@ -39,7 +39,7 @@ use UniFi_API\Exceptions\UnifiApiException;
 class Client
 {
     /** Constants. */
-    const CLASS_VERSION        = '2.3.1';
+    const CLASS_VERSION        = '2.4.0';
     const CURL_METHODS_ALLOWED = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'];
     const DEFAULT_CURL_METHOD  = 'GET';
 
