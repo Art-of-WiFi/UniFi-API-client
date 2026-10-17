@@ -12,7 +12,33 @@ This class is used by our API Browser tool, which can be found
 
 The package can be installed manually or by using
 composer/[packagist](https://packagist.org/packages/art-of-wifi/unifi-api-client) for
-easy inclusion in your projects. See the [installation instructions](#Installation) below for more details.
+easy inclusion in your projects. See the [installation instructions](#installation) below for more details.
+
+## Contents
+
+- [Why use this API client?](#why-use-this-api-client)
+- [Supported Versions](#supported-versions)
+  - [Network Application 11.x](#network-application-11x)
+- [Requirements](#requirements)
+- [UniFi OS Support](#unifi-os-support)
+  - [Remote API access to UniFi OS-based gateways](#remote-api-access-to-unifi-os-based-gateways)
+- [Upgrading from previous versions](#upgrading-from-previous-versions)
+- [Installation](#installation)
+- [Authentication](#authentication)
+  - [Option 1: API Key (recommended for UniFi OS)](#option-1-api-key-recommended-for-unifi-os)
+  - [Option 2: Username/Password](#option-2-usernamepassword)
+  - [Option 3: Site Manager Proxy](#option-3-site-manager-proxy)
+  - [When to use which method?](#when-to-use-which-method)
+  - [Migrating from username/password to API keys](#migrating-from-usernamepassword-to-api-keys)
+  - [Code Examples](#code-examples)
+- [Exception handling](#exception-handling)
+- [Functions/methods supported](#functionsmethods-supported)
+- [Need help or have suggestions?](#need-help-or-have-suggestions)
+- [Looking for version 1.x.x?](#looking-for-version-1xx)
+- [Credits](#credits)
+- [Contributors](#contributors)
+- [About Art of WiFi](#about-art-of-wifi)
+- [Important Disclaimer](#important-disclaimer)
 
 
 ## Why use this API client?
