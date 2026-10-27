@@ -5236,7 +5236,7 @@ class Client
                         error_log(__FUNCTION__ . ': re-logged in, calling exec_curl again');
                     }
 
-                    return $this->exec_curl($path, $payload);
+                    return $this->exec_curl($path, $payload, $prefix_path);
                 }
 
                 throw new LoginFailedException('Cookie/Token has expired and re-login failed.', $http_code);
